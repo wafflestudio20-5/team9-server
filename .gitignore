@@ -449,4 +449,12 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+## PreCommit Git Hook
+# Dependency directories
+node_modules/
+
+# husky
+.husky/_
+.husky/.gitignore
+
 # End of https://www.toptal.com/developers/gitignore/api/django,visualstudiocode,pycharm,python,macos,windows
