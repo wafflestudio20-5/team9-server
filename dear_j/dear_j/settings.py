@@ -37,7 +37,43 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "user.apps.UserConfig",  # app
+    "rest_framework",  # drf
+    "rest_framework.authtoken",
+    "dj_rest_auth",  # auth
+    "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "dj_rest_auth.registration",
 ]
+
+# auth setting
+REST_USE_JWT = True  # use jwt
+JWT_AUTH_COOKIE = "my-app-auth"  # cookie key value
+JWT_AUTH_REFRESH_COOKIE = "my-refresh-token"  # refresh token cookie key value
+
+SITE_ID = 1  # nomain id
+ACCOUNT_UNIQUE_EMAIL = True  # make email unique
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None  # username type
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # require email verification
+
+AUTH_USER_MODEL = "user.User"
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
+    'PAGE_SIZE': 100,
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
