@@ -2,12 +2,11 @@
 - adminpassword
 
 
-
-http://localhost:8000/api/accounts/v1/password/reset/
-http://localhost:8000/api/accounts/v1/password/reset/confirm/
-http://localhost:8000/api/accounts/v1/login/
-http://localhost:8000/api/accounts/v1/logout/
-http://localhost:8000/api/accounts/v1/user/
-http://localhost:8000/api/accounts/v1/password/change/
-http://localhost:8000/api/accounts/v1/token/verify/
-http://localhost:8000/api/accounts/v1/token/refresh/
+api/v1/user/password/reset/
+api/v1/user/password/reset/confirm/
+api/v1/user/login/
+api/v1/user/logout/
+api/v1/user/user/
+api/v1/user/password/change/
+api/v1/user/token/verify/
+api/v1/user/token/refresh/

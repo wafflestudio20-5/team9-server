@@ -10,11 +10,21 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
+import os
+import json
+import sys
 
+# split secret info
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = os.path.dirname(BASE_DIR)
+SECRET_BASE_FILE = os.path.join(BASE_DIR, 'secrets.json')
 
+secrets = json.loads(open(SECRET_BASE_FILE).read())
+for key, value in secrets.items():
+    setattr(sys.modules[__name__], key, value)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -40,18 +50,18 @@ INSTALLED_APPS = [
     "user.apps.UserConfig",  # app
     "rest_framework",  # drf
     "rest_framework.authtoken",
+    "rest_framework_simplejwt.token_blacklist",
     "dj_rest_auth",  # auth
-    "django.contrib.sites",
-    "allauth",
+    "dj_rest_auth.registration",
+    "django.contrib.sites",  # ??
+    "allauth",  # allauth
     "allauth.account",
     "allauth.socialaccount",
-    "dj_rest_auth.registration",
+    "allauth.socialaccount.providers.kakao",
+    "allauth.socialaccount.providers.google",
 ]
 
-# auth setting
-REST_USE_JWT = True  # use jwt
-JWT_AUTH_COOKIE = "my-app-auth"  # cookie key value
-JWT_AUTH_REFRESH_COOKIE = "my-refresh-token"  # refresh token cookie key value
+# auth setting - user setting
 
 SITE_ID = 1  # nomain id
 ACCOUNT_UNIQUE_EMAIL = True  # make email unique
@@ -63,6 +73,7 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'  # require email verification
 
 AUTH_USER_MODEL = "user.User"
 
+# rest framework setting
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
     'PAGE_SIZE': 100,
@@ -70,9 +81,21 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     ),
+}
+
+# jwt environment setting
+REST_USE_JWT = True
+JWT_AUTH_COOKIE = "my-app-auth"  # cookie key value
+JWT_AUTH_REFRESH_COOKIE = "my-refresh-token"  # refresh token cookie key value
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
 }
 
 MIDDLEWARE = [
