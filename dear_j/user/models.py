@@ -1,20 +1,23 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.utils.translation import gettext_lazy as _
-
-from .managers import UserManager
-
-# Create your models here.
+from django.db import models as db_models
+from django.contrib.auth import models as auth_models
+from user import managers
 
 
-class User(AbstractUser):
+class User(auth_models.AbstractBaseUser,
+           auth_models.PermissionsMixin):
+    objects = managers.UserManager()
+    email = db_models.EmailField(
+        max_length=255,
+        unique=True,
+    )
+    is_active = db_models.BooleanField(default=True)
+    is_admin = db_models.BooleanField(default=False)
+    is_superuser = db_models.BooleanField(default=False)
+    is_staff = db_models.BooleanField(default=False)
+    date_joined = db_models.DateTimeField(auto_now_add=True)
     username = None
-    email = models.EmailField(_('email address'), unique=True)
-
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
-
-    objects = UserManager()
 
     def __str__(self):
         return self.email
