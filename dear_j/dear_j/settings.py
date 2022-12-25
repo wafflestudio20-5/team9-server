@@ -15,16 +15,10 @@ from pathlib import Path
 import os
 import json
 import sys
+import config
 
-# split secret info
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-ROOT_DIR = os.path.dirname(BASE_DIR)
-SECRET_BASE_FILE = os.path.join(BASE_DIR, 'secrets.json')
-
-secrets = json.loads(open(SECRET_BASE_FILE).read())
-for key, value in secrets.items():
-    setattr(sys.modules[__name__], key, value)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -39,7 +33,6 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -47,31 +40,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "user.apps.UserConfig",  # app
-    "rest_framework",  # drf
+    "django.contrib.sites",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
+    "rest_framework",
     "rest_framework.authtoken",
     "rest_framework_simplejwt.token_blacklist",
-    "dj_rest_auth",  # auth
-    "dj_rest_auth.registration",
-    "django.contrib.sites",  # ??
-    "allauth",  # allauth
-    "allauth.account",
-    "allauth.socialaccount",
-    "allauth.socialaccount.providers.kakao",
-    "allauth.socialaccount.providers.google",
+    "user.apps.UserConfig"
 ]
 
-# auth setting - user setting
-
-SITE_ID = 1  # nomain id
-ACCOUNT_UNIQUE_EMAIL = True  # make email unique
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None  # username type
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'none'  # require email verification
-
-AUTH_USER_MODEL = "user.User"
 
 # rest framework setting
 REST_FRAMEWORK = {
@@ -86,14 +63,9 @@ REST_FRAMEWORK = {
     ),
 }
 
-# jwt environment setting
-REST_USE_JWT = True
-JWT_AUTH_COOKIE = "my-app-auth"  # cookie key value
-JWT_AUTH_REFRESH_COOKIE = "my-refresh-token"  # refresh token cookie key value
-
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ACCESS_TOKEN_LIFETIME': config.ACCESS_TOKEN_LIFETIME,
+    'REFRESH_TOKEN_LIFETIME': config.REFRESH_TOKEN_LIFETIME,
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
 }
