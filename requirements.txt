@@ -1,10 +1,11 @@
+django==4.1.1
+djangorestframework==3.14.0
+psycopg2-binary==2.9.3; sys_platform == 'darwin' and platform_machine == 'arm64'
+psycopg2==2.9.3; sys_platform != 'darwin' or platform_machine != 'arm64'
 cryptography==38.0.4
 dj-rest-auth==2.2.5
 django-allauth==0.51.0
 django-rest-auth==0.9.5
 djangorestframework-simplejwt==5.2.2
-isort==5.11.4
-pip==20.0.2
-pkg-resources==0.0.0
 psycopg2==2.9.3
 setuptools==44.0.0
