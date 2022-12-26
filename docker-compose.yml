@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+  interface:
+    build:
+      context: ""
+      dockerfile: ./image/dear_j/Dockerfile
+    environment:
+      SITE: dev
+    volumes:
+      - static:/var/dear_j/src/static_root
+      - $HOME/.aws/:/root/.aws/:ro
+    expose:
+      - 8080
+
+  nginx:
+    build:
+      context: ""
+      dockerfile: ./image/nginx/Dockerfile
+      args:
+        SITE: dev
+    depends_on:
+      - interface
+    volumes:
+      - static:/var/dear_j/static_root
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 80:80
+
+volumes:
+  static:
+  dear_j:
