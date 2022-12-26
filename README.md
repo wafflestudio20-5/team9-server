@@ -3,7 +3,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 
-## Development Guide
+## Development Environment Setting
 
 To setup virtualenv, follow below commands. (It is based on pyenv, but it is also fine to use conda)
 ```bash
@@ -18,6 +18,16 @@ $ yarn install
 ```
 
 #
+
+## Development Guide
+
+To run local server, execute follow command.
+```bash
+$ make up # -> http://localhost
+```
+
+#
+
 
 ## Convention
 - [Python Google Style Guide](https://google.github.io/styleguide/pyguide.html)
