@@ -7,6 +7,7 @@ class UserManager(base_user.BaseUserManager):
     def create_user(self, email: str, password: str, birthday: str, **extra_fields):
         if not email:
             raise ValueError("The Email must be set")
+        print(birthday)
         user = self.model(email=self.normalize_email(email), birthday=birthday)
         user.set_password(password)
         user.save()

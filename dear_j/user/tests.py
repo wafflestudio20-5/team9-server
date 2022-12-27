@@ -26,11 +26,23 @@ class LoginTestCase(test.APITestCase):
 
 class RegisterTestCase(test.APITestCase):
     def test_success_register(self):
-        data = {"email": "testcase@example.com", "password1": "NewPassword@123", "password2": "NewPassword@123", "birthday": "2001/06/11"}
+        data = {
+            "username": "username123",
+            "email": "email@naver.com",
+            "password1": "testpassword*",
+            "password2": "testpassword*",
+            "birthday": "2022-12-27",
+        }
         response = self.client.post("/api/v1/user/registration/", data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_fail_register(self):
-        data = {"email": "testcase@example.com", "password1": "NewPassword@123", "password2": "NewPassword@122", "birthday": "2001-06-11"}
+        data = {
+            "username": "username123",
+            "email": "email@naver.com",
+            "password1": "testpassword*",
+            "password2": "testpasswo1d*",
+            "birthday": "2022-12-27",
+        }
         response = self.client.post("/api/v1/user/registration/", data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
