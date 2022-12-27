@@ -4,6 +4,7 @@
 # window
 node_modules
 dos2unix.sh
+windows/
 
 ### Django ###
 *.log
