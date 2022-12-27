@@ -6,7 +6,3 @@ model-mommy==2.0.0
 pylint==2.13.8
 pytest==7.0.0
 pytest-django==4.5.2
-pip==20.0.2
-pkg-resources==0.0.0
-# sh dos2unix.sh
-# pre
