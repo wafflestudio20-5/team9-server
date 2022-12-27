@@ -15,7 +15,6 @@ ACCOUNT_ADAPTER = "user.adapter.CustomAccountAdapter"
 
 # jwt environment setting
 REST_USE_JWT = True
-JWT_AUTH_COOKIE = "my-app-auth"
 JWT_AUTH_REFRESH_COOKIE = "my-refresh-token"
 ACCESS_TOKEN_LIFETIME = datetime.timedelta(hours=2)
 REFRESH_TOKEN_LIFETIME = datetime.timedelta(days=7)
