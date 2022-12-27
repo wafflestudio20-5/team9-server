@@ -50,9 +50,6 @@ class CustomRegisterSerializer(dj_regist_serializers.RegisterSerializer):
         instance.save()
         return instance
 
-    def save(self, request):
-        pass
-
     class Meta:
         model = models.User
         fields = ["username", "email", "password1", "password2", "birthday"]
