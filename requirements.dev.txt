@@ -6,3 +6,4 @@ model-mommy==2.0.0
 pylint==2.13.8
 pytest==7.0.0
 pytest-django==4.5.2
+setuptools==44.0.0

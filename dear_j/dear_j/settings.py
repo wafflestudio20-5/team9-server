@@ -9,12 +9,13 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+import datetime
+import pathlib
 
-from pathlib import Path
+from dear_j import config as conf
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -29,7 +30,6 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -37,7 +37,62 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "rest_framework_simplejwt.token_blacklist",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.kakao",
+    "allauth.socialaccount.providers.google",
+    "user.apps.UserConfig",
 ]
+
+
+# rest framework setting
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.CursorPagination",
+    "PAGE_SIZE": 100,
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.SessionAuthentication",
+        "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
+    ),
+}
+
+# settings regarding login
+SITE_ID = conf.SITE_ID
+ACCOUNT_UNIQUE_EMAIL = conf.ACCOUNT_UNIQUE_EMAIL
+ACCOUNT_USER_MODEL_USERNAME_FIELD = conf.ACCOUNT_USER_MODEL_USERNAME_FIELD
+ACCOUNT_USERNAME_REQUIRED = conf.ACCOUNT_USERNAME_REQUIRED
+ACCOUNT_EMAIL_REQUIRED = conf.ACCOUNT_EMAIL_REQUIRED
+ACCOUNT_AUTHENTICATION_METHOD = conf.ACCOUNT_AUTHENTICATION_METHOD
+ACCOUNT_EMAIL_VERIFICATION = conf.ACCOUNT_EMAIL_VERIFICATION
+
+# custom dj-rest-auth
+AUTH_USER_MODEL = conf.AUTH_USER_MODEL
+ACCOUNT_ADAPTER = conf.ACCOUNT_ADAPTER
+
+# jwt environment setting
+REST_USE_JWT = conf.REST_USE_JWT
+JWT_AUTH_REFRESH_COOKIE = conf.JWT_AUTH_REFRESH_COOKIE
+ACCESS_TOKEN_LIFETIME = conf.ACCESS_TOKEN_LIFETIME
+REFRESH_TOKEN_LIFETIME = conf.REFRESH_TOKEN_LIFETIME
+
+# custom dj-rest-auth (for birthday/username field)
+REST_AUTH_SERIALIZERS = {"USER_DETAILS_SERIALIZER": "user.serializers.CustomUserDetailSerializer"}
+REST_AUTH_REGISTER_SERIALIZERS = {"REGISTER_SERIALIZER": "user.serializers.CustomRegisterSerializer"}
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": ACCESS_TOKEN_LIFETIME,
+    "REFRESH_TOKEN_LIFETIME": REFRESH_TOKEN_LIFETIME,
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
+}
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
