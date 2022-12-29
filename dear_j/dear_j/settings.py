@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 import pathlib
 
+import site_env
 from utils import ssm
 
 from dear_j import config
@@ -25,7 +26,7 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = site_env.is_dev()
 
 ALLOWED_HOSTS = []
 
