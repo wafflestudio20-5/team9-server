@@ -9,10 +9,11 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-import datetime
 import pathlib
 
-from dear_j import config as conf
+from utils import ssm
+
+from dear_j import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
@@ -21,7 +22,7 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-gkub&ga4g000$!upi9o2svpo85634yaa9+af*mz94d(zl3n4q("
+SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -63,23 +64,23 @@ REST_FRAMEWORK = {
 }
 
 # settings regarding login
-SITE_ID = conf.SITE_ID
-ACCOUNT_UNIQUE_EMAIL = conf.ACCOUNT_UNIQUE_EMAIL
-ACCOUNT_USER_MODEL_USERNAME_FIELD = conf.ACCOUNT_USER_MODEL_USERNAME_FIELD
-ACCOUNT_USERNAME_REQUIRED = conf.ACCOUNT_USERNAME_REQUIRED
-ACCOUNT_EMAIL_REQUIRED = conf.ACCOUNT_EMAIL_REQUIRED
-ACCOUNT_AUTHENTICATION_METHOD = conf.ACCOUNT_AUTHENTICATION_METHOD
-ACCOUNT_EMAIL_VERIFICATION = conf.ACCOUNT_EMAIL_VERIFICATION
+SITE_ID = config.SITE_ID
+ACCOUNT_UNIQUE_EMAIL = config.ACCOUNT_UNIQUE_EMAIL
+ACCOUNT_USER_MODEL_USERNAME_FIELD = config.ACCOUNT_USER_MODEL_USERNAME_FIELD
+ACCOUNT_USERNAME_REQUIRED = config.ACCOUNT_USERNAME_REQUIRED
+ACCOUNT_EMAIL_REQUIRED = config.ACCOUNT_EMAIL_REQUIRED
+ACCOUNT_AUTHENTICATION_METHOD = config.ACCOUNT_AUTHENTICATION_METHOD
+ACCOUNT_EMAIL_VERIFICATION = config.ACCOUNT_EMAIL_VERIFICATION
 
 # custom dj-rest-auth
-AUTH_USER_MODEL = conf.AUTH_USER_MODEL
-ACCOUNT_ADAPTER = conf.ACCOUNT_ADAPTER
+AUTH_USER_MODEL = config.AUTH_USER_MODEL
+ACCOUNT_ADAPTER = config.ACCOUNT_ADAPTER
 
 # jwt environment setting
-REST_USE_JWT = conf.REST_USE_JWT
-JWT_AUTH_REFRESH_COOKIE = conf.JWT_AUTH_REFRESH_COOKIE
-ACCESS_TOKEN_LIFETIME = conf.ACCESS_TOKEN_LIFETIME
-REFRESH_TOKEN_LIFETIME = conf.REFRESH_TOKEN_LIFETIME
+REST_USE_JWT = config.REST_USE_JWT
+JWT_AUTH_REFRESH_COOKIE = config.JWT_AUTH_REFRESH_COOKIE
+ACCESS_TOKEN_LIFETIME = config.ACCESS_TOKEN_LIFETIME
+REFRESH_TOKEN_LIFETIME = config.REFRESH_TOKEN_LIFETIME
 
 # custom dj-rest-auth (for birthday/username field)
 REST_AUTH_SERIALIZERS = {"USER_DETAILS_SERIALIZER": "user.serializers.CustomUserDetailSerializer"}
