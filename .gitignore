@@ -6,6 +6,8 @@ node_modules
 dos2unix.sh
 windows/
 
+secrets.json
+
 ### Django ###
 *.log
 *.pot
