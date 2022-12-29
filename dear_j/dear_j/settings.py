@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+import os
 import pathlib
 
 import site_env
@@ -23,7 +24,10 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
+if site_env.is_prod():
+    SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
+else:
+    SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = site_env.is_dev()
@@ -47,8 +51,8 @@ INSTALLED_APPS = [
     "dj_rest_auth.registration",
     "allauth.account",
     "allauth.socialaccount",
-    "allauth.socialaccount.providers.kakao",
     "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.kakao",
     "user.apps.UserConfig",
 ]
 
