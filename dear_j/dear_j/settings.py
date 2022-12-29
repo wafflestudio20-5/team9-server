@@ -51,8 +51,8 @@ INSTALLED_APPS = [
     "dj_rest_auth.registration",
     "allauth.account",
     "allauth.socialaccount",
-    "allauth.socialaccount.providers.kakao",
     "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.kakao",
     "user.apps.UserConfig",
 ]
 
