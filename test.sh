@@ -1,8 +1,16 @@
-docker build -t test --platform linux/arm64 .
+docker build -t interface --platform linux/arm64 -f images/dear_j/Dockerfile .
 docker run -e "DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY" \
-           -e "SITE=PROD" \
-           -e "AWS_ACCESS_KEY_ID=AKIAQWP5JDIY2JALGFNT" \
-           -e "AWS_SECRET_ACCESS_KEY=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" \
+           -e "SITE=DEV" \
            -p 8000:8000 \
-           -it test /bin/bash
-gunicorn --bind 0.0.0.0:8000 dear_j.wsgi:application
+           -it --name interface \
+           interface
+
+docker build -t nginx \
+            --platform linux/arm64 \
+            --build-arg SITE=dev \
+             -f images/nginx/Dockerfile .
+docker run -p 80:80 \
+           -it nginx
+
+# gunicorn --bind 0.0.0.0:8000 dear_j.wsgi:application
+aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 048312687153.dkr.ecr.ap-northeast.amazonaws.com

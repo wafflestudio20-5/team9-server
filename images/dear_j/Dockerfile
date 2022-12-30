@@ -13,8 +13,10 @@ ENV DJANGO_SECRET_KEY $DJANGO_SECRET_KEY
 
 COPY ./dear_j /var/dear_j
 COPY ./requirements.txt /var/requirements.txt
+COPY ./run-interface.sh /var/run-interface.sh
 
 RUN python3 -m pip install --upgrade pip 
 RUN pip3 install -r /var/requirements.txt
 
-WORKDIR /var/dear_j
+WORKDIR /var
+ENTRYPOINT [ "/bin/bash", "./run-interface.sh" ]
