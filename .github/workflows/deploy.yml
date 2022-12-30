@@ -7,7 +7,6 @@ on:
       - refac/server
 
 env:
-  AWS_ACCOUNT_ID: 048312687153
   AWS_REGION: ap-northeast-2
   ECR_REPOSITORY_INTERFACE: backend/interface
   ECR_REPOSITORY_NGINX: backend/nginx
@@ -82,7 +81,7 @@ jobs:
       uses: appleboy/ssh-action@v0.1.6
       env:
         AWS_REGION: ${{ env.AWS_REGION }}
-        ECR_REGISTRY: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY_INTERFACE: ${{ env.ECR_REPOSITORY_INTERFACE }}
         ECR_REPOSITORY_NGINX: ${{ env.ECR_REPOSITORY_NGINX }}
         IMAGE_TAG: ${{ env.IMAGE_TAG }}
