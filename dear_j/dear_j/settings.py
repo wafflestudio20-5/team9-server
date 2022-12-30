@@ -143,7 +143,7 @@ if site_env.is_prod():
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",
-            "NAME": "database-dear-j",
+            "NAME": "DEARJ",
             "USER": "admin",
             "PASSWORD": ssm.get_ssm_parameter("/database/dearj/master_key"),
             "HOST": "database-dear-j.c8csrf4cdshb.ap-northeast-2.rds.amazonaws.com",

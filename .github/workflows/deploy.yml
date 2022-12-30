@@ -93,8 +93,12 @@ jobs:
         ECR_REPOSITORY_NGINX: ${{ env.ECR_REPOSITORY_NGINX }}
         IMAGE_TAG: ${{ env.IMAGE_TAG }}
       with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.PASSWORD }}
+        # host: ${{ secrets.HOST }}
+        # username: ec2-user
+        # key: ${{ secrets.EC2_SSH_KEY }}
+        host: ${{ secrets.REMOTE_IP }}
+        username: ${{ secrets.REMOTE_SSH_ID }}
+        key: ${{ secrets.REMOTE_SSH_KEY }}
+        port: ${{ secrets.REMOTE_SSH_PORT }}
         script: |
           ${{ github.workspace }}/deploy.sh
