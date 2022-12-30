@@ -92,7 +92,6 @@ jobs:
         ECR_REPOSITORY_INTERFACE: ${{ env.ECR_REPOSITORY_INTERFACE }}
         ECR_REPOSITORY_NGINX: ${{ env.ECR_REPOSITORY_NGINX }}
         IMAGE_TAG: ${{ env.IMAGE_TAG }}
-
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
