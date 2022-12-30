@@ -6,6 +6,7 @@ on:
       - main
       - refac/server
     paths:
+      - .github/workflows/deploy.yml
       - dear_j/**
       - image/**
       - nginx/**
