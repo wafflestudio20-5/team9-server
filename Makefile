@@ -10,7 +10,7 @@ down-local: ## Shut down local server
 	pkill -f gunicorn
 
 run-dev: ## Run dev server
-	docker-compose down && docker-compose up
+	docker-compose down && docker-compose up -d
 
 down-dev: ## Shut down dev server
 	docker-compose down
