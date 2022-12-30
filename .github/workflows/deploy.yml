@@ -90,4 +90,5 @@ jobs:
         host: ${{ secrets.EC2_PUBLIC_IP }}
         username: ${{ secrets.EC2_SSH_ID }}
         key: ${{ secrets.EC2_SSH_KEY }}
-        script: deploy.sh
+        script: |
+          sh deploy.sh
