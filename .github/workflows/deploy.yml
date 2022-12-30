@@ -91,4 +91,4 @@ jobs:
         username: ${{ secrets.EC2_SSH_ID }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          sh deploy.sh
+          sh ${{ github.workspace }}/deploy.sh
