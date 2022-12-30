@@ -72,7 +72,7 @@ jobs:
         echo "is_exist=${TAG_EXIST}" >> $GITHUB_OUTPUT
 
     - name: Build, tag, and push interface image to Amazon ECR
-      id: build-image-interface
+      id: build-image-nginx
       uses: docker/build-push-action@v3
       if: steps.docker-nginx-tag.outputs.is_exist == 'false'
       with:
