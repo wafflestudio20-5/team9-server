@@ -5,12 +5,6 @@ on:
     branches:
       - main
       - refac/server
-    # paths:
-    #   - .github/workflows/deploy.yml
-    #   - dear_j/**
-    #   - image/**
-    #   - nginx/**
-    #   - requirements.txt
 
 env:
   AWS_ACCOUNT_ID: 048312687153
@@ -93,11 +87,7 @@ jobs:
         ECR_REPOSITORY_NGINX: ${{ env.ECR_REPOSITORY_NGINX }}
         IMAGE_TAG: ${{ env.IMAGE_TAG }}
       with:
-        # host: ${{ secrets.HOST }}
-        # username: ec2-user
-        # key: ${{ secrets.EC2_SSH_KEY }}
         host: ${{ secrets.EC2_PUBLIC_IP }}
         username: ${{ secrets.EC2_SSH_ID }}
         key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          ${{ github.workspace }}/deploy.sh
+        script: deploy.sh
