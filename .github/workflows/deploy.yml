@@ -92,4 +92,5 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         envs: AWS_ACCOUNT_ID,AWS_REGION,ECR_REPOSITORY_INTERFACE,ECR_REPOSITORY_NGINX,IMAGE_TAG
         script: |
+          echo $AWS_ACCOUNT_ID
           docker-compose down && docker-compose pull && docker-compose up
