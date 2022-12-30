@@ -36,7 +36,7 @@ $ make down-local # Terminate Local Server
 
 ### Dev Server
 Dev server uses gunicorn + sqlite3, but use docker which is same setting with prod
-You can test api at http://localhost:8000/
+You can test api at http://localhost/
 
 ```bash
 $ make run-dev # Start Dev Server - automatically migrate db
