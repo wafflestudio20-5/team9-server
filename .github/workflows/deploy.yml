@@ -81,8 +81,7 @@ jobs:
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@v0.1.6
       env:
-        AWS_ACCOUNT_ID: ${{ env.AWS_ACCOUNT_ID }}
-        AWS_REGION: ${{ env.AWS_REGION }}
+        ECR_REGISTRY: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
         ECR_REPOSITORY_INTERFACE: ${{ env.ECR_REPOSITORY_INTERFACE }}
         ECR_REPOSITORY_NGINX: ${{ env.ECR_REPOSITORY_NGINX }}
         IMAGE_TAG: ${{ env.IMAGE_TAG }}
@@ -90,11 +89,11 @@ jobs:
         host: ${{ secrets.EC2_PUBLIC_IP }}
         username: ${{ secrets.EC2_SSH_ID }}
         key: ${{ secrets.EC2_SSH_KEY }}
-        envs: AWS_ACCOUNT_ID,AWS_REGION,ECR_REPOSITORY_INTERFACE,ECR_REPOSITORY_NGINX,IMAGE_TAG
+        envs: ECR_REGISTRY,ECR_REPOSITORY_INTERFACE,ECR_REPOSITORY_NGINX,IMAGE_TAG
         script: |
-          echo AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID > .env
-          echo AWS_REGION=$AWS_REGION >> .env
+          echo ECR_REGISTRY=$ECR_REGISTRY > .env
           echo ECR_REPOSITORY_INTERFACE=$ECR_REPOSITORY_INTERFACE >> .env
           echo ECR_REPOSITORY_NGINX=$ECR_REPOSITORY_NGINX >> .env
           echo IMAGE_TAG=$IMAGE_TAG >> .env
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
           docker-compose down && docker-compose pull && docker-compose up
