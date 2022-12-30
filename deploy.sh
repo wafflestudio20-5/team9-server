@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 COMPOSE_FILE="docker-compose.prod.yml"
 
 docker-compose -f $COMPOSE_FILE down \
