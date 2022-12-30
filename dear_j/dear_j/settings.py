@@ -28,6 +28,16 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# drf spectacular setting
+SPECTACULAR_SETTINGS = {
+    "TITLE": "J-Calendar API Document",
+    "DESCRIPTION": "drf-specatular를 사용해서 만든 J-Calendar의 API 문서입니다.",
+    "SWAGGER_UI_SETTINGS": {
+        "persistAuthorization": True,
+        "displayOperationId": True,
+        "filter": True,
+    },
+}
 
 # Application definition
 INSTALLED_APPS = [
@@ -43,6 +53,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "dj_rest_auth",
     "dj_rest_auth.registration",
+    "drf_spectacular",
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.kakao",
@@ -60,6 +71,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 # settings regarding login
