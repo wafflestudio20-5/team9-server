@@ -35,7 +35,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     "ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com",
-    "127.0.0.1", "localhost",
+    "127.0.0.1",
+    "localhost",
 ]
 
 
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "rest_framework_simplejwt.token_blacklist",
+    "corsheaders",
     "dj_rest_auth",
     "dj_rest_auth.registration",
     "allauth.account",
@@ -80,8 +82,17 @@ ACCOUNT_USERNAME_REQUIRED = config.ACCOUNT_USERNAME_REQUIRED
 ACCOUNT_EMAIL_REQUIRED = config.ACCOUNT_EMAIL_REQUIRED
 ACCOUNT_AUTHENTICATION_METHOD = config.ACCOUNT_AUTHENTICATION_METHOD
 ACCOUNT_EMAIL_VERIFICATION = config.ACCOUNT_EMAIL_VERIFICATION
+SITE_ID = config.SITE_ID
+ACCOUNT_UNIQUE_EMAIL = config.ACCOUNT_UNIQUE_EMAIL
+ACCOUNT_USER_MODEL_USERNAME_FIELD = config.ACCOUNT_USER_MODEL_USERNAME_FIELD
+ACCOUNT_USERNAME_REQUIRED = config.ACCOUNT_USERNAME_REQUIRED
+ACCOUNT_EMAIL_REQUIRED = config.ACCOUNT_EMAIL_REQUIRED
+ACCOUNT_AUTHENTICATION_METHOD = config.ACCOUNT_AUTHENTICATION_METHOD
+ACCOUNT_EMAIL_VERIFICATION = config.ACCOUNT_EMAIL_VERIFICATION
 
 # custom dj-rest-auth
+AUTH_USER_MODEL = config.AUTH_USER_MODEL
+ACCOUNT_ADAPTER = config.ACCOUNT_ADAPTER
 AUTH_USER_MODEL = config.AUTH_USER_MODEL
 ACCOUNT_ADAPTER = config.ACCOUNT_ADAPTER
 
@@ -90,6 +101,13 @@ REST_USE_JWT = config.REST_USE_JWT
 JWT_AUTH_REFRESH_COOKIE = config.JWT_AUTH_REFRESH_COOKIE
 ACCESS_TOKEN_LIFETIME = config.ACCESS_TOKEN_LIFETIME
 REFRESH_TOKEN_LIFETIME = config.REFRESH_TOKEN_LIFETIME
+REST_USE_JWT = config.REST_USE_JWT
+JWT_AUTH_REFRESH_COOKIE = config.JWT_AUTH_REFRESH_COOKIE
+ACCESS_TOKEN_LIFETIME = config.ACCESS_TOKEN_LIFETIME
+REFRESH_TOKEN_LIFETIME = config.REFRESH_TOKEN_LIFETIME
+
+# cors setting
+CORS_ORIGIN_ALLOW_ALL = config.CORS_ORIGIN_ALLOW_ALL
 
 # custom dj-rest-auth (for birthday/username field)
 REST_AUTH_SERIALIZERS = {"USER_DETAILS_SERIALIZER": "user.serializers.CustomUserDetailSerializer"}
@@ -105,6 +123,7 @@ SIMPLE_JWT = {
 
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
