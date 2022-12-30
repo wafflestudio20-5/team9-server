@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 import pathlib
 
+import pymysql
 import site_env
 from utils import ssm
 
@@ -32,7 +33,10 @@ else:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com",
+    "127.0.0.1",
+]
 
 
 # Application definition
@@ -135,6 +139,7 @@ WSGI_APPLICATION = "dear_j.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 if site_env.is_prod():
+    pymysql.install_as_MySQLdb()
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",

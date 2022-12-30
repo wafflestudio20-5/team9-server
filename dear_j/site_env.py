@@ -8,7 +8,11 @@ class SiteEnv(enum.Enum):
     LOCAL = "LOCAL"
 
 
-_current_site = SiteEnv[os.environ.get("SITE", "LOCAL").upper()]
+_site = os.environ.get("SITE", "LOCAL").upper()
+if not _site:
+    _site = "LOCAL"
+
+_current_site = SiteEnv[_site]
 
 
 def is_prod() -> bool:
