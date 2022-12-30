@@ -96,8 +96,8 @@ jobs:
         # host: ${{ secrets.HOST }}
         # username: ec2-user
         # key: ${{ secrets.EC2_SSH_KEY }}
-        host: ${{ secrets.REMOTE_IP }}
-        username: ${{ secrets.REMOTE_SSH_ID }}
-        key: ${{ secrets.REMOTE_SSH_KEY }}
+        host: ${{ secrets.EC2_PUBLIC_IP }}
+        username: ${{ secrets.EC2_SSH_ID }}
+        key: ${{ secrets.EC2_SSH_KEY }}
         script: |
           ${{ github.workspace }}/deploy.sh
