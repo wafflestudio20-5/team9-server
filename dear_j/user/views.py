@@ -4,6 +4,11 @@ import os
 from django import http
 from django import shortcuts
 from rest_framework import views
+from rest_framework import status
+from allauth.socialaccount import models as allauth_models
+from allauth.socialaccount.providers.kakao import views as kakao_view
+from allauth.socialaccount.providers.oauth2 import client
+from dj_rest_auth.registration import views
 
 import requests
 from user import exceptions
@@ -12,6 +17,8 @@ from user import models
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 with open(os.path.join(BASE_DIR, "dear_j/secrets.json"), "rb") as secret_file:
     secrets = json.load(secret_file)
+
+BASE_URL = "http://127.0.0.1:8000/"
 
 
 class KakaoView(views.APIView):
@@ -25,8 +32,8 @@ class KakaoView(views.APIView):
             redirect_uri = secrets["KAKAO"]["REDIRECT_URI"]
             return shortcuts.redirect(
                 f"https://kauth.kakao.com/oauth/authorize?" +
-                "client_id={client_id}&" +
-                "redirect_uri={redirect_uri}&" +
+                f"client_id={client_id}&" +
+                f"redirect_uri={redirect_uri}&" +
                 "response_type=code"
             )
         except exceptions.KakaoException as error:
@@ -46,16 +53,16 @@ class KakaoCallBackView(views.APIView):
             token_request = requests.get(
                 f"https://kauth.kakao.com/oauth/token?" +
                 "grant_type=authorization_code&" +
-                "client_id={client_id}&" +
-                "redirect_uri={redirect_uri}&"
-                "code={code}"
+                f"client_id={client_id}&" +
+                f"redirect_uri={redirect_uri}&"
+                f"code={code}"
             )
             token_json = token_request.json()
             error = token_json.get("error", None)
             if error is not None:
                 return http.JsonResponse(
                     {"message": "INVALID_CODE"},
-                    status=400
+                    status=status.HTTP_400_BAD_REQUEST
                 )
             access_token = token_json.get("access_token")
             # use access token to get kakao profile info
@@ -66,6 +73,12 @@ class KakaoCallBackView(views.APIView):
                 },
             )
             profile_json = profile_request.json()
+            error = profile_json.get("error")
+            if error is not None:
+                return http.JsonResponse(
+                    {"message": "INVALID_CODE"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             kakao_account = profile_json.get("kakao_account")
             email = kakao_account.get("email", None)  # get email
             kakao_id = profile_json.get("id")
@@ -73,15 +86,73 @@ class KakaoCallBackView(views.APIView):
         except KeyError:
             return http.JsonResponse(
                 {"message": "INVALID_CODE"},
-                status=400
+                status=status.HTTP_400_BAD_REQUEST
             )
         except access_token.DoesNotExist:
             return http.JsonResponse(
                 {"message": "INVALID_CODE"},
-                status=400
+                status=status.HTTP_400_BAD_REQUEST
             )
-        # login or register to dear j server
-        if models.User.objects.filter().exists():
-            pass
-        else:
-            pass
+        # signup or signin
+        try:
+            user = models.User.objects.get(email=email)
+            # check if the provider of the user is kakao
+            social_user = allauth_models.SocialAccount.objects.get(user=user)
+            if social_user is None:
+                return http.JsonResponse(
+                    {
+                        "message": "Email exists but not social user"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if social_user.provider != "kakao":
+                return http.JsonResponse(
+                    {
+                        "message": "Email exists but not kakao user"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            # kakao users that registered earlier
+            data = {
+                "access_token": access_token,
+                "code": code
+            }
+            accept = requests.post(
+                f"{BASE_URL}login/kakao/finish/",
+                data=data
+            )
+            accept_status = accept.status_code
+            if accept_status != 200:
+                return http.JsonResponse(
+                    {"message": "failed to signin"},
+                    status=accept_status
+                )
+            accept_json = accept.json()
+            accept_json.pop("user", None)
+            return http.JsonResponse(accept_json)
+
+        except models.User.DoesNotExist:
+            # kakao user does not exist
+            data = {
+                "access_token": access_token,
+                "code": code
+            }
+            accept = requests.post(
+                f"{BASE_URL}login/kakao/finish/",
+                data=data
+            )
+            accept_status = accept.status_code
+            if accept_status != 200:
+                return http.JsonResponse(
+                    {"message": "failed to signin"},
+                    status=accept_status
+                )
+            accept_json = accept.json()
+            accept_json.pop("user", None)
+            return http.JsonResponse(accept_json)
+
+
+class KakaoLogin(views.SocialLoginView):
+    adapter_class = kakao_view.KakaoOAuth2Adapter
+    client_class = client.OAuth2Client
+    callback_url = secrets["KAKAO"]["REDIRECT_URI"]

@@ -10,5 +10,6 @@ urlpatterns = [
     urls.path("login/", dj_auth_views.LoginView.as_view()),
     urls.path("login/kakao", views.KakaoView.as_view()),
     urls.path("login/kakao/callback/", views.KakaoCallBackView.as_view()),
+    urls.path("login/kakao/finish/", views.KakaoLogin.as_view()),
     urls.path("logout/", dj_auth_views.LogoutView.as_view()),
 ]
