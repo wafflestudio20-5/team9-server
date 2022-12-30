@@ -18,14 +18,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 with open(os.path.join(BASE_DIR, "dear_j/secrets.json"), "rb") as secret_file:
     secrets = json.load(secret_file)
 
-BASE_URL = "http://127.0.0.1:8000/"
+BASE_URL = "http://127.0.0.1:8000/api/v1/user/"
 
 
 class KakaoView(views.APIView):
     def get(self, request, format=None):
         try:
             if request.user.is_authenticated:
-                raise exceptions.SocialLoginExeption(
+                raise exceptions.SocialLoginException(
                     "User already logged in."
                 )
             client_id = secrets["KAKAO"]["REST_API_KEY"]
@@ -122,11 +122,11 @@ class KakaoCallBackView(views.APIView):
                 data=data
             )
             accept_status = accept.status_code
-            if accept_status != 200:
+            """if accept_status != 200:
                 return http.JsonResponse(
                     {"message": "failed to signin"},
                     status=accept_status
-                )
+                )"""
             accept_json = accept.json()
             accept_json.pop("user", None)
             return http.JsonResponse(accept_json)
@@ -142,11 +142,11 @@ class KakaoCallBackView(views.APIView):
                 data=data
             )
             accept_status = accept.status_code
-            if accept_status != 200:
+            """if accept_status != 200:
                 return http.JsonResponse(
                     {"message": "failed to signin"},
                     status=accept_status
-                )
+                )"""
             accept_json = accept.json()
             accept_json.pop("user", None)
             return http.JsonResponse(accept_json)

@@ -98,6 +98,10 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": BLACKLIST_AFTER_ROTATION,
 }
 
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend"
+)
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
