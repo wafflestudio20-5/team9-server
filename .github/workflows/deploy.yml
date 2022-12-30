@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - refac/server
 
 env:
   AWS_REGION: ap-northeast-2
