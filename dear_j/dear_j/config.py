@@ -18,3 +18,9 @@ REST_USE_JWT = True
 JWT_AUTH_REFRESH_COOKIE = "my-refresh-token"
 ACCESS_TOKEN_LIFETIME = datetime.timedelta(hours=2)
 REFRESH_TOKEN_LIFETIME = datetime.timedelta(days=7)
+
+# cors setting
+CORS_ORIGIN_ALLOW_ALL = True
+
+ROTATE_REFRESH_TOKENS = False
+BLACKLIST_AFTER_ROTATION = True
