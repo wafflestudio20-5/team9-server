@@ -95,9 +95,9 @@ REFRESH_TOKEN_LIFETIME = config.REFRESH_TOKEN_LIFETIME
 # cors setting
 CORS_ORIGIN_ALLOW_ALL = config.CORS_ORIGIN_ALLOW_ALL
 
-# custom dj-rest-auth (for birthday/username field)
-REST_AUTH_SERIALIZERS = {"USER_DETAILS_SERIALIZER": "user.serializers.CustomUserDetailSerializer"}
-REST_AUTH_REGISTER_SERIALIZERS = {"REGISTER_SERIALIZER": "user.serializers.CustomRegisterSerializer"}
+# custom dj-rest-auth serializer
+REST_AUTH_SERIALIZERS = {"USER_DETAILS_SERIALIZER": "user.serializers.UserDetailSerializer"}
+REST_AUTH_REGISTER_SERIALIZERS = {"REGISTER_SERIALIZER": "user.serializers.RegisterSerializer"}
 
 
 SIMPLE_JWT = {
