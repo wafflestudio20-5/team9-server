@@ -205,9 +205,12 @@ class GoogleCallBackView(rest_views.APIView):
                                      status=status.HTTP_400_BAD_REQUEST)
         email_req_json = email_req.json()
         email = email_req_json.get("email")
+        birthdate = email_req_json.get("birthday")
         # signup or signin request
         try:
+            print("tried to signin")
             user = models.User.objects.get(email=email)
+            print(user)
             social_user = allauth_models.SocialAccount.objects.get(user=user)
             if social_user is None:
                 return http.JsonResponse(
@@ -218,37 +221,44 @@ class GoogleCallBackView(rest_views.APIView):
                 return http.JsonResponse(
                     {"message": "no matching social type"},
                     status=status.HTTP_400_BAD_REQUEST)
+            # google account exist -> sign in
             data = {"access_token": access_token,
                     "code": code}
             accept = requests.post(
-                f"{BASE_URL}login/google/finish/", data=data)
+                "http://127.0.0.1:8000/api/v1/user/login/google/finish/",
+                data=data)
             accept_status = accept.status_code
             if accept_status != 200:
                 return http.JsonResponse({"message": "failed to signin"},
                                          status=accept_status)
             accept_json = accept.json()
-            accept_json.pop('user', None)
+            accept_json.pop("user", None)
             return http.JsonResponse(accept_json)
-        except:
-            # registered user
-            data = {"access_token":access_token, 
-                    "code":code}
+        except models.User.DoesNotExist:
+            # register user
+            data = {"access_token": access_token,
+                    "code": code}
+            print("user registration finish api call")
             accept = requests.post(
-                f"{BASE_URL}login/google/finish/",
+                "http://127.0.0.1:8000/api/v1/user/login/google/finish/",
                 data=data
             )
             accept_status = accept.status_code
             if accept_status != 200:
                 return http.JsonResponse(
-                    {"message":"failed to signup"},
+                    {"message": "failed to signup"},
                     status=accept_status
                 )
             accept_json = accept.json()
             accept_json.pop("user", None)
             return http.JsonResponse(accept_json)
+        except allauth_models.SocialAccount.DoesNotExist:
+            return http.JsonResponse(
+                {"message": "no matching social type"},
+                status=status.HTTP_400_BAD_REQUEST)
 
 
 class GoogleLogin(auth_views.SocialLoginView):
     adapter_class = google_view.GoogleOAuth2Adapter
-    callback_url = BASE_URL + "login/google/callback/"
+    callback_url = "http://127.0.0.1:8000/api/v1/user/login/google/callback/"
     client_class = client.OAuth2Client
