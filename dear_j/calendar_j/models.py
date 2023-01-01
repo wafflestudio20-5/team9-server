@@ -1,22 +1,16 @@
 from django.db import models
 
+from calendar_j.services.attendance import attendance
+from calendar_j.services.protection import protection
 from user import models as user_models
-
-
-class ProtectionLevel(models.IntegerChoices):
-    OPEN = 1
-    SEMI_OPEN = 2
-    CLOSED = 3
-
-    DEFAULT = OPEN
 
 
 class Schedule(models.Model):
     title = models.CharField(max_length=50)
-    created_by = models.ForeignKey(user_models.User, on_delete=models.PROTECT)
+    created_by = models.ForeignKey(user_models.User, on_delete=models.PROTECT, related_name="schedules")
     protection_level = models.IntegerField(
-        choices=ProtectionLevel.choices,
-        default=ProtectionLevel.DEFAULT.value,
+        choices=protection.ProtectionLevel.choices,
+        default=protection.ProtectionLevel.get_default(),
     )
     start_at = models.DateTimeField()
     end_at = models.DateTimeField()
@@ -32,21 +26,12 @@ class Schedule(models.Model):
         db_table = "tb_schedule"
 
 
-class AttendanceStatus(models.IntegerChoices):
-    PRESENCE = 1
-    ABSENCE = 2
-    HOLD = 3
-    UNANSWERED = 4
-
-    DEFAULT = UNANSWERED
-
-
 class Participant(models.Model):
     participant = models.ForeignKey(user_models.User, on_delete=models.PROTECT)
     schedule = models.ForeignKey(Schedule, on_delete=models.PROTECT)
     status = models.IntegerField(
-        choices=AttendanceStatus.choices,
-        default=AttendanceStatus.DEFAULT.value,
+        choices=attendance.AttendanceStatus.choices,
+        default=attendance.AttendanceStatus.get_default(),
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
