@@ -6,19 +6,16 @@ from user import models
 
 class LoginTestCase(test.APITestCase):
     def test_success_login(self):
-        user = models.User.objects.create(
-            email="testcase@example.com", birthday="2001-06-11")
+        user = models.User.objects.create(email="testcase@example.com", birthdate="2001-06-11")
         user.set_password("testcasePassword123")
         user.save()
 
-        data = {"email": "testcase@example.com",
-                "password": "testcasePassword123"}
+        data = {"email": "testcase@example.com", "password": "testcasePassword123"}
         response = self.client.post("/api/v1/user/login/", data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_fail_login(self):
-        user = models.User.objects.create(
-            email="testcase@example.com", birthday="2001-06-11")
+        user = models.User.objects.create(email="testcase@example.com", birthdate="2001-06-11")
         user.set_password("testcasePassword123")
         user.save()
 
@@ -34,7 +31,7 @@ class RegisterTestCase(test.APITestCase):
             "email": "email@naver.com",
             "password1": "testpassword*",
             "password2": "testpassword*",
-            "birthday": "2022-12-27"
+            "birthdate": "2022-12-27",
         }
         response = self.client.post("/api/v1/user/registration/", data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -45,7 +42,7 @@ class RegisterTestCase(test.APITestCase):
             "email": "email@naver.com",
             "password1": "testpassword*",
             "password2": "testpasswo1d*",
-            "birthday": "2022-12-27"
+            "birthdate": "2022-12-27",
         }
         response = self.client.post("/api/v1/user/registration/", data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
