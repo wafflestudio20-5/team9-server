@@ -11,7 +11,7 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 
 # custom dj-rest-auth
 AUTH_USER_MODEL = "user.User"
-ACCOUNT_ADAPTER = "user.adapter.CustomAccountAdapter"
+ACCOUNT_ADAPTER = "user.adapter.AccountAdapter"
 
 # jwt environment setting
 REST_USE_JWT = True
