@@ -91,10 +91,11 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         envs: AWS_REGION,ECR_REGISTRY,ECR_REPOSITORY_INTERFACE,ECR_REPOSITORY_NGINX,IMAGE_TAG
         script: |
-          echo AWS_REGION=$AWS_REGION > .env
-          echo ECR_REGISTRY=$ECR_REGISTRY >> .env
-          echo ECR_REPOSITORY_INTERFACE=$ECR_REPOSITORY_INTERFACE >> .env
-          echo ECR_REPOSITORY_NGINX=$ECR_REPOSITORY_NGINX >> .env
-          echo IMAGE_TAG=$IMAGE_TAG >> .env
+          cat << EOF > .env
+            AWS_REGION=$AWS_REGION
+            ECR_REGISTRY=$ECR_REGISTRY
+            ECR_REPOSITORY_INTERFACE=$ECR_REPOSITORY_INTERFACE
+            IMAGE_TAG=$IMAGE_TAG
+          EOF
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
           docker-compose down && docker-compose pull && docker-compose up -d
