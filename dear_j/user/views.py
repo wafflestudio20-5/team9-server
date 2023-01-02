@@ -7,14 +7,16 @@ from django import shortcuts
 from rest_framework import views as rest_views
 from rest_framework import status
 from allauth.socialaccount import models as allauth_models
-from allauth.socialaccount.providers.kakao import views as kakao_view
+from allauth.socialaccount import adapter
 from allauth.socialaccount.providers.google import views as google_view
+from allauth.socialaccount.providers.kakao import views as kakao_view
 from allauth.socialaccount.providers.oauth2 import client
 from dj_rest_auth.registration import views as auth_views
 
 import requests
 from user import exceptions
 from user import models
+from user import adapter
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 with open(os.path.join(BASE_DIR, "dear_j/secrets.json"), "rb") as secret_file:
@@ -162,7 +164,7 @@ class KakaoLogin(auth_views.SocialLoginView):
 
 class GoogleView(rest_views.APIView):
     def get(self, request, format=None):
-        info_scope = "https://www.googleapis.com/auth/userinfo.email"
+        info_scope = "https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/userinfo.email"
         client_id = secrets["GOOGLE"]["CLIENT_ID"]
         callback_url = secrets["GOOGLE"]["REDIRECT_URI"]
         return shortcuts.redirect(
@@ -204,13 +206,12 @@ class GoogleCallBackView(rest_views.APIView):
             return http.JsonResponse({"message": "failed to get email"},
                                      status=status.HTTP_400_BAD_REQUEST)
         email_req_json = email_req.json()
+        print(email_req_json)
         email = email_req_json.get("email")
         birthdate = email_req_json.get("birthday")
         # signup or signin request
         try:
-            print("tried to signin")
             user = models.User.objects.get(email=email)
-            print(user)
             social_user = allauth_models.SocialAccount.objects.get(user=user)
             if social_user is None:
                 return http.JsonResponse(
@@ -232,13 +233,12 @@ class GoogleCallBackView(rest_views.APIView):
                 return http.JsonResponse({"message": "failed to signin"},
                                          status=accept_status)
             accept_json = accept.json()
-            accept_json.pop("user", None)
+            #accept_json.pop("user", None)
             return http.JsonResponse(accept_json)
         except models.User.DoesNotExist:
             # register user
             data = {"access_token": access_token,
                     "code": code}
-            print("user registration finish api call")
             accept = requests.post(
                 "http://127.0.0.1:8000/api/v1/user/login/google/finish/",
                 data=data
