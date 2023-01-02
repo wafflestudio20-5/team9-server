@@ -18,7 +18,6 @@ class Schedule(models.Model):
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    url = models.URLField(blank=True)
 
     class Meta:
         verbose_name = "schedule"

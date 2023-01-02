@@ -7,6 +7,6 @@ class AttendanceStatus(models.IntegerChoices):
     HOLD = 3
     UNANSWERED = 4
 
-    @staticmethod
-    def get_default():
-        return AttendanceStatus.UNANSWERED.value
+    @classmethod
+    def get_default(cls):
+        return cls.UNANSWERED.value
