@@ -95,6 +95,7 @@ jobs:
             AWS_REGION=$AWS_REGION
             ECR_REGISTRY=$ECR_REGISTRY
             ECR_REPOSITORY_INTERFACE=$ECR_REPOSITORY_INTERFACE
+            ECR_REPOSITORY_NGINX=$ECR_REPOSITORY_NGINX
             IMAGE_TAG=$IMAGE_TAG
           EOF
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
