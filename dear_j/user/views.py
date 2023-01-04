@@ -84,7 +84,6 @@ class KakaoCallBackView(rest_views.APIView):
                 }
             )
             profile_json = profile_request.json()
-            print(profile_json)
             error = profile_json.get("error")
             if error is not None:
                 return http.JsonResponse(
@@ -118,7 +117,6 @@ class KakaoCallBackView(rest_views.APIView):
             user = models.User.objects.get(email=email)
             # check if the provider of the user is kakao
             social_user = allauth_models.SocialAccount.objects.get(user=user)
-            print("social user 받아오기 성공")
             if social_user is None:
                 return http.JsonResponse(
                     {
@@ -149,11 +147,6 @@ class KakaoCallBackView(rest_views.APIView):
                     status=accept_status
                 )
             accept_json = accept.json()
-            new_user = models.User.objects.get(email=email)
-            print(new_user.email)
-            print(new_user.pk)
-            print(new_user.birthday)
-            print(new_user.username)
             return http.JsonResponse(accept_json)
         
 
@@ -186,10 +179,8 @@ class KakaoCallBackView(rest_views.APIView):
                 )
             accept_json = accept.json()
             new_user = models.User.objects.get(email=email)
-            print(new_user.email)
-            print(new_user.pk)
-            print(new_user.birthday)
-            print(new_user.username)
+            if birthday != "9999-12-31":
+                new_user.birthday = birthday
             return http.JsonResponse(accept_json)
         except allauth_models.SocialAccount.DoesNotExist:
             return http.JsonResponse(
@@ -307,6 +298,9 @@ class GoogleCallBackView(rest_views.APIView):
             if birthday != "9999-12-31":
                 user.birthday = birthday
             accept_json = accept.json()
+            if accept_json.get("user") is not None:
+                if accept_json.get("user").get("birthday") is None:
+                    accept_json["user"]["birthday"] = birthday
             return http.JsonResponse(accept_json)
         except allauth_models.SocialAccount.DoesNotExist:
             return http.JsonResponse(
