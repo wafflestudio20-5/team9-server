@@ -4,19 +4,18 @@ import os
 
 from django import http
 from django import shortcuts
-from rest_framework import views as rest_views
 from rest_framework import status
-from allauth.socialaccount import models as allauth_models
+from rest_framework import views as rest_views
+
 from allauth.socialaccount import adapter
+from allauth.socialaccount import models as allauth_models
 from allauth.socialaccount.providers.google import views as google_view
 from allauth.socialaccount.providers.kakao import views as kakao_view
 from allauth.socialaccount.providers.oauth2 import client
 from dj_rest_auth.registration import views as auth_views
-
 import requests
 from user import exceptions
 from user import models
-from user import adapter
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 with open(os.path.join(BASE_DIR, "dear_j/secrets.json"), "rb") as secret_file:
