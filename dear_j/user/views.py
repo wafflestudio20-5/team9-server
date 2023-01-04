@@ -28,10 +28,10 @@ BASE_URL = "http://127.0.0.1:8000/api/v1/user/"
 class KakaoView(rest_views.APIView):
     def get(self, request, format=None):
         try:
-            if request.user.is_authenticated:
+            """if request.user.is_authenticated:
                 raise exceptions.SocialLoginException(
                     "User already logged in."
-                )
+                )"""
             client_id = secrets["KAKAO"]["REST_API_KEY"]
             redirect_uri = secrets["KAKAO"]["REDIRECT_URI"]
             return shortcuts.redirect(
@@ -41,9 +41,15 @@ class KakaoView(rest_views.APIView):
                 "response_type=code"
             )
         except exceptions.KakaoException as error:
-            return shortcuts.redirect("http://127.0.0.1:8000")
+            return http.JsonResponse(
+                    {"message": "kakao exception"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         except exceptions.SocialLoginException as error:
-            return shortcuts.redirect("http://127.0.0.1:8000")
+            return http.JsonResponse(
+                    {"message": "user already logged in"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
 
 class KakaoCallBackView(rest_views.APIView):
@@ -62,7 +68,7 @@ class KakaoCallBackView(rest_views.APIView):
                 f"code={code}"
             )
             token_json = token_request.json()
-            error = token_json.get("error", None)
+            error = token_json.get("error")
             if error is not None:
                 return http.JsonResponse(
                     {"message": "INVALID_CODE"},
@@ -74,9 +80,10 @@ class KakaoCallBackView(rest_views.APIView):
                 "https://kapi.kakao.com/v2/user/me",
                 headers={
                     "Authorization": f"Bearer {access_token}"
-                },
+                }
             )
             profile_json = profile_request.json()
+            print(profile_json)
             error = profile_json.get("error")
             if error is not None:
                 return http.JsonResponse(
@@ -84,8 +91,16 @@ class KakaoCallBackView(rest_views.APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             kakao_account = profile_json.get("kakao_account")
-            email = kakao_account.get("email", None)  # get email
-            kakao_id = profile_json.get("id")
+            # required
+            email = kakao_account.get("email")
+            # not required field
+            birthday = "9999-12-31"
+            if "birthday" in kakao_account.keys():
+                raw_mmdd = kakao_account.get("birthday")
+                birthday = "9999-" + raw_mmdd[:2] + "-" + raw_mmdd[2:]
+            username = "user"
+            if "nickname" in kakao_account.keys():
+                username = kakao_account.get("profile").get("nickname")
 
         except KeyError:
             return http.JsonResponse(
@@ -126,17 +141,27 @@ class KakaoCallBackView(rest_views.APIView):
                 data=data
             )
             accept_status = accept.status_code
-            """if accept_status != 200:
+            if accept_status != 200:
                 return http.JsonResponse(
                     {"message": "failed to signin"},
                     status=accept_status
-                )"""
+                )
             accept_json = accept.json()
-            accept_json.pop("user", None)
             return http.JsonResponse(accept_json)
 
         except models.User.DoesNotExist:
             # kakao user does not exist
+            if birthday == "9999-12-31":
+                models.User.objects.create(
+                    email=email,
+                    username=username
+                )
+            else:
+                models.User.objects.create(
+                    email=email,
+                    birthday=birthday,
+                    username=username
+                )
             data = {
                 "access_token": access_token,
                 "code": code
@@ -146,13 +171,12 @@ class KakaoCallBackView(rest_views.APIView):
                 data=data
             )
             accept_status = accept.status_code
-            """if accept_status != 200:
+            if accept_status != 200:
                 return http.JsonResponse(
                     {"message": "failed to signin"},
                     status=accept_status
-                )"""
+                )
             accept_json = accept.json()
-            accept_json.pop("user", None)
             return http.JsonResponse(accept_json)
 
 
@@ -206,7 +230,6 @@ class GoogleCallBackView(rest_views.APIView):
             return http.JsonResponse({"message": "failed to get email"},
                                      status=status.HTTP_400_BAD_REQUEST)
         email_req_json = email_req.json()
-        print(email_req_json)
         email = email_req_json.get("email")
         birthdate = email_req_json.get("birthday")
         # signup or signin request
@@ -250,7 +273,6 @@ class GoogleCallBackView(rest_views.APIView):
                     status=accept_status
                 )
             accept_json = accept.json()
-            accept_json.pop("user", None)
             return http.JsonResponse(accept_json)
         except allauth_models.SocialAccount.DoesNotExist:
             return http.JsonResponse(
