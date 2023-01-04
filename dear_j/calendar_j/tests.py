@@ -56,7 +56,7 @@ class CalendarAPITest(test.APITestCase):
         self.client.post(path="/api/v1/user/login/", data=creator_data.for_login, format="json")
 
         response = self.client.post(
-            path="/api/v1/calendar_j/schedule/",
+            path="/api/v1/calendar/schedule/",
             data={
                 "title": "Test Schedule1",
                 "start_at": "2022-12-11 00:00:00",
@@ -103,7 +103,7 @@ class CalendarAPITest(test.APITestCase):
         self.client.post("/api/v1/user/login/", data=user1_data.for_login, format="json")
 
         self.client.post(
-            path="/api/v1/calendar_j/schedule/",
+            path="/api/v1/calendar/schedule/",
             data={
                 "title": "Test Schedule 1-1",
                 "start_at": "2022-12-11 00:00:00",
@@ -114,7 +114,7 @@ class CalendarAPITest(test.APITestCase):
         )
 
         self.client.post(
-            path="/api/v1/calendar_j/schedule/",
+            path="/api/v1/calendar/schedule/",
             data={
                 "title": "Test Schedule 2",
                 "start_at": "2022-12-12 00:00:00",
@@ -129,7 +129,7 @@ class CalendarAPITest(test.APITestCase):
             format="json",
         )
 
-        response = self.client.get("/api/v1/calendar_j/schedule/")
+        response = self.client.get("/api/v1/calendar/schedule/")
 
         expected = [
             {
@@ -172,7 +172,7 @@ class CalendarAPITest(test.APITestCase):
 
         pk = (
             self.client.post(
-                path="/api/v1/calendar_j/schedule/",
+                path="/api/v1/calendar/schedule/",
                 data={
                     "title": "Test Schedule 1-1",
                     "start_at": "2022-12-11 00:00:00",
@@ -186,7 +186,7 @@ class CalendarAPITest(test.APITestCase):
         )
 
         # Check Patch (Partial Update)
-        response = self.client.patch(path=f"/api/v1/calendar_j/schedule/{pk}/", data={"title": "Modified Test Schedule 1-1"}, format="json")
+        response = self.client.patch(path=f"/api/v1/calendar/schedule/{pk}/", data={"title": "Modified Test Schedule 1-1"}, format="json")
         expected = {
             "id": 1,
             "participants": [],
@@ -206,7 +206,7 @@ class CalendarAPITest(test.APITestCase):
 
         # Check Put (Total Update)
         response = self.client.put(
-            path=f"/api/v1/calendar_j/schedule/{pk}/",
+            path=f"/api/v1/calendar/schedule/{pk}/",
             data={
                 "title": "Second Modified Test Schedule 1-1",
                 "start_at": "2022-12-12 00:00:00",
@@ -233,5 +233,5 @@ class CalendarAPITest(test.APITestCase):
             assert actual[key] == value
 
         # Check Delete
-        response = self.client.delete(path=f"/api/v1/calendar_j/schedule/{pk}/", format="json")
+        response = self.client.delete(path=f"/api/v1/calendar/schedule/{pk}/", format="json")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
