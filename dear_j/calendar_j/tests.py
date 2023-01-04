@@ -157,9 +157,9 @@ class CalendarAPITest(test.APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for actual_row, expected_row in zip(actual, expected):
-            for key in expected_row.keys():
+            for key, value in expected_row.items():
                 assert key in actual_row.keys()
-                assert actual_row[key] == expected_row[key]
+                assert actual_row[key] == value
 
     def test_update_schedule(self):
         user1_data = UserData.create_nth_user_data(1)
