@@ -29,8 +29,9 @@ class KakaoView(rest_views.APIView):
     def get(self, request, format=None):
         try:
             """if request.user.is_authenticated:
-                raise exceptions.SocialLoginException(
-                    "User already logged in."
+                return http.JsonResponse(
+                    {"message": "user already logged in"},
+                    status=status.HTTP_400_BAD_REQUEST
                 )"""
             client_id = secrets["KAKAO"]["REST_API_KEY"]
             redirect_uri = secrets["KAKAO"]["REDIRECT_URI"]
@@ -148,16 +149,16 @@ class KakaoCallBackView(rest_views.APIView):
                     status=accept_status
                 )
             accept_json = accept.json()
-            print("signin 성공")
+            new_user = models.User.objects.get(email=email)
+            print(new_user.email)
+            print(new_user.pk)
+            print(new_user.birthday)
+            print(new_user.username)
             return http.JsonResponse(accept_json)
         
 
         except models.User.DoesNotExist:
             # kakao user does not exist
-            """if birthday == "9999-12-31" and username == "user":
-                models.User.objects.create(
-                    email=email
-                )
             if birthday == "9999-12-31":
                 models.User.objects.create(
                     email=email,
@@ -168,7 +169,7 @@ class KakaoCallBackView(rest_views.APIView):
                     email=email,
                     birthday=birthday,
                     username=username
-                )"""
+                )
             data = {
                 "access_token": access_token,
                 "code": code
@@ -184,9 +185,13 @@ class KakaoCallBackView(rest_views.APIView):
                     status=accept_status
                 )
             accept_json = accept.json()
+            new_user = models.User.objects.get(email=email)
+            print(new_user.email)
+            print(new_user.pk)
+            print(new_user.birthday)
+            print(new_user.username)
             return http.JsonResponse(accept_json)
         except allauth_models.SocialAccount.DoesNotExist:
-            print("exception 처리 잘 되고 있음")
             return http.JsonResponse(
                 {"message": "no matching social type"},
                 status=status.HTTP_400_BAD_REQUEST)
@@ -200,7 +205,7 @@ class KakaoLogin(auth_views.SocialLoginView):
 
 class GoogleView(rest_views.APIView):
     def get(self, request, format=None):
-        info_scope = "https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/userinfo.email"
+        info_scope = "https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"
         client_id = secrets["GOOGLE"]["CLIENT_ID"]
         callback_url = secrets["GOOGLE"]["REDIRECT_URI"]
         return shortcuts.redirect(
@@ -243,11 +248,24 @@ class GoogleCallBackView(rest_views.APIView):
                                      status=status.HTTP_400_BAD_REQUEST)
         email_req_json = email_req.json()
         email = email_req_json.get("email")
-        birthdate = email_req_json.get("birthday")
+        birthday_req = requests.get(
+                "https://people.googleapis.com/v1/people/me?personFields=birthdays",
+                headers={
+                    "Authorization": f"Bearer {access_token}"
+                }
+            )
+        birthday = "9999-12-31"
+        birthday_json = birthday_req.json()
+        if birthday_json.get("birthdays") is not None:
+            if birthday_json.get("birthdays")[0].get("date") is not None:
+                date = birthday_json.get("birthdays")[0].get("date")
+                year = str(date.get("year")).rjust(4, "0")
+                month = str(date.get("month")).rjust(2, "0")
+                day = str(date.get("day")).rjust(2, "0")
+                birthday = year + "-" + month + "-" + day
         # signup or signin request
         try:
             user = models.User.objects.get(email=email)
-            print(user)
             social_user = allauth_models.SocialAccount.objects.get(user=user)
             if social_user is None:
                 return http.JsonResponse(
@@ -285,10 +303,12 @@ class GoogleCallBackView(rest_views.APIView):
                     {"message": "failed to signup"},
                     status=accept_status
                 )
+            user = models.User.objects.get(email=email)
+            if birthday != "9999-12-31":
+                user.birthday = birthday
             accept_json = accept.json()
             return http.JsonResponse(accept_json)
         except allauth_models.SocialAccount.DoesNotExist:
-            print("exception 처리 잘 되고 있음")
             return http.JsonResponse(
                 {"message": "no matching social type"},
                 status=status.HTTP_400_BAD_REQUEST)
