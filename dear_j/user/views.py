@@ -101,7 +101,7 @@ class KakaoCallBackView(rest_views.APIView):
             username = "user"
             if "nickname" in kakao_account.keys():
                 username = kakao_account.get("profile").get("nickname")
-
+            
         except KeyError:
             return http.JsonResponse(
                 {"message": "INVALID_CODE"},
@@ -115,8 +115,10 @@ class KakaoCallBackView(rest_views.APIView):
         # signup or signin
         try:
             user = models.User.objects.get(email=email)
+            print("user 받아오기 성공")
             # check if the provider of the user is kakao
             social_user = allauth_models.SocialAccount.objects.get(user=user)
+            print("social user 받아오기 성공")
             if social_user is None:
                 return http.JsonResponse(
                     {
@@ -147,6 +149,7 @@ class KakaoCallBackView(rest_views.APIView):
                     status=accept_status
                 )
             accept_json = accept.json()
+            print("signin 성공")
             return http.JsonResponse(accept_json)
 
         except models.User.DoesNotExist:
