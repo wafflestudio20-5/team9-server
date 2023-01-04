@@ -16,7 +16,7 @@ class User(auth_models.AbstractBaseUser, auth_models.PermissionsMixin):
     is_admin = db_models.BooleanField(default=False)
     is_superuser = db_models.BooleanField(default=False)
     is_staff = db_models.BooleanField(default=False)
-    date_joined = db_models.DateTimeField(auto_now_add=True)
+    created_at = db_models.DateTimeField(auto_now_add=True)
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 

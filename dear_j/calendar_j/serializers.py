@@ -6,17 +6,18 @@ from calendar_j import models as calendar_model
 from user import models as user_models
 
 
-class ParticipantSerializer(serializers.ModelSerializer):
+class ParticipantEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
-    class Meta:
-        model = user_models.User
-        fields = ["pk", "email"]
-        read_only_fields = ["email"]
+    def create(self, validated_data):
+        raise NotImplementedError
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError
 
 
 class ScheduleSerializer(serializers.ModelSerializer):
-    participants = ParticipantSerializer(many=True, required=False)
+    participants = ParticipantEmailSerializer(many=True, required=False)
 
     class Meta:
         model = calendar_model.Schedule
@@ -35,3 +36,9 @@ class ScheduleSerializer(serializers.ModelSerializer):
             participant = user_models.User.objects.get(**participant_data)
             calendar_model.Participant.objects.create(schedule=schedule, participant=participant)
         return schedule
+
+
+class ParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = calendar_model.Participant
+        fields = "__all__"
