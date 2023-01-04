@@ -146,22 +146,18 @@ class KakaoCallBackView(rest_views.APIView):
                     status=accept_status
                 )
             accept_json = accept.json()
-            return http.JsonResponse(accept_json)
+            if accept_json.get("user") is not None:
+                if accept_json.get("user").get("birthday") is not None:
+                    accept_json["user"]["birthday"] = user.birthday
+                if accept_json.get("user").get("username") is not None:
+                    accept_json["user"]["username"] = user.username
+            return http.JsonResponse(accept_json, 
+                                     json_dumps_params={'ensure_ascii': False}, 
+                                     status=200)
         
 
         except models.User.DoesNotExist:
             # kakao user does not exist
-            if birthday == "9999-12-31":
-                models.User.objects.create(
-                    email=email,
-                    username=username
-                )
-            else:
-                models.User.objects.create(
-                    email=email,
-                    birthday=birthday,
-                    username=username
-                )
             data = {
                 "access_token": access_token,
                 "code": code
@@ -180,7 +176,16 @@ class KakaoCallBackView(rest_views.APIView):
             new_user = models.User.objects.get(email=email)
             if birthday != "9999-12-31":
                 new_user.birthday = birthday
-            return http.JsonResponse(accept_json)
+                new_user.save()
+            if accept_json.get("user") is not None:
+                if accept_json.get("user").get("birthday") is not None:
+                    accept_json["user"]["birthday"] = new_user.birthday
+                if accept_json.get("user").get("username") is not None:
+                    accept_json["user"]["username"] = new_user.username
+            return http.JsonResponse(accept_json, 
+                                     json_dumps_params={'ensure_ascii': False}, 
+                                     status=200)
+        
         except allauth_models.SocialAccount.DoesNotExist:
             return http.JsonResponse(
                 {"message": "no matching social type"},
@@ -277,7 +282,6 @@ class GoogleCallBackView(rest_views.APIView):
                 return http.JsonResponse({"message": "failed to signin"},
                                          status=accept_status)
             accept_json = accept.json()
-            #accept_json.pop("user", None)
             return http.JsonResponse(accept_json)
         except models.User.DoesNotExist:
             # register user
@@ -296,6 +300,7 @@ class GoogleCallBackView(rest_views.APIView):
             user = models.User.objects.get(email=email)
             if birthday != "9999-12-31":
                 user.birthday = birthday
+                user.save()
             accept_json = accept.json()
             if accept_json.get("user") is not None:
                 if accept_json.get("user").get("birthday") is None:
