@@ -115,7 +115,6 @@ class KakaoCallBackView(rest_views.APIView):
         # signup or signin
         try:
             user = models.User.objects.get(email=email)
-            print("user 받아오기 성공")
             # check if the provider of the user is kakao
             social_user = allauth_models.SocialAccount.objects.get(user=user)
             print("social user 받아오기 성공")
@@ -151,9 +150,14 @@ class KakaoCallBackView(rest_views.APIView):
             accept_json = accept.json()
             print("signin 성공")
             return http.JsonResponse(accept_json)
+        
 
         except models.User.DoesNotExist:
             # kakao user does not exist
+            """if birthday == "9999-12-31" and username == "user":
+                models.User.objects.create(
+                    email=email
+                )
             if birthday == "9999-12-31":
                 models.User.objects.create(
                     email=email,
@@ -164,7 +168,7 @@ class KakaoCallBackView(rest_views.APIView):
                     email=email,
                     birthday=birthday,
                     username=username
-                )
+                )"""
             data = {
                 "access_token": access_token,
                 "code": code
@@ -181,6 +185,11 @@ class KakaoCallBackView(rest_views.APIView):
                 )
             accept_json = accept.json()
             return http.JsonResponse(accept_json)
+        except allauth_models.SocialAccount.DoesNotExist:
+            print("exception 처리 잘 되고 있음")
+            return http.JsonResponse(
+                {"message": "no matching social type"},
+                status=status.HTTP_400_BAD_REQUEST)
 
 
 class KakaoLogin(auth_views.SocialLoginView):
@@ -238,6 +247,7 @@ class GoogleCallBackView(rest_views.APIView):
         # signup or signin request
         try:
             user = models.User.objects.get(email=email)
+            print(user)
             social_user = allauth_models.SocialAccount.objects.get(user=user)
             if social_user is None:
                 return http.JsonResponse(
@@ -278,6 +288,7 @@ class GoogleCallBackView(rest_views.APIView):
             accept_json = accept.json()
             return http.JsonResponse(accept_json)
         except allauth_models.SocialAccount.DoesNotExist:
+            print("exception 처리 잘 되고 있음")
             return http.JsonResponse(
                 {"message": "no matching social type"},
                 status=status.HTTP_400_BAD_REQUEST)

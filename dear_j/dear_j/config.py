@@ -1,7 +1,7 @@
 import datetime
 
 # settings regarding login
-SITE_ID = 2
+SITE_ID = 4
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
 ACCOUNT_USERNAME_REQUIRED = True
