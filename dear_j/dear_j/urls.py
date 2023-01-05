@@ -5,4 +5,5 @@ urlpatterns = [
     urls.path("admin/", admin.site.urls),
     urls.path("api/v1/user/", urls.include("user.urls")),
     urls.path("api/v1/calendar/", urls.include("calendar_j.urls")),
+    urls.path("api/v1/social/", urls.include("social.urls")),
 ]

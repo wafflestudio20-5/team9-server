@@ -9,6 +9,7 @@ from dj_rest_auth import jwt_auth
 
 
 class ScheduleListCreateView(generics.ListCreateAPIView):
+    # TODO: User can only access to related Schedule
     authentication_classes = [
         jwt_auth.JWTCookieAuthentication,
         authentication.SessionAuthentication,

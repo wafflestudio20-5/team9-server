@@ -59,8 +59,9 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.kakao",
-    "user.apps.UserConfig",
     "calendar_j.apps.CalendarJConfig",
+    "user.apps.UserConfig",
+    "social.apps.SocialConfig",
 ]
 
 

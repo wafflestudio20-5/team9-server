@@ -48,3 +48,18 @@ class RegisterSerializer(dj_reg_serializers.RegisterSerializer):
     class Meta:
         model = models.User
         fields = ["username", "email", "password1", "password2", "birthdate"]
+
+
+class UserEmailSerializer(rest_serializers.ModelSerializer):
+    email = rest_serializers.EmailField()
+
+    class Meta:
+        model = models.User
+        fields = ["pk", "email"]
+        read_only_fields = ["pk"]
+
+    def create(self, validated_data):
+        raise NotImplementedError
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError
