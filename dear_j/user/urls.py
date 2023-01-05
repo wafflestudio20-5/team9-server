@@ -15,4 +15,5 @@ urlpatterns = [
     urls.path("login/google/callback/", views.GoogleCallBackView.as_view()),
     urls.path("login/google/finish/", views.GoogleLogin.as_view()),
     urls.path("logout/", dj_auth_views.LogoutView.as_view()),
+    urls.path("", urls.include("allauth.urls")),
 ]

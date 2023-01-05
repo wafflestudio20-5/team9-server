@@ -1,9 +1,12 @@
 import jwt
+import requests
 from allauth.account import adapter
 from allauth.socialaccount.providers.oauth2 import client
 
 from allauth.socialaccount.providers.google import views as google_view
 from allauth.socialaccount.providers.google import provider
+from allauth.socialaccount.providers.kakao import views as kakao_view
+
 
 
 class CustomAccountAdapter(adapter.DefaultAccountAdapter):
@@ -15,7 +18,6 @@ class CustomAccountAdapter(adapter.DefaultAccountAdapter):
         user.username = data.get("username")
         user.save()
         return user
-
 
 class CustomGoogleAdapter(google_view.GoogleOAuth2Adapter):
     provider_id = provider.GoogleProvider.id
