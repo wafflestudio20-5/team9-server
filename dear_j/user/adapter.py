@@ -1,4 +1,5 @@
 from allauth.account import adapter
+
 from user import models
 
 

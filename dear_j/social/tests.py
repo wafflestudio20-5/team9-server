@@ -1,10 +1,11 @@
 from rest_framework import status
 from rest_framework import test
+
 from utils import test_data as test_data_utils
 
 
 class CalendarAPITest(test.APITestCase):
-    def setUp(self) -> None:
+    def setUp(self):
         self.client = test.APIClient(enforce_csrf_checks=False)
 
     def test_search_candidate(self):

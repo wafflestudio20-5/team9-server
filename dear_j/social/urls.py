@@ -1,4 +1,5 @@
 from django import urls
+
 from social import views
 
 urlpatterns = [

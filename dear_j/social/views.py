@@ -2,6 +2,7 @@ from dj_rest_auth import jwt_auth
 from rest_framework import authentication
 from rest_framework import filters
 from rest_framework import generics
+
 from social import models as social_models
 from social import paginations as social_paginations
 from social import permissions as social_permissions
