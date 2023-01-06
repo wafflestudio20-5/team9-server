@@ -16,17 +16,14 @@ Including another URLconf
 from django import urls
 from django.contrib import admin
 
-from drf_spectacular.views import SpectacularAPIView
-from drf_spectacular.views import SpectacularJSONAPIView
-from drf_spectacular.views import SpectacularRedocView
-from drf_spectacular.views import SpectacularSwaggerView
+from drf_spectacular import views
 
 urlpatterns = [
-    urls.path("docs/json/", SpectacularJSONAPIView.as_view(), name="schema-json"),
-    urls.path("schema/", SpectacularAPIView.as_view(), name="schema"),
+    urls.path("docs/json/", views.SpectacularJSONAPIView.as_view(), name="schema-json"),
+    urls.path("schema/", views.SpectacularAPIView.as_view(), name="schema"),
     urls.path(
         "docs/swagger/",
-        SpectacularSwaggerView.as_view(url_name="schema-json"),
+        views.SpectacularSwaggerView.as_view(url_name="schema-json"),
         name="swagger-ui",
     ),
     urls.path("admin/", admin.site.urls),
