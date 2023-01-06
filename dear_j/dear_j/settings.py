@@ -31,7 +31,7 @@ ALLOWED_HOSTS = []
 # drf spectacular setting
 SPECTACULAR_SETTINGS = {
     "TITLE": "J-Calendar API Document",
-    "DESCRIPTION": "drf-specatular를 사용해서 만든 J-Calendar의 API 문서입니다.",
+    "DESCRIPTION": "API document of Calendar J by drf-specatular",
     "SWAGGER_UI_SETTINGS": {
         "persistAuthorization": True,
         "displayOperationId": True,
