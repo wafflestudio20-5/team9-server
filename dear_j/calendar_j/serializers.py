@@ -7,16 +7,6 @@ from user import models as user_models
 from user import serializers as user_serializers
 
 
-class ParticipantEmailSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-
-    def create(self, validated_data):
-        raise NotImplementedError
-
-    def update(self, instance, validated_data):
-        raise NotImplementedError
-
-
 class ScheduleSerializer(serializers.ModelSerializer):
     participants = user_serializers.UserEmailSerializer(many=True, required=False)
 
