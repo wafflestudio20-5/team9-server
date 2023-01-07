@@ -1,7 +1,7 @@
 import datetime
 
 # settings regarding login
-SITE_ID = 4
+SITE_ID = 2
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
 ACCOUNT_USERNAME_REQUIRED = True
@@ -21,6 +21,8 @@ REFRESH_TOKEN_LIFETIME = datetime.timedelta(days=7)
 
 # cors setting
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 
 ROTATE_REFRESH_TOKENS = False
 BLACKLIST_AFTER_ROTATION = True
+
