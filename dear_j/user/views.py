@@ -125,19 +125,17 @@ class KakaoCallBackView(rest_views.APIView):
             # check if the provider of the user is kakao
             social_user = allauth_models.SocialAccount.objects.get(user=user)
             if social_user is None:
-                return http.JsonResponse(
-                    {
-                        "message": "Email exists but not social user"
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                params = parse.urlencode({
+                    "error":"Email exists but not social user"
+                })
+                return shortcuts.redirect(f"{fe_login_url}?{params}")
+
             if social_user.provider != "kakao":
-                return http.JsonResponse(
-                    {
-                        "message": "Email exists but not kakao user"
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                params = parse.urlencode({
+                    "error":"Email exists but not kakao user"
+                })
+                return shortcuts.redirect(f"{fe_login_url}?{params}")
+
             # kakao users that registered earlier
             data = {
                 "access_token": access_token,
@@ -155,11 +153,7 @@ class KakaoCallBackView(rest_views.APIView):
                 return shortcuts.redirect(f"{fe_login_url}?{params}")
 
             accept_json = accept.json()
-            if accept_json.get("user") is not None:
-                if accept_json.get("user").get("birthday") is not None:
-                    accept_json["user"]["birthday"] = user.birthday
-                if accept_json.get("user").get("username") is not None:
-                    accept_json["user"]["username"] = user.username
+            accept_json.pop('user', None)
             return http.JsonResponse(accept_json, 
                                      json_dumps_params={'ensure_ascii': False}, 
                                      status=200)
@@ -183,15 +177,12 @@ class KakaoCallBackView(rest_views.APIView):
                 return shortcuts.redirect(f"{fe_login_url}?{params}")
 
             accept_json = accept.json()
+            accept_json.pop('user', None)
             new_user = models.User.objects.get(email=email)
             if birthday != "9999-12-31":
                 new_user.birthday = birthday
                 new_user.save()
-            if accept_json.get("user") is not None:
-                if accept_json.get("user").get("birthday") is not None:
-                    accept_json["user"]["birthday"] = new_user.birthday
-                if accept_json.get("user").get("username") is not None:
-                    accept_json["user"]["username"] = new_user.username
+                    
             return http.JsonResponse(accept_json, 
                                      json_dumps_params={'ensure_ascii': False}, 
                                      status=200)
@@ -302,6 +293,7 @@ class GoogleCallBackView(rest_views.APIView):
                 })
                 return shortcuts.redirect(f"{fe_login_url}?{params}")
             accept_json = accept.json()
+            accept_json.pop('user', None)
             return http.JsonResponse(accept_json)
         except models.User.DoesNotExist:
             # register user
@@ -322,9 +314,7 @@ class GoogleCallBackView(rest_views.APIView):
                 user.birthday = birthday
                 user.save()
             accept_json = accept.json()
-            if accept_json.get("user") is not None:
-                if accept_json.get("user").get("birthday") is None:
-                    accept_json["user"]["birthday"] = birthday
+            accept_json.pop('user', None)
             return http.JsonResponse(accept_json)
         except allauth_models.SocialAccount.DoesNotExist:
             params = parse.urlencode({
