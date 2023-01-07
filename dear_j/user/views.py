@@ -30,10 +30,11 @@ class KakaoView(rest_views.APIView):
         fe_login_url = f"{BASE_FRONTEND_URL}/login"
         try:
             """if request.user.is_authenticated:
-                return http.JsonResponse(
-                    {"message": "user already logged in"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )"""
+                    params = parse.urlencode({
+                        "error":"user already logged in"
+                    })
+                    return shortcuts.redirect(f"{fe_login_url}?{params}")
+            """
             client_id = secrets["KAKAO"]["REST_API_KEY"]
             redirect_uri = secrets["KAKAO"]["REDIRECT_URI"]
             return shortcuts.redirect(
@@ -334,5 +335,8 @@ class GoogleCallBackView(rest_views.APIView):
 class GoogleLogin(auth_views.SocialLoginView):
     # process login
     adapter_class = google_view.GoogleOAuth2Adapter
-    callback_url = "http://127.0.0.1:3000/api/v1/user/login/google/callback/"
+    callback_url = "http://127.0.0.1:8000/api/v1/user/login/google/callback/"
     client_class = client.OAuth2Client
+
+class UserProfileView():
+    pass
