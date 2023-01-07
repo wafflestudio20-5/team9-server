@@ -9,10 +9,14 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-import datetime
+import os
 import pathlib
 
-from dear_j import config as conf
+import pymysql
+import site_env
+from utils import ssm
+
+from dear_j import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
@@ -21,12 +25,19 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-gkub&ga4g000$!upi9o2svpo85634yaa9+af*mz94d(zl3n4q("
+if site_env.is_prod():
+    SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
+else:
+    SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com",
+    "127.0.0.1",
+    "localhost",
+]
 
 # drf spectacular setting
 SPECTACULAR_SETTINGS = {
@@ -51,14 +62,16 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "rest_framework_simplejwt.token_blacklist",
+    "corsheaders",
     "dj_rest_auth",
     "dj_rest_auth.registration",
     "drf_spectacular",
     "allauth.account",
     "allauth.socialaccount",
-    "allauth.socialaccount.providers.kakao",
     "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.kakao",
     "user.apps.UserConfig",
+    "calendar_j.apps.CalendarJConfig",
 ]
 
 
@@ -75,27 +88,29 @@ REST_FRAMEWORK = {
 }
 
 # settings regarding login
-SITE_ID = conf.SITE_ID
-ACCOUNT_UNIQUE_EMAIL = conf.ACCOUNT_UNIQUE_EMAIL
-ACCOUNT_USER_MODEL_USERNAME_FIELD = conf.ACCOUNT_USER_MODEL_USERNAME_FIELD
-ACCOUNT_USERNAME_REQUIRED = conf.ACCOUNT_USERNAME_REQUIRED
-ACCOUNT_EMAIL_REQUIRED = conf.ACCOUNT_EMAIL_REQUIRED
-ACCOUNT_AUTHENTICATION_METHOD = conf.ACCOUNT_AUTHENTICATION_METHOD
-ACCOUNT_EMAIL_VERIFICATION = conf.ACCOUNT_EMAIL_VERIFICATION
+SITE_ID = config.SITE_ID
+ACCOUNT_UNIQUE_EMAIL = config.ACCOUNT_UNIQUE_EMAIL
+ACCOUNT_USER_MODEL_USERNAME_FIELD = config.ACCOUNT_USER_MODEL_USERNAME_FIELD
+ACCOUNT_USERNAME_REQUIRED = config.ACCOUNT_USERNAME_REQUIRED
+ACCOUNT_EMAIL_REQUIRED = config.ACCOUNT_EMAIL_REQUIRED
+ACCOUNT_AUTHENTICATION_METHOD = config.ACCOUNT_AUTHENTICATION_METHOD
+ACCOUNT_EMAIL_VERIFICATION = config.ACCOUNT_EMAIL_VERIFICATION
 
 # custom dj-rest-auth
-AUTH_USER_MODEL = conf.AUTH_USER_MODEL
-ACCOUNT_ADAPTER = conf.ACCOUNT_ADAPTER
+AUTH_USER_MODEL = config.AUTH_USER_MODEL
+ACCOUNT_ADAPTER = config.ACCOUNT_ADAPTER
 
 # jwt environment setting
-REST_USE_JWT = conf.REST_USE_JWT
-JWT_AUTH_REFRESH_COOKIE = conf.JWT_AUTH_REFRESH_COOKIE
-ACCESS_TOKEN_LIFETIME = conf.ACCESS_TOKEN_LIFETIME
-REFRESH_TOKEN_LIFETIME = conf.REFRESH_TOKEN_LIFETIME
+REST_USE_JWT = config.REST_USE_JWT
+JWT_AUTH_REFRESH_COOKIE = config.JWT_AUTH_REFRESH_COOKIE
+ACCESS_TOKEN_LIFETIME = config.ACCESS_TOKEN_LIFETIME
+REFRESH_TOKEN_LIFETIME = config.REFRESH_TOKEN_LIFETIME
+# cors setting
+CORS_ORIGIN_ALLOW_ALL = config.CORS_ORIGIN_ALLOW_ALL
 
-# custom dj-rest-auth (for birthday/username field)
-REST_AUTH_SERIALIZERS = {"USER_DETAILS_SERIALIZER": "user.serializers.CustomUserDetailSerializer"}
-REST_AUTH_REGISTER_SERIALIZERS = {"REGISTER_SERIALIZER": "user.serializers.CustomRegisterSerializer"}
+# custom dj-rest-auth serializer
+REST_AUTH_SERIALIZERS = {"USER_DETAILS_SERIALIZER": "user.serializers.UserDetailSerializer"}
+REST_AUTH_REGISTER_SERIALIZERS = {"REGISTER_SERIALIZER": "user.serializers.RegisterSerializer"}
 
 
 SIMPLE_JWT = {
@@ -107,6 +122,7 @@ SIMPLE_JWT = {
 
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -140,12 +156,25 @@ WSGI_APPLICATION = "dear_j.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+if site_env.is_prod():
+    pymysql.install_as_MySQLdb()
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": "DEARJ",
+            "USER": "admin",
+            "PASSWORD": ssm.get_ssm_parameter("/database/dearj/master_key"),
+            "HOST": "database-dear-j.c8csrf4cdshb.ap-northeast-2.rds.amazonaws.com",
+            "PORT": "3306",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password validation
