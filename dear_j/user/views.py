@@ -1,6 +1,7 @@
 import json
 from json import decoder
 import os
+from urllib import parse
 
 from django import http
 from django import shortcuts
@@ -22,10 +23,11 @@ with open(os.path.join(BASE_DIR, "dear_j/secrets.json"), "rb") as secret_file:
     secrets = json.load(secret_file)
 
 BASE_URL = "http://127.0.0.1:8000/api/v1/user/"
-
+BASE_FRONTEND_URL = "http://127.0.0.1:3000"
 
 class KakaoView(rest_views.APIView):
     def get(self, request, format=None):
+        fe_login_url = f"{BASE_FRONTEND_URL}/login"
         try:
             """if request.user.is_authenticated:
                 return http.JsonResponse(
@@ -41,19 +43,20 @@ class KakaoView(rest_views.APIView):
                 "response_type=code"
             )
         except exceptions.KakaoException as error:
-            return http.JsonResponse(
-                    {"message": "kakao exception"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            params = parse.urlencode({
+                "error":"kakao exception"
+            })
+            return shortcuts.redirect(f"{fe_login_url}?{params}")
         except exceptions.SocialLoginException as error:
-            return http.JsonResponse(
-                    {"message": "user already logged in"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            params = parse.urlencode({
+                "error":"user already logged in"
+            })
+            return shortcuts.redirect(f"{fe_login_url}?{params}")
 
 
 class KakaoCallBackView(rest_views.APIView):
     def get(self, request, format=None):
+        fe_login_url = f"{BASE_FRONTEND_URL}/login"
         try:
             # get authorization code from kakao server
             code = request.GET.get("code")
@@ -70,10 +73,11 @@ class KakaoCallBackView(rest_views.APIView):
             token_json = token_request.json()
             error = token_json.get("error")
             if error is not None:
-                return http.JsonResponse(
-                    {"message": "INVALID_CODE"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                params = parse.urlencode({
+                    "error":"invalid kAKAO token"
+                })
+                return shortcuts.redirect(f"{fe_login_url}?{params}")
+
             access_token = token_json.get("access_token")
             # use access token to get kakao profile info
             profile_request = requests.get(
@@ -85,10 +89,11 @@ class KakaoCallBackView(rest_views.APIView):
             profile_json = profile_request.json()
             error = profile_json.get("error")
             if error is not None:
-                return http.JsonResponse(
-                    {"message": "INVALID_CODE"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                params = parse.urlencode({
+                    "error":"invalid profile request token"
+                })
+                return shortcuts.redirect(f"{fe_login_url}?{params}")
+
             kakao_account = profile_json.get("kakao_account")
             # required
             email = kakao_account.get("email")
@@ -102,15 +107,17 @@ class KakaoCallBackView(rest_views.APIView):
                 username = kakao_account.get("profile").get("nickname")
             
         except KeyError:
-            return http.JsonResponse(
-                {"message": "INVALID_CODE"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            params = parse.urlencode({
+                    "error":"invalid code"
+                })
+            return shortcuts.redirect(f"{fe_login_url}?{params}")
+
         except access_token.DoesNotExist:
-            return http.JsonResponse(
-                {"message": "INVALID_CODE"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            params = parse.urlencode({
+                    "error":"invalid code"
+                })
+            return shortcuts.redirect(f"{fe_login_url}?{params}")
+
         # signup or signin
         try:
             user = models.User.objects.get(email=email)
@@ -141,10 +148,11 @@ class KakaoCallBackView(rest_views.APIView):
             )
             accept_status = accept.status_code
             if accept_status != 200:
-                return http.JsonResponse(
-                    {"message": "failed to signin"},
-                    status=accept_status
-                )
+                params = parse.urlencode({
+                    "error":"failed to signin"
+                })
+                return shortcuts.redirect(f"{fe_login_url}?{params}")
+
             accept_json = accept.json()
             if accept_json.get("user") is not None:
                 if accept_json.get("user").get("birthday") is not None:
@@ -168,10 +176,11 @@ class KakaoCallBackView(rest_views.APIView):
             )
             accept_status = accept.status_code
             if accept_status != 200:
-                return http.JsonResponse(
-                    {"message": "failed to signin"},
-                    status=accept_status
-                )
+                params = parse.urlencode({
+                    "error":"failed to signin"
+                })
+                return shortcuts.redirect(f"{fe_login_url}?{params}")
+
             accept_json = accept.json()
             new_user = models.User.objects.get(email=email)
             if birthday != "9999-12-31":
@@ -187,9 +196,11 @@ class KakaoCallBackView(rest_views.APIView):
                                      status=200)
         
         except allauth_models.SocialAccount.DoesNotExist:
-            return http.JsonResponse(
-                {"message": "no matching social type"},
-                status=status.HTTP_400_BAD_REQUEST)
+            params = parse.urlencode({
+                    "error":"no matching social type"
+                })
+            return shortcuts.redirect(f"{fe_login_url}?{params}")
+
 
 
 class KakaoLogin(auth_views.SocialLoginView):
@@ -214,6 +225,7 @@ class GoogleView(rest_views.APIView):
 
 class GoogleCallBackView(rest_views.APIView):
     def get(self, request, format=None):
+        fe_login_url = f"{BASE_FRONTEND_URL}/login"
         client_id = secrets["GOOGLE"]["CLIENT_ID"]
         client_pw = secrets["GOOGLE"]["CLIENT_PW"]
         callback_url = secrets["GOOGLE"]["REDIRECT_URI"]
@@ -239,8 +251,11 @@ class GoogleCallBackView(rest_views.APIView):
             f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={access_token}")
         email_req_status = email_req.status_code
         if email_req_status != 200:
-            return http.JsonResponse({"message": "failed to get email"},
-                                     status=status.HTTP_400_BAD_REQUEST)
+            params = parse.urlencode({
+                    "error":"failed to get email"
+                })
+            return shortcuts.redirect(f"{fe_login_url}?{params}")
+        
         email_req_json = email_req.json()
         email = email_req_json.get("email")
         birthday_req = requests.get(
@@ -263,14 +278,16 @@ class GoogleCallBackView(rest_views.APIView):
             user = models.User.objects.get(email=email)
             social_user = allauth_models.SocialAccount.objects.get(user=user)
             if social_user is None:
-                return http.JsonResponse(
-                    {"message": "email exists but not social user"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                params = parse.urlencode({
+                    "error":"email exists but not social user"
+                })
+                return shortcuts.redirect(f"{fe_login_url}?{params}")
+            
             if social_user.provider != "google":
-                return http.JsonResponse(
-                    {"message": "no matching social type"},
-                    status=status.HTTP_400_BAD_REQUEST)
+                params = parse.urlencode({
+                    "error":"no matching social type"
+                })
+                return shortcuts.redirect(f"{fe_login_url}?{params}")
             # google account exist -> sign in
             data = {"access_token": access_token,
                     "code": code}
@@ -279,8 +296,10 @@ class GoogleCallBackView(rest_views.APIView):
                 data=data)
             accept_status = accept.status_code
             if accept_status != 200:
-                return http.JsonResponse({"message": "failed to signin"},
-                                         status=accept_status)
+                params = parse.urlencode({
+                    "error":"failed to signin"
+                })
+                return shortcuts.redirect(f"{fe_login_url}?{params}")
             accept_json = accept.json()
             return http.JsonResponse(accept_json)
         except models.User.DoesNotExist:
@@ -293,10 +312,10 @@ class GoogleCallBackView(rest_views.APIView):
             )
             accept_status = accept.status_code
             if accept_status != 200:
-                return http.JsonResponse(
-                    {"message": "failed to signup"},
-                    status=accept_status
-                )
+                params = parse.urlencode({
+                    "error":"failed to signup"
+                })
+                return shortcuts.redirect(f"{fe_login_url}?{params}")
             user = models.User.objects.get(email=email)
             if birthday != "9999-12-31":
                 user.birthday = birthday
@@ -307,12 +326,13 @@ class GoogleCallBackView(rest_views.APIView):
                     accept_json["user"]["birthday"] = birthday
             return http.JsonResponse(accept_json)
         except allauth_models.SocialAccount.DoesNotExist:
-            return http.JsonResponse(
-                {"message": "no matching social type"},
-                status=status.HTTP_400_BAD_REQUEST)
-
+            params = parse.urlencode({
+                    "error":"no matching social type"
+                })
+            return shortcuts.redirect(f"{fe_login_url}?{params}")
 
 class GoogleLogin(auth_views.SocialLoginView):
+    # process login
     adapter_class = google_view.GoogleOAuth2Adapter
-    callback_url = "http://127.0.0.1:8000/api/v1/user/login/google/callback/"
+    callback_url = "http://127.0.0.1:3000/api/v1/user/login/google/callback/"
     client_class = client.OAuth2Client
