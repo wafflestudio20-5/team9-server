@@ -154,10 +154,8 @@ class KakaoCallBackView(rest_views.APIView):
 
             accept_json = accept.json()
             accept_json.pop('user', None)
-            return http.JsonResponse(accept_json, 
-                                     json_dumps_params={'ensure_ascii': False}, 
-                                     status=200)
-        
+            params = parse.urlencode(accept_json)
+            return shortcuts.redirect(f"{fe_login_url}?{params}")
 
         except models.User.DoesNotExist:
             # kakao user does not exist
@@ -182,10 +180,8 @@ class KakaoCallBackView(rest_views.APIView):
             if birthday != "9999-12-31":
                 new_user.birthday = birthday
                 new_user.save()
-                    
-            return http.JsonResponse(accept_json, 
-                                     json_dumps_params={'ensure_ascii': False}, 
-                                     status=200)
+            params = parse.urlencode(accept_json)
+            return shortcuts.redirect(f"{fe_login_url}?{params}")
         
         except allauth_models.SocialAccount.DoesNotExist:
             params = parse.urlencode({
@@ -294,7 +290,8 @@ class GoogleCallBackView(rest_views.APIView):
                 return shortcuts.redirect(f"{fe_login_url}?{params}")
             accept_json = accept.json()
             accept_json.pop('user', None)
-            return http.JsonResponse(accept_json)
+            params = parse.urlencode(accept_json)
+            return shortcuts.redirect(f"{fe_login_url}?{params}")
         except models.User.DoesNotExist:
             # register user
             data = {"access_token": access_token,
@@ -315,7 +312,9 @@ class GoogleCallBackView(rest_views.APIView):
                 user.save()
             accept_json = accept.json()
             accept_json.pop('user', None)
-            return http.JsonResponse(accept_json)
+            params = parse.urlencode(accept_json)
+            return shortcuts.redirect(f"{fe_login_url}?{params}")
+
         except allauth_models.SocialAccount.DoesNotExist:
             params = parse.urlencode({
                     "error":"no matching social type"
@@ -328,5 +327,5 @@ class GoogleLogin(auth_views.SocialLoginView):
     callback_url = "http://127.0.0.1:8000/api/v1/user/login/google/callback/"
     client_class = client.OAuth2Client
 
-class UserProfileView():
+class UserProfileView(rest_views.APIView):
     pass
