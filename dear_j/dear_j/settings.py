@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.kakao",
     "user.apps.UserConfig",
     "calendar_j.apps.CalendarJConfig",
+    "documentation.apps.DocumentationConfig",
 ]
 
 
