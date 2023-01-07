@@ -5,6 +5,8 @@ from urllib import parse
 
 from django import http
 from django import shortcuts
+from rest_framework import generics
+from rest_framework import permissions
 from rest_framework import status
 from rest_framework import views as rest_views
 
@@ -17,6 +19,7 @@ from dj_rest_auth.registration import views as auth_views
 import requests
 from user import exceptions
 from user import models
+from user import serializers
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 with open(os.path.join(BASE_DIR, "dear_j/secrets.json"), "rb") as secret_file:
@@ -29,12 +32,11 @@ class KakaoView(rest_views.APIView):
     def get(self, request, format=None):
         fe_login_url = f"{BASE_FRONTEND_URL}/login"
         try:
-            """if request.user.is_authenticated:
-                    params = parse.urlencode({
-                        "error":"user already logged in"
-                    })
-                    return shortcuts.redirect(f"{fe_login_url}?{params}")
-            """
+            if request.user.is_authenticated:
+                params = parse.urlencode({
+                    "error":"user_already_logged_in"
+                })
+                return shortcuts.redirect(f"{fe_login_url}?{params}")
             client_id = secrets["KAKAO"]["REST_API_KEY"]
             redirect_uri = secrets["KAKAO"]["REDIRECT_URI"]
             return shortcuts.redirect(
@@ -45,12 +47,12 @@ class KakaoView(rest_views.APIView):
             )
         except exceptions.KakaoException as error:
             params = parse.urlencode({
-                "error":"kakao exception"
+                "error":"kakao_exception"
             })
             return shortcuts.redirect(f"{fe_login_url}?{params}")
         except exceptions.SocialLoginException as error:
             params = parse.urlencode({
-                "error":"user already logged in"
+                "error":"social_login_exception"
             })
             return shortcuts.redirect(f"{fe_login_url}?{params}")
 
@@ -75,7 +77,7 @@ class KakaoCallBackView(rest_views.APIView):
             error = token_json.get("error")
             if error is not None:
                 params = parse.urlencode({
-                    "error":"invalid kAKAO token"
+                    "error":"invalid-KAKAO-token"
                 })
                 return shortcuts.redirect(f"{fe_login_url}?{params}")
 
@@ -91,7 +93,7 @@ class KakaoCallBackView(rest_views.APIView):
             error = profile_json.get("error")
             if error is not None:
                 params = parse.urlencode({
-                    "error":"invalid profile request token"
+                    "error":"invalid-profile-request-token"
                 })
                 return shortcuts.redirect(f"{fe_login_url}?{params}")
 
@@ -109,13 +111,13 @@ class KakaoCallBackView(rest_views.APIView):
             
         except KeyError:
             params = parse.urlencode({
-                    "error":"invalid code"
+                    "error":"invalid-code"
                 })
             return shortcuts.redirect(f"{fe_login_url}?{params}")
 
         except access_token.DoesNotExist:
             params = parse.urlencode({
-                    "error":"invalid code"
+                    "error":"invalid-code"
                 })
             return shortcuts.redirect(f"{fe_login_url}?{params}")
 
@@ -126,13 +128,13 @@ class KakaoCallBackView(rest_views.APIView):
             social_user = allauth_models.SocialAccount.objects.get(user=user)
             if social_user is None:
                 params = parse.urlencode({
-                    "error":"Email exists but not social user"
+                    "error":"Email-exists-but-not-social-user"
                 })
                 return shortcuts.redirect(f"{fe_login_url}?{params}")
 
             if social_user.provider != "kakao":
                 params = parse.urlencode({
-                    "error":"Email exists but not kakao user"
+                    "error":"Email-exists-but-not-kakao-user"
                 })
                 return shortcuts.redirect(f"{fe_login_url}?{params}")
 
@@ -148,7 +150,7 @@ class KakaoCallBackView(rest_views.APIView):
             accept_status = accept.status_code
             if accept_status != 200:
                 params = parse.urlencode({
-                    "error":"failed to signin"
+                    "error":"failed-to-signin"
                 })
                 return shortcuts.redirect(f"{fe_login_url}?{params}")
 
@@ -170,7 +172,7 @@ class KakaoCallBackView(rest_views.APIView):
             accept_status = accept.status_code
             if accept_status != 200:
                 params = parse.urlencode({
-                    "error":"failed to signin"
+                    "error":"failed-to-register"
                 })
                 return shortcuts.redirect(f"{fe_login_url}?{params}")
 
@@ -185,7 +187,7 @@ class KakaoCallBackView(rest_views.APIView):
         
         except allauth_models.SocialAccount.DoesNotExist:
             params = parse.urlencode({
-                    "error":"no matching social type"
+                    "error":"Email-exists-but-not-kakao-user"
                 })
             return shortcuts.redirect(f"{fe_login_url}?{params}")
 
@@ -240,7 +242,7 @@ class GoogleCallBackView(rest_views.APIView):
         email_req_status = email_req.status_code
         if email_req_status != 200:
             params = parse.urlencode({
-                    "error":"failed to get email"
+                    "error":"failed-to-get-email"
                 })
             return shortcuts.redirect(f"{fe_login_url}?{params}")
         
@@ -267,13 +269,13 @@ class GoogleCallBackView(rest_views.APIView):
             social_user = allauth_models.SocialAccount.objects.get(user=user)
             if social_user is None:
                 params = parse.urlencode({
-                    "error":"email exists but not social user"
+                    "error":"email-exists-but-not-social-user"
                 })
                 return shortcuts.redirect(f"{fe_login_url}?{params}")
             
             if social_user.provider != "google":
                 params = parse.urlencode({
-                    "error":"no matching social type"
+                    "error":"no-matching-social-type"
                 })
                 return shortcuts.redirect(f"{fe_login_url}?{params}")
             # google account exist -> sign in
@@ -285,7 +287,7 @@ class GoogleCallBackView(rest_views.APIView):
             accept_status = accept.status_code
             if accept_status != 200:
                 params = parse.urlencode({
-                    "error":"failed to signin"
+                    "error":"failed-to-signin"
                 })
                 return shortcuts.redirect(f"{fe_login_url}?{params}")
             accept_json = accept.json()
@@ -303,7 +305,7 @@ class GoogleCallBackView(rest_views.APIView):
             accept_status = accept.status_code
             if accept_status != 200:
                 params = parse.urlencode({
-                    "error":"failed to signup"
+                    "error":"failed-to-signup"
                 })
                 return shortcuts.redirect(f"{fe_login_url}?{params}")
             user = models.User.objects.get(email=email)
@@ -317,7 +319,7 @@ class GoogleCallBackView(rest_views.APIView):
 
         except allauth_models.SocialAccount.DoesNotExist:
             params = parse.urlencode({
-                    "error":"no matching social type"
+                    "error":"no-matching-social-type"
                 })
             return shortcuts.redirect(f"{fe_login_url}?{params}")
 
@@ -327,5 +329,9 @@ class GoogleLogin(auth_views.SocialLoginView):
     callback_url = "http://127.0.0.1:8000/api/v1/user/login/google/callback/"
     client_class = client.OAuth2Client
 
-class UserProfileView(rest_views.APIView):
-    pass
+class UserProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = serializers.CustomUserDetailSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    
+    def get_object(self):
+        return self.request.user

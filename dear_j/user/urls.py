@@ -16,4 +16,5 @@ urlpatterns = [
     urls.path("login/google/finish/", views.GoogleLogin.as_view()),
     urls.path("logout/", dj_auth_views.LogoutView.as_view()),
     urls.path("", urls.include("allauth.urls")),
+    urls.path("profile/", views.UserProfileView.as_view()),
 ]
