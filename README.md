@@ -5,7 +5,7 @@
 
 ## Development Guide
 
-To setup virtualenv, follow below commands. (It is based on pyenv, but it is also fine to use conda)
+To setup virtualenv, follow below commands. (It is based on pyenv, but it is also fine to use conda or other virtualenv tools)
 ```bash
 $ pyenv virtualenv 3.8.13 dear_j
 $ pyenv activate dear_j
@@ -18,6 +18,32 @@ $ yarn install
 ```
 
 #
+## Development Cycle
+We use 3 environments : `local`, `dev`, `prod`
+1. Test at local
+2. Test at dev
+3. PR Review
+4. Automatically deploy at prod(ec2)
+
+### Local Server
+Local server uses gunicorn + sqlite3.
+You can test api at http://localhost:8000/
+
+```bash
+$ make run-local # Start Local Server - automatically migrate db
+$ make down-local # Terminate Local Server
+```
+
+### Dev Server
+Dev server uses gunicorn + sqlite3, but use docker which is same setting with prod
+You can test api at http://localhost/
+
+```bash
+$ make run-dev # Start Dev Server - automatically migrate db
+$ make down-dev # Terminate Dev Server
+```
+
+# 
 
 ## Convention
 - [Python Google Style Guide](https://google.github.io/styleguide/pyguide.html)
