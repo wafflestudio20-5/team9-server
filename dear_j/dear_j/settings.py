@@ -39,6 +39,16 @@ ALLOWED_HOSTS = [
     "localhost",
 ]
 
+# drf spectacular setting
+SPECTACULAR_SETTINGS = {
+    "TITLE": "J-Calendar API Document",
+    "DESCRIPTION": "API document of Calendar J by drf-specatular",
+    "SWAGGER_UI_SETTINGS": {
+        "persistAuthorization": True,
+        "displayOperationId": True,
+        "filter": True,
+    },
+}
 
 # Application definition
 INSTALLED_APPS = [
@@ -55,6 +65,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "dj_rest_auth",
     "dj_rest_auth.registration",
+    "drf_spectacular",
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
@@ -62,6 +73,7 @@ INSTALLED_APPS = [
     "calendar_j.apps.CalendarJConfig",
     "user.apps.UserConfig",
     "social.apps.SocialConfig",
+    "documentation.apps.DocumentationConfig",
 ]
 
 
@@ -74,6 +86,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 # settings regarding login
