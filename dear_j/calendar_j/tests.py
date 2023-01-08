@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework import test
 
 from utils import test_data as test_data_utils
+from utils import uri as uri_utils
 
 
 class CalendarAPITest(test.APITestCase):
@@ -113,8 +114,15 @@ class CalendarAPITest(test.APITestCase):
             },
             format="json",
         )
-
-        response = self.client.get(f"/api/v1/calendar/schedule/?email={user1_data.email}&from=2022-12-11&to=2022-12-12")
+        target_uri = uri_utils.get_uri_with_extra_params(
+            url="/api/v1/calendar/schedule/",
+            extra_params={
+                "email": user1_data.email,
+                "from": "2022-12-11",
+                "to": "2022-12-12",
+            },
+        )
+        response = self.client.get(target_uri)
         expected = [
             {
                 "id": 1,
