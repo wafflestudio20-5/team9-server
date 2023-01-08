@@ -20,7 +20,7 @@ class FollowCandidateSearchListView(generics.ListAPIView):
     pagination_class = social_paginations.CandidateListPagination
     serializer_class = user_serializers.UserEmailSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ["email", "username"]
+    search_fields = ["email"]
 
 
 class NetworkListCreateView(generics.ListCreateAPIView):
