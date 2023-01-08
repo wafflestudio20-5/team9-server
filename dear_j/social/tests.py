@@ -21,9 +21,18 @@ class CalendarAPITest(test.APITestCase):
 
         response = self.client.get(path="/api/v1/social/search/candidate/?search=user")
         expected = [
-            {"pk": 1, "email": "user1@example.com"},
-            {"pk": 2, "email": "user2@example.com"},
-            {"pk": 3, "email": "user3@example.com"},
+            {
+                "pk": 1,
+                "email": "user1@example.com",
+            },
+            {
+                "pk": 2,
+                "email": "user2@example.com",
+            },
+            {
+                "pk": 3,
+                "email": "user3@example.com",
+            },
             {
                 "pk": 4,
                 "email": "user4@example.com",
