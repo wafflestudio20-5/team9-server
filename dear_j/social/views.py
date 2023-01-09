@@ -18,9 +18,9 @@ class FollowCandidateSearchListView(generics.ListAPIView):
     ]
     queryset = user_models.User.objects.all()
     pagination_class = social_paginations.CandidateListPagination
-    serializer_class = user_serializers.UserEmailSerializer
+    serializer_class = user_serializers.EssentialUserInfoFromPKSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ["email"]
+    search_fields = ["username", "email"]
 
 
 class NetworkListCreateView(generics.ListCreateAPIView):

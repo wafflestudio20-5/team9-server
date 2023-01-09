@@ -44,9 +44,5 @@ class NormalDatetimeFormatter(DatetimeFormatter):
     pattern = "%Y-%m-%d %H:%M:%S"
 
 
-class NormalDatetimeMsecsFormatter(DatetimeFormatter):
-    pattern = "%Y-%m-%d %H:%M:%S.%f"
-
-
 normal_date_formatter = NormalDateFormatter()
 normal_datetime_formatter = NormalDatetimeFormatter()

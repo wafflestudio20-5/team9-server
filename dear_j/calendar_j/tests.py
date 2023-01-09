@@ -28,10 +28,10 @@ class CalendarAPITest(test.APITestCase):
                 "description": "Test description",
                 "participants": [
                     {
-                        "email": "user2@example.com",
+                        "pk": 2,
                     },
                     {
-                        "email": "user3@example.com",
+                        "pk": 3,
                     },
                 ],
             },
@@ -42,10 +42,12 @@ class CalendarAPITest(test.APITestCase):
             "participants": [
                 {
                     "pk": 2,
+                    "username": "user2",
                     "email": "user2@example.com",
                 },
                 {
                     "pk": 3,
+                    "username": "user3",
                     "email": "user3@example.com",
                 },
             ],
@@ -80,7 +82,7 @@ class CalendarAPITest(test.APITestCase):
                 "description": "Test description 2",
                 "participants": [
                     {
-                        "email": "user1@example.com",
+                        "pk": 1,
                     },
                 ],
             },
@@ -108,7 +110,7 @@ class CalendarAPITest(test.APITestCase):
                 "description": "Test description 1",
                 "participants": [
                     {
-                        "email": "user2@example.com",
+                        "pk": 2,
                     },
                 ],
             },
@@ -129,6 +131,7 @@ class CalendarAPITest(test.APITestCase):
                 "participants": [
                     {
                         "pk": 1,
+                        "username": "user1",
                         "email": "user1@example.com",
                     }
                 ],

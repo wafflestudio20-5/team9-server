@@ -22,7 +22,6 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = calendar_serializers.ScheduleSerializer
 
     def get_queryset(self) -> query.QuerySet:
-        queryset: query.QuerySet = super().get_queryset()
         params = self.request.GET
         if not all(key in params.keys() for key in ("email", "from", "to")):
             raise calendar_exceptions.GetScheduleListKeyException
@@ -31,8 +30,9 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         start_date = time_utils.normal_date_formatter.parse(params.get("from"))
         end_date = time_utils.normal_date_formatter.parse(params.get("to"))
 
+        queryset: query.QuerySet = super().get_queryset()
         refined_queryset = queryset.filter(created_by__email=target_email, start_at__range=(start_date, end_date)) | queryset.filter(
-            participants__email=target_email, start_at__range=(start_date, end_date)
+            participants__email=target_email, end_at__range=(start_date, end_date)
         )
         return refined_queryset
 

@@ -8,7 +8,7 @@ from user import serializers as user_serializers
 
 
 class ScheduleSerializer(serializers.ModelSerializer):
-    participants = user_serializers.UserEmailSerializer(many=True, required=False)
+    participants = user_serializers.EssentialUserInfoFromPKSerializer(many=True, required=False)
 
     class Meta:
         model = calendar_model.Schedule
