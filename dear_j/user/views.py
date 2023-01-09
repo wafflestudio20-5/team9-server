@@ -15,7 +15,9 @@ from allauth.socialaccount import models as allauth_models
 from allauth.socialaccount.providers.google import views as google_view
 from allauth.socialaccount.providers.kakao import views as kakao_view
 from allauth.socialaccount.providers.oauth2 import client
-from dj_rest_auth.registration import views as auth_views
+
+from dj_rest_auth import views as dj_auth_views
+from dj_rest_auth.registration import views as dj_reg_views
 import requests
 from user import exceptions
 from user import models
@@ -27,6 +29,20 @@ with open(os.path.join(BASE_DIR, "dear_j/secrets.json"), "rb") as secret_file:
 
 BASE_URL = "http://127.0.0.1:8000/api/v1/user/"
 BASE_FRONTEND_URL = "http://127.0.0.1:3000"
+
+
+
+class UserRegistrationView(dj_reg_views.RegisterView):
+    pass
+
+
+class UserLoginView(dj_auth_views.LoginView):
+    pass
+
+
+class UserLogoutView(dj_auth_views.LogoutView):
+    pass
+
 
 class KakaoView(rest_views.APIView):
     def get(self, request, format=None):
@@ -193,7 +209,7 @@ class KakaoCallBackView(rest_views.APIView):
 
 
 
-class KakaoLogin(auth_views.SocialLoginView):
+class KakaoLogin(dj_reg_views.SocialLoginView):
     adapter_class = kakao_view.KakaoOAuth2Adapter
     client_class = client.OAuth2Client
     callback_url = secrets["KAKAO"]["REDIRECT_URI"]
@@ -323,7 +339,7 @@ class GoogleCallBackView(rest_views.APIView):
                 })
             return shortcuts.redirect(f"{fe_login_url}?{params}")
 
-class GoogleLogin(auth_views.SocialLoginView):
+class GoogleLogin(dj_reg_views.SocialLoginView):
     # process login
     adapter_class = google_view.GoogleOAuth2Adapter
     callback_url = "http://127.0.0.1:8000/api/v1/user/login/google/callback/"
