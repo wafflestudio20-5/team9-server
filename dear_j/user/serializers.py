@@ -7,7 +7,7 @@ from user import adapter
 from user import models
 
 
-class CustomUserDetailSerializer(dj_auth_serializers.UserDetailsSerializer):
+class UserDetailSerializer(dj_auth_serializers.UserDetailsSerializer):
     def create(self, validated_data):
         user = models.User.objects.create_user(**validated_data)
         return user
@@ -27,7 +27,7 @@ class CustomUserDetailSerializer(dj_auth_serializers.UserDetailsSerializer):
         )
 
 
-class CustomRegisterSerializer(dj_regist_serializers.RegisterSerializer):
+class RegisterSerializer(dj_regist_serializers.RegisterSerializer):
     email = rest_serializers.EmailField(max_length=255)
     username = rest_serializers.CharField(max_length=30)
     birthday = rest_serializers.DateField()

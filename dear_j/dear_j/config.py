@@ -11,7 +11,7 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 
 # custom dj-rest-auth
 AUTH_USER_MODEL = "user.User"
-ACCOUNT_ADAPTER = "user.adapter.CustomAccountAdapter"
+ACCOUNT_ADAPTER = "user.adapter.AccountAdapter"
 
 # jwt environment setting
 REST_USE_JWT = True
@@ -21,7 +21,6 @@ REFRESH_TOKEN_LIFETIME = datetime.timedelta(days=7)
 
 # cors setting
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = True
 
 ROTATE_REFRESH_TOKENS = False
 BLACKLIST_AFTER_ROTATION = True
