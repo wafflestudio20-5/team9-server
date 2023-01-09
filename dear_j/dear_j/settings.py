@@ -25,7 +25,12 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 if site_env.is_prod():
     SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
 else:
-    SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+    SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
+    KAKAO_CLIENT_ID = ssm.get_ssm_parameter(alias="/backend/dearj/kakao/client-id")
+    KAKAO_CLIENT_PW = ssm.get_ssm_parameter(alias="/backend/dearj/kakao/client-pw")
+    GOOGLE_CLIENT_ID = ssm.get_ssm_parameter(alias="/backend/dearj/google/client-id")
+    GOOGLE_CLIENT_PW = ssm.get_ssm_parameter(alias="/backend/dearj/google/client-pw")
+    
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
