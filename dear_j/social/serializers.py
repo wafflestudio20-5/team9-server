@@ -8,7 +8,7 @@ from user import serializers as user_serializers
 
 class NetworkSerializer(serializers.ModelSerializer):
     # TODO: Followee can only update approve state to True when is_opened=True
-    followee = user_serializers.UserEmailSerializer(many=False, required=True)
+    followee = user_serializers.EssentialUserInfoFromPKSerializer(many=False, required=True)
 
     class Meta:
         model = social_models.Network
@@ -21,7 +21,7 @@ class NetworkSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data) -> social_models.Network:
         follower = self.context.get("request").user
-        followee = shortcuts.get_object_or_404(user_models.User, email=validated_data["followee"]["email"])
+        followee = shortcuts.get_object_or_404(user_models.User, pk=validated_data["followee"]["pk"])
         network = social_models.Network.objects.create(
             follower=follower,
             followee=followee,

@@ -15,6 +15,7 @@ import pathlib
 import pymysql
 import site_env
 from utils import ssm
+from utils import time as time_utils
 
 from dear_j import config
 
@@ -25,13 +26,13 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+# SECURITY WARNING: don't run with debug turned on in production!
 if site_env.is_prod():
     SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
+    DEBUG = False
 else:
     SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+    DEBUG = True
 
 ALLOWED_HOSTS = [
     "ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com",
@@ -86,6 +87,8 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
     ),
+    "DATE_FORMAT": time_utils.NormalDateFormatter.pattern,
+    "DATETIME_FORMAT": time_utils.NormalDatetimeFormatter.pattern,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
@@ -114,14 +117,12 @@ CORS_ORIGIN_ALLOW_ALL = config.CORS_ORIGIN_ALLOW_ALL
 REST_AUTH_SERIALIZERS = {"USER_DETAILS_SERIALIZER": "user.serializers.UserDetailSerializer"}
 REST_AUTH_REGISTER_SERIALIZERS = {"REGISTER_SERIALIZER": "user.serializers.RegisterSerializer"}
 
-
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": ACCESS_TOKEN_LIFETIME,
     "REFRESH_TOKEN_LIFETIME": REFRESH_TOKEN_LIFETIME,
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": True,
 }
-
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -153,7 +154,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "dear_j.wsgi.application"
-
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -203,11 +203,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Seoul"
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)

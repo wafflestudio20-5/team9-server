@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework import test
 
 from utils import test_data as test_data_utils
+from utils import uri as uri_utils
 
 
 class CalendarAPITest(test.APITestCase):
@@ -27,10 +28,10 @@ class CalendarAPITest(test.APITestCase):
                 "description": "Test description",
                 "participants": [
                     {
-                        "email": "user2@example.com",
+                        "pk": 2,
                     },
                     {
-                        "email": "user3@example.com",
+                        "pk": 3,
                     },
                 ],
             },
@@ -41,17 +42,19 @@ class CalendarAPITest(test.APITestCase):
             "participants": [
                 {
                     "pk": 2,
+                    "username": "user2",
                     "email": "user2@example.com",
                 },
                 {
                     "pk": 3,
+                    "username": "user3",
                     "email": "user3@example.com",
                 },
             ],
             "title": "Test Schedule1",
             "protection_level": 1,
-            "start_at": "2022-12-11T00:00:00Z",
-            "end_at": "2022-12-12T00:00:00Z",
+            "start_at": "2022-12-11 00:00:00",
+            "end_at": "2022-12-12 00:00:00",
             "description": "Test description",
             "created_by": 1,
         }
@@ -69,62 +72,75 @@ class CalendarAPITest(test.APITestCase):
         self.client.post("/api/v1/user/registration/", data=user1_data.for_registration, format="json")
         self.client.post("/api/v1/user/registration/", data=user2_data.for_registration, format="json")
 
-        self.client.post("/api/v1/user/login/", data=user1_data.for_login, format="json")
-
-        self.client.post(
-            path="/api/v1/calendar/schedule/",
-            data={
-                "title": "Test Schedule 1-1",
-                "start_at": "2022-12-11 00:00:00",
-                "end_at": "2022-12-12 00:00:00",
-                "description": "Test description 1-1",
-            },
-            format="json",
-        )
-
+        self.client.post("/api/v1/user/login/", data=user2_data.for_login, format="json")
         self.client.post(
             path="/api/v1/calendar/schedule/",
             data={
                 "title": "Test Schedule 2",
-                "start_at": "2022-12-12 00:00:00",
-                "end_at": "2022-12-13 00:00:00",
+                "start_at": "2022-12-11 00:00:00",
+                "end_at": "2022-12-12 00:00:00",
                 "description": "Test description 2",
                 "participants": [
                     {
-                        "email": "user2@example.com",
+                        "pk": 1,
                     },
                 ],
             },
             format="json",
         )
-
-        response = self.client.get("/api/v1/calendar/schedule/")
-
-        expected = [
-            {
-                "id": 1,
-                "participants": [],
-                "title": "Test Schedule 1-1",
-                "protection_level": 1,
-                "start_at": "2022-12-11T00:00:00Z",
-                "end_at": "2022-12-12T00:00:00Z",
-                "description": "Test description 1-1",
-                "created_by": 1,
+        self.client.post(
+            path="/api/v1/calendar/schedule/",
+            data={
+                "title": "Test Schedule 3",
+                "start_at": "2022-12-11 00:00:00",
+                "end_at": "2022-12-12 00:00:00",
+                "description": "Test description 3",
             },
-            {
-                "id": 2,
+            format="json",
+        )
+        self.client.post("/api/v1/user/logout/")
+        self.client.post("/api/v1/user/login/", data=user1_data.for_login, format="json")
+
+        self.client.post(
+            path="/api/v1/calendar/schedule/",
+            data={
+                "title": "Test Schedule 1",
+                "start_at": "2022-12-13 00:00:00",
+                "end_at": "2022-12-14 00:00:00",
+                "description": "Test description 1",
                 "participants": [
                     {
                         "pk": 2,
-                        "email": "user2@example.com",
+                    },
+                ],
+            },
+            format="json",
+        )
+        target_uri = uri_utils.get_uri_with_extra_params(
+            url="/api/v1/calendar/schedule/",
+            extra_params={
+                "email": user1_data.email,
+                "from": "2022-12-11",
+                "to": "2022-12-12",
+            },
+        )
+        response = self.client.get(target_uri)
+        expected = [
+            {
+                "id": 1,
+                "participants": [
+                    {
+                        "pk": 1,
+                        "username": "user1",
+                        "email": "user1@example.com",
                     }
                 ],
                 "title": "Test Schedule 2",
                 "protection_level": 1,
-                "start_at": "2022-12-12T00:00:00Z",
-                "end_at": "2022-12-13T00:00:00Z",
+                "start_at": "2022-12-11 00:00:00",
+                "end_at": "2022-12-12 00:00:00",
                 "description": "Test description 2",
-                "created_by": 1,
+                "created_by": 2,
             },
         ]
         actual = response.json()["results"]
@@ -166,8 +182,8 @@ class CalendarAPITest(test.APITestCase):
             "participants": [],
             "title": "Modified Test Schedule 1-1",
             "protection_level": 1,
-            "start_at": "2022-12-11T00:00:00Z",
-            "end_at": "2022-12-12T00:00:00Z",
+            "start_at": "2022-12-11 00:00:00",
+            "end_at": "2022-12-12 00:00:00",
             "description": "Test description 1-1",
             "created_by": 1,
         }
@@ -194,8 +210,8 @@ class CalendarAPITest(test.APITestCase):
             "participants": [],
             "title": "Second Modified Test Schedule 1-1",
             "protection_level": 1,
-            "start_at": "2022-12-12T00:00:00Z",
-            "end_at": "2022-12-13T00:00:00Z",
+            "start_at": "2022-12-12 00:00:00",
+            "end_at": "2022-12-13 00:00:00",
             "description": "Second Modified Test description 1-1",
             "created_by": 1,
         }

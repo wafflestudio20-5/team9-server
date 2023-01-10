@@ -23,18 +23,22 @@ class CalendarAPITest(test.APITestCase):
         expected = [
             {
                 "pk": 1,
+                "username": "user1",
                 "email": "user1@example.com",
             },
             {
                 "pk": 2,
+                "username": "user2",
                 "email": "user2@example.com",
             },
             {
                 "pk": 3,
+                "username": "user3",
                 "email": "user3@example.com",
             },
             {
                 "pk": 4,
+                "username": "user4",
                 "email": "user4@example.com",
             },
         ]
@@ -50,6 +54,7 @@ class CalendarAPITest(test.APITestCase):
         expected = [
             {
                 "pk": 3,
+                "username": "user3",
                 "email": "user3@example.com",
             },
         ]
@@ -70,11 +75,12 @@ class CalendarAPITest(test.APITestCase):
 
         self.client.post(path="/api/v1/user/login/", data=follower_data.for_login, format="json")
 
-        response = self.client.post(path="/api/v1/social/network/", data={"followee": {"email": followee_data.email}}, format="json")
+        response = self.client.post(path="/api/v1/social/network/", data={"followee": {"pk": 2}}, format="json")
         expected = {
             "id": 1,
             "followee": {
                 "pk": 2,
+                "username": "user2",
                 "email": "user2@example.com",
             },
             "approved": False,
@@ -95,6 +101,7 @@ class CalendarAPITest(test.APITestCase):
             "id": 1,
             "followee": {
                 "pk": 2,
+                "username": "user2",
                 "email": "user2@example.com",
             },
             "approved": True,
