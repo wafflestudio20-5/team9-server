@@ -1,3 +1,4 @@
+from dj_rest_auth import jwt_auth
 from rest_framework import authentication
 from rest_framework import generics
 
@@ -5,10 +6,10 @@ from calendar_j import models as calendar_models
 from calendar_j import paginations as calendar_paginations
 from calendar_j import permissions as calendar_permissions
 from calendar_j import serializers as calendar_serializers
-from dj_rest_auth import jwt_auth
 
 
 class ScheduleListCreateView(generics.ListCreateAPIView):
+    # TODO: User can only access to related Schedule
     authentication_classes = [
         jwt_auth.JWTCookieAuthentication,
         authentication.SessionAuthentication,

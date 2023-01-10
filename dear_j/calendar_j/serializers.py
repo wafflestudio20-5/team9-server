@@ -4,20 +4,11 @@ from rest_framework import serializers
 
 from calendar_j import models as calendar_model
 from user import models as user_models
-
-
-class ParticipantEmailSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-
-    def create(self, validated_data):
-        raise NotImplementedError
-
-    def update(self, instance, validated_data):
-        raise NotImplementedError
+from user import serializers as user_serializers
 
 
 class ScheduleSerializer(serializers.ModelSerializer):
-    participants = ParticipantEmailSerializer(many=True, required=False)
+    participants = user_serializers.UserEmailSerializer(many=True, required=False)
 
     class Meta:
         model = calendar_model.Schedule

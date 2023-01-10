@@ -1,44 +1,7 @@
-from __future__ import annotations
-
-import dataclasses
-from typing import Dict
-
 from rest_framework import status
 from rest_framework import test
 
-
-@dataclasses.dataclass
-class UserData:
-    username: str
-    email: str
-    password: str
-    birthdate: str
-
-    @property
-    def for_registration(self) -> Dict:
-        return {
-            "username": self.username,
-            "email": self.email,
-            "password1": self.password,
-            "password2": self.password,
-            "birthdate": self.birthdate,
-        }
-
-    @property
-    def for_login(self) -> Dict:
-        return {
-            "email": self.email,
-            "password": self.password,
-        }
-
-    @classmethod
-    def create_nth_user_data(cls, n: int) -> UserData:
-        return cls(
-            username=f"user{n}",
-            email=f"user{n}@example.com",
-            password=f"password@{n}",
-            birthdate="2000-01-01",
-        )
+from utils import test_data as test_data_utils
 
 
 class CalendarAPITest(test.APITestCase):
@@ -46,9 +9,9 @@ class CalendarAPITest(test.APITestCase):
         self.client = test.APIClient(enforce_csrf_checks=False)
 
     def test_create_schedule(self):
-        creator_data = UserData.create_nth_user_data(1)
-        participant1_data = UserData.create_nth_user_data(2)
-        participant2_data = UserData.create_nth_user_data(3)
+        creator_data = test_data_utils.UserData.create_nth_user_data(1)
+        participant1_data = test_data_utils.UserData.create_nth_user_data(2)
+        participant2_data = test_data_utils.UserData.create_nth_user_data(3)
 
         self.client.post(path="/api/v1/user/registration/", data=creator_data.for_registration, format="json")
         self.client.post(path="/api/v1/user/registration/", data=participant1_data.for_registration, format="json")
@@ -76,8 +39,14 @@ class CalendarAPITest(test.APITestCase):
         expected = {
             "id": 1,
             "participants": [
-                {"email": "user2@example.com"},
-                {"email": "user3@example.com"},
+                {
+                    "pk": 2,
+                    "email": "user2@example.com",
+                },
+                {
+                    "pk": 3,
+                    "email": "user3@example.com",
+                },
             ],
             "title": "Test Schedule1",
             "protection_level": 1,
@@ -94,8 +63,8 @@ class CalendarAPITest(test.APITestCase):
             assert actual[key] == value
 
     def test_get_schedule_list(self):
-        user1_data = UserData.create_nth_user_data(1)
-        user2_data = UserData.create_nth_user_data(2)
+        user1_data = test_data_utils.UserData.create_nth_user_data(1)
+        user2_data = test_data_utils.UserData.create_nth_user_data(2)
 
         self.client.post("/api/v1/user/registration/", data=user1_data.for_registration, format="json")
         self.client.post("/api/v1/user/registration/", data=user2_data.for_registration, format="json")
@@ -144,7 +113,12 @@ class CalendarAPITest(test.APITestCase):
             },
             {
                 "id": 2,
-                "participants": [{"email": "user2@example.com"}],
+                "participants": [
+                    {
+                        "pk": 2,
+                        "email": "user2@example.com",
+                    }
+                ],
                 "title": "Test Schedule 2",
                 "protection_level": 1,
                 "start_at": "2022-12-12T00:00:00Z",
@@ -162,8 +136,8 @@ class CalendarAPITest(test.APITestCase):
                 assert actual_row[key] == value
 
     def test_update_schedule(self):
-        user1_data = UserData.create_nth_user_data(1)
-        user2_data = UserData.create_nth_user_data(2)
+        user1_data = test_data_utils.UserData.create_nth_user_data(1)
+        user2_data = test_data_utils.UserData.create_nth_user_data(2)
 
         self.client.post("/api/v1/user/registration/", data=user1_data.for_registration, format="json")
         self.client.post("/api/v1/user/registration/", data=user2_data.for_registration, format="json")
