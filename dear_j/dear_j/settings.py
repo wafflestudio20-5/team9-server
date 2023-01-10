@@ -31,7 +31,6 @@ else:
     GOOGLE_CLIENT_ID = ssm.get_ssm_parameter(alias="/backend/dearj/google/client-id")
     GOOGLE_CLIENT_PW = ssm.get_ssm_parameter(alias="/backend/dearj/google/client-pw")
     
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -113,12 +112,9 @@ CORS_ORIGIN_ALLOW_ALL = config.CORS_ORIGIN_ALLOW_ALL
 ROTATE_REFRESH_TOKENS = config.ROTATE_REFRESH_TOKENS
 BLACKLIST_AFTER_ROTATION = config.BLACKLIST_AFTER_ROTATION
 
-
 # custom dj-rest-auth serializer
-REST_AUTH_SERIALIZERS = {
-    "USER_DETAILS_SERIALIZER": "user.serializers.UserDetailSerializer"}
-REST_AUTH_REGISTER_SERIALIZERS = {
-    "REGISTER_SERIALIZER": "user.serializers.RegisterSerializer"}
+REST_AUTH_SERIALIZERS = {"USER_DETAILS_SERIALIZER": "user.serializers.UserDetailSerializer"}
+REST_AUTH_REGISTER_SERIALIZERS = {"REGISTER_SERIALIZER": "user.serializers.RegisterSerializer"}
 
 
 SIMPLE_JWT = {

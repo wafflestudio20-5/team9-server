@@ -1,55 +1,48 @@
+from typing import Dict
+
 from rest_framework import serializers as rest_serializers
 
-import dj_rest_auth
 from dj_rest_auth import serializers as dj_auth_serializers
-from dj_rest_auth.registration import serializers as dj_regist_serializers
-from user import adapter
+from dj_rest_auth.registration import serializers as dj_reg_serializers
 from user import models
 
 
 class UserDetailSerializer(dj_auth_serializers.UserDetailsSerializer):
-    def create(self, validated_data):
+    def create(self, validated_data: Dict) -> models.User:
         user = models.User.objects.create_user(**validated_data)
         return user
 
-    def update(self, instance, validated_data):
+    def update(self, instance: models.User, validated_data: Dict) -> models.User:
         instance.email = validated_data.get("email", instance.email)
         instance.username = validated_data.get("username", instance.username)
-        instance.birthday = validated_data.get("birthday", instance.birthday)
+        instance.birthdate = validated_data.get("birthdate", instance.birthdate)
         instance.save()
         return instance
 
     class Meta(dj_auth_serializers.UserDetailsSerializer.Meta):
         fields = dj_auth_serializers.UserDetailsSerializer.Meta.fields + (
-            "email",
-            "birthday",
+            "birthdate",
             "username",
         )
 
-
-class RegisterSerializer(dj_regist_serializers.RegisterSerializer):
-    email = rest_serializers.EmailField(max_length=255)
-    username = rest_serializers.CharField(max_length=30)
-    birthday = rest_serializers.DateField()
-
-    def get_cleaned_data(self):
+class RegisterSerializer(dj_reg_serializers.RegisterSerializer):
+    birthdate = rest_serializers.DateField()
+    def get_cleaned_data(self) -> Dict:
         data_dict = super().get_cleaned_data()
-        data_dict["email"] = self.validated_data.get("email", "null")
-        data_dict["username"] = self.validated_data.get("username", "null")
-        data_dict["birthday"] = self.validated_data.get("birthday", "null")
+        data_dict["birthdate"] = self.validated_data.get("birthdate", "")
         return data_dict
 
-    def create(self, validated_data):
+    def create(self, validated_data: Dict) -> models.User:
         user = models.User.objects.create_user(**validated_data)
         return user
 
-    def update(self, instance, validated_data):
+    def update(self, instance: models.User, validated_data: Dict) -> models.User:
         instance.email = validated_data.get("email", instance.email)
         instance.username = validated_data.get("username", instance.username)
-        instance.birthday = validated_data.get("birthday", instance.birthday)
+        instance.birthdate = validated_data.get("birthdate", instance.birthdate)
         instance.save()
         return instance
 
     class Meta:
         model = models.User
-        fields = ["username", "email", "password1", "password2", "birthday"]
+        fields = ["username", "email", "password1", "password2", "birthdate"]

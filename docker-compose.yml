@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  interface:
+    build:
+      context: ""
+      dockerfile: ./images/dear_j/Dockerfile
+    environment:
+      SITE: DEV
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+    ports:
+      - 8000:8000
+
+  nginx:
+    build:
+      context: ""
+      dockerfile: ./images/nginx/Dockerfile
+      args:
+        SITE: dev
+    depends_on:
+      - interface
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 80:80
+
+volumes:
+  dear_j:

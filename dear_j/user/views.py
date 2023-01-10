@@ -31,7 +31,6 @@ BASE_URL = "http://127.0.0.1:8000/api/v1/user/"
 BASE_FRONTEND_URL = "http://127.0.0.1:3000"
 
 
-
 class UserRegistrationView(dj_reg_views.RegisterView):
     pass
 
@@ -42,7 +41,6 @@ class UserLoginView(dj_auth_views.LoginView):
 
 class UserLogoutView(dj_auth_views.LogoutView):
     pass
-
 
 class KakaoView(rest_views.APIView):
     def get(self, request, format=None):

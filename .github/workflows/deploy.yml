@@ -1,0 +1,102 @@
+name: "Deploy Dear J"
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: ap-northeast-2
+  ECR_REPOSITORY_INTERFACE: backend/interface
+  ECR_REPOSITORY_NGINX: backend/nginx
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  deploy:
+    name: Deploy Dear J
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Configure AWS infra account credentials
+      uses: aws-actions/configure-aws-credentials@v1-node16
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Check interface tag existence
+      id: docker-interface-tag
+      run: |
+        export TAG_EXIST=$(aws ecr list-images --repository-name ${ECR_REPOSITORY_INTERFACE} | jq 'any(.imageIds[].imageTag; . == "'${IMAGE_TAG}'")')
+        echo "is_exist=${TAG_EXIST}" >> $GITHUB_OUTPUT
+
+    - name: Build, tag, and push interface image to Amazon ECR
+      id: build-image-interface
+      uses: docker/build-push-action@v3
+      if: steps.docker-interface-tag.outputs.is_exist == 'false'
+      with:
+        push: true
+        context: ${{ github.workspace }}/${{ env.PROJECT_DIR }}
+        file: ${{ github.workspace }}/images/dear_j/Dockerfile
+        platforms: linux/x86_64
+        tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_INTERFACE }}:${{ env.IMAGE_TAG }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          AWS_ACCESS_KEY_ID_ARG: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY_ARG: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION_ARG: ${{ env.AWS_REGION }}
+
+    - name: Check nginx tag existence
+      id: docker-nginx-tag
+      run: |
+        export TAG_EXIST=$(aws ecr list-images --repository-name ${ECR_REPOSITORY_NGINX} | jq 'any(.imageIds[].imageTag; . == "'${IMAGE_TAG}'")')
+        echo "is_exist=${TAG_EXIST}" >> $GITHUB_OUTPUT
+
+    - name: Build, tag, and push interface image to Amazon ECR
+      id: build-image-nginx
+      uses: docker/build-push-action@v3
+      if: steps.docker-nginx-tag.outputs.is_exist == 'false'
+      with:
+        push: true
+        context: ${{ github.workspace }}/${{ env.PROJECT_DIR }}
+        file: ${{ github.workspace }}/images/nginx/Dockerfile
+        platforms: linux/x86_64
+        tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_NGINX}}:${{ env.IMAGE_TAG }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Deploy API container by docker-compose
+      uses: appleboy/ssh-action@v0.1.6
+      env:
+        AWS_REGION: ${{ env.AWS_REGION }}
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY_INTERFACE: ${{ env.ECR_REPOSITORY_INTERFACE }}
+        ECR_REPOSITORY_NGINX: ${{ env.ECR_REPOSITORY_NGINX }}
+        IMAGE_TAG: ${{ env.IMAGE_TAG }}
+      with:
+        host: ${{ secrets.EC2_PUBLIC_IP }}
+        username: ${{ secrets.EC2_SSH_ID }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        envs: AWS_REGION,ECR_REGISTRY,ECR_REPOSITORY_INTERFACE,ECR_REPOSITORY_NGINX,IMAGE_TAG
+        script: |
+          cat << EOF > .env
+            AWS_REGION=$AWS_REGION
+            ECR_REGISTRY=$ECR_REGISTRY
+            ECR_REPOSITORY_INTERFACE=$ECR_REPOSITORY_INTERFACE
+            ECR_REPOSITORY_NGINX=$ECR_REPOSITORY_NGINX
+            IMAGE_TAG=$IMAGE_TAG
+          EOF
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+          docker-compose down && docker-compose pull && docker-compose up -d
