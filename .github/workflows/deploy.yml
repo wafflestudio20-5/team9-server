@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - deploy/stage
-      - env/stage
+      - add/stage
 
 env:
   AWS_REGION: ap-northeast-2
