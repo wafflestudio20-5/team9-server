@@ -117,7 +117,8 @@ jobs:
       with:
         host: ${{ secrets.STAGE_EC2_PUBLIC_IP }}
         username: ${{ secrets.STAGE_EC2_SSH_ID }}
-        key: ${{ secrets.STAGE_EC2_SSH_KEY }}
+        # key: ${{ secrets.STAGE_EC2_SSH_KEY }}
+        password: ${{ secrets.STAGE_EC2_SSH_KEY }}
         envs: AWS_REGION,ECR_REGISTRY,ECR_REPOSITORY_INTERFACE,ECR_REPOSITORY_NGINX,IMAGE_TAG
         script: |
           cat << EOF > .env
