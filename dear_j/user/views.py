@@ -190,7 +190,7 @@ class GoogleLogin(dj_reg_views.SocialLoginView):
 
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
-    serializer_class = serializers.CustomUserDetailSerializer
+    serializer_class = serializers.UserDetailSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_object(self):
