@@ -25,8 +25,10 @@ class UserDetailSerializer(dj_auth_serializers.UserDetailsSerializer):
             "username",
         )
 
+
 class RegisterSerializer(dj_reg_serializers.RegisterSerializer):
     birthdate = rest_serializers.DateField()
+
     def get_cleaned_data(self) -> Dict:
         data_dict = super().get_cleaned_data()
         data_dict["birthdate"] = self.validated_data.get("birthdate", "")
