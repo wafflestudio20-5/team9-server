@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - deploy/stage
-      - add/stage
 
 env:
   AWS_REGION: ap-northeast-2
@@ -81,7 +80,7 @@ jobs:
 
     - name: Deploy API container by docker-compose
       uses: appleboy/ssh-action@v0.1.6
-      if: github.ref == 'refs/heads/add/stage'
+      if: github.ref == 'refs/heads/main'
       env:
         AWS_REGION: ${{ env.AWS_REGION }}
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -95,12 +94,12 @@ jobs:
         envs: AWS_REGION,ECR_REGISTRY,ECR_REPOSITORY_INTERFACE,ECR_REPOSITORY_NGINX,IMAGE_TAG
         script: |
           cat << EOF > .env
-            SITE=PROD
-            AWS_REGION=$AWS_REGION
-            ECR_REGISTRY=$ECR_REGISTRY
-            ECR_REPOSITORY_INTERFACE=$ECR_REPOSITORY_INTERFACE
-            ECR_REPOSITORY_NGINX=$ECR_REPOSITORY_NGINX
-            IMAGE_TAG=$IMAGE_TAG
+          SITE=PROD
+          AWS_REGION=$AWS_REGION
+          ECR_REGISTRY=$ECR_REGISTRY
+          ECR_REPOSITORY_INTERFACE=$ECR_REPOSITORY_INTERFACE
+          ECR_REPOSITORY_NGINX=$ECR_REPOSITORY_NGINX
+          IMAGE_TAG=$IMAGE_TAG
           EOF
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
           docker-compose down && docker-compose pull && docker-compose up -d
@@ -121,12 +120,12 @@ jobs:
         envs: AWS_REGION,ECR_REGISTRY,ECR_REPOSITORY_INTERFACE,ECR_REPOSITORY_NGINX,IMAGE_TAG
         script: |
           cat << EOF > .env
-            SITE=STAGE
-            AWS_REGION=$AWS_REGION
-            ECR_REGISTRY=$ECR_REGISTRY
-            ECR_REPOSITORY_INTERFACE=$ECR_REPOSITORY_INTERFACE
-            ECR_REPOSITORY_NGINX=$ECR_REPOSITORY_NGINX
-            IMAGE_TAG=$IMAGE_TAG
+          SITE=STAGE
+          AWS_REGION=$AWS_REGION
+          ECR_REGISTRY=$ECR_REGISTRY
+          ECR_REPOSITORY_INTERFACE=$ECR_REPOSITORY_INTERFACE
+          ECR_REPOSITORY_NGINX=$ECR_REPOSITORY_NGINX
+          IMAGE_TAG=$IMAGE_TAG
           EOF
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
           docker-compose down && docker-compose pull && docker-compose up -d
