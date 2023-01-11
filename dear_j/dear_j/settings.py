@@ -26,7 +26,7 @@ if site_env.is_prod():
     SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
 else:
     SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
-    
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -103,10 +103,11 @@ REST_USE_JWT = config.REST_USE_JWT
 JWT_AUTH_REFRESH_COOKIE = config.JWT_AUTH_REFRESH_COOKIE
 ACCESS_TOKEN_LIFETIME = config.ACCESS_TOKEN_LIFETIME
 REFRESH_TOKEN_LIFETIME = config.REFRESH_TOKEN_LIFETIME
-# cors setting
-CORS_ORIGIN_ALLOW_ALL = config.CORS_ORIGIN_ALLOW_ALL
 ROTATE_REFRESH_TOKENS = config.ROTATE_REFRESH_TOKENS
 BLACKLIST_AFTER_ROTATION = config.BLACKLIST_AFTER_ROTATION
+
+# cors setting
+CORS_ORIGIN_ALLOW_ALL = config.CORS_ORIGIN_ALLOW_ALL
 
 # custom dj-rest-auth serializer
 REST_AUTH_SERIALIZERS = {"USER_DETAILS_SERIALIZER": "user.serializers.UserDetailSerializer"}
@@ -120,10 +121,7 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": BLACKLIST_AFTER_ROTATION,
 }
 
-AUTHENTICATION_BACKENDS = (
-    "django.contrib.auth.backends.ModelBackend",
-    "allauth.account.auth_backends.AuthenticationBackend"
-)
+AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend", "allauth.account.auth_backends.AuthenticationBackend")
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
