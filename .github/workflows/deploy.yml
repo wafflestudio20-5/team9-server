@@ -79,22 +79,9 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-    - name: Set EC2 Access Info
-      run: |
-        if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-          echo "SITE=PROD" >> $GITHUB_ENV
-          echo "EC2_PUBLIC_IP=${{ secrets.PROD_EC2_PUBLIC_IP }}" >> $GITHUB_ENV
-          echo "EC2_SSH_ID=${{ secrets.PROD_EC2_SSH_ID }}" >> $GITHUB_ENV
-          echo "EC2_SSH_KEY=${{ secrets.PROD_EC2_SSH_KEY }}" >> $GITHUB_ENV
-        else
-          echo "SITE=STAGE" >> $GITHUB_ENV
-          echo "EC2_PUBLIC_IP=${{ secrets.STAGE_EC2_PUBLIC_IP }}" >> $GITHUB_ENV
-          echo "EC2_SSH_ID=${{ secrets.STAGE_EC2_SSH_ID }}" >> $GITHUB_ENV
-          echo "EC2_SSH_KEY=${{ secrets.STAGE_EC2_SSH_KEY }}" >> $GITHUB_ENV
-        fi
-
     - name: Deploy API container by docker-compose
       uses: appleboy/ssh-action@v0.1.6
+      if: github.ref == 'refs/heads/main'
       env:
         AWS_REGION: ${{ env.AWS_REGION }}
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -102,18 +89,42 @@ jobs:
         ECR_REPOSITORY_NGINX: ${{ env.ECR_REPOSITORY_NGINX }}
         IMAGE_TAG: ${{ env.IMAGE_TAG }}
       with:
-        host: ${{ env.EC2_PUBLIC_IP }}
-        username: ${{ env.EC2_SSH_ID }}
-        key: ${{ env.EC2_SSH_KEY }}
-        envs: SITE,AWS_REGION,ECR_REGISTRY,ECR_REPOSITORY_INTERFACE,ECR_REPOSITORY_NGINX,IMAGE_TAG
+        host: ${{ secrets.PROD_EC2_PUBLIC_IP }}
+        username: ${{ secrets.PROD_EC2_SSH_ID }}
+        key: ${{ secrets.PROD_EC2_SSH_KEY }}
+        envs: AWS_REGION,ECR_REGISTRY,ECR_REPOSITORY_INTERFACE,ECR_REPOSITORY_NGINX,IMAGE_TAG
         script: |
           cat << EOF > .env
-          SITE=$SITE
-          AWS_REGION=$AWS_REGION
-          ECR_REGISTRY=$ECR_REGISTRY
-          ECR_REPOSITORY_INTERFACE=$ECR_REPOSITORY_INTERFACE
-          ECR_REPOSITORY_NGINX=$ECR_REPOSITORY_NGINX
-          IMAGE_TAG=$IMAGE_TAG
+            AWS_REGION=$AWS_REGION
+            ECR_REGISTRY=$ECR_REGISTRY
+            ECR_REPOSITORY_INTERFACE=$ECR_REPOSITORY_INTERFACE
+            ECR_REPOSITORY_NGINX=$ECR_REPOSITORY_NGINX
+            IMAGE_TAG=$IMAGE_TAG
+          EOF
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+          docker-compose down && docker-compose pull && docker-compose up -d
+
+    - name: Deploy API container by docker-compose
+      uses: appleboy/ssh-action@v0.1.6
+      if: github.ref == 'refs/heads/add/stage'
+      env:
+        AWS_REGION: ${{ env.AWS_REGION }}
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY_INTERFACE: ${{ env.ECR_REPOSITORY_INTERFACE }}
+        ECR_REPOSITORY_NGINX: ${{ env.ECR_REPOSITORY_NGINX }}
+        IMAGE_TAG: ${{ env.IMAGE_TAG }}
+      with:
+        host: ${{ secrets.STAGE_EC2_PUBLIC_IP }}
+        username: ${{ secrets.STAGE_EC2_SSH_ID }}
+        key: ${{ secrets.STAGE_EC2_SSH_KEY }}
+        envs: AWS_REGION,ECR_REGISTRY,ECR_REPOSITORY_INTERFACE,ECR_REPOSITORY_NGINX,IMAGE_TAG
+        script: |
+          cat << EOF > .env
+            AWS_REGION=$AWS_REGION
+            ECR_REGISTRY=$ECR_REGISTRY
+            ECR_REPOSITORY_INTERFACE=$ECR_REPOSITORY_INTERFACE
+            ECR_REPOSITORY_NGINX=$ECR_REPOSITORY_NGINX
+            IMAGE_TAG=$IMAGE_TAG
           EOF
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
           docker-compose down && docker-compose pull && docker-compose up -d
