@@ -81,7 +81,7 @@ jobs:
 
     - name: Deploy API container by docker-compose
       uses: appleboy/ssh-action@v0.1.6
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/add/stage'
       env:
         AWS_REGION: ${{ env.AWS_REGION }}
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -107,7 +107,7 @@ jobs:
 
     - name: Deploy API container by docker-compose
       uses: appleboy/ssh-action@v0.1.6
-      if: github.ref == 'refs/heads/add/stage'
+      if: github.ref == 'refs/heads/deploy/stage'
       env:
         AWS_REGION: ${{ env.AWS_REGION }}
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}

@@ -27,7 +27,7 @@ DEBUG = not site_env.is_prod()
 
 ALLOWED_HOSTS = [
     "ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com",  # Prod Server
-    "ec2-15-164-212-125.ap-northeast-2.compute.amazonaws.com",  # Stage Server
+    "ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com",  # Stage Server
     "127.0.0.1",
     "localhost",
 ]
