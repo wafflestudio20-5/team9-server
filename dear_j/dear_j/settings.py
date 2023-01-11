@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-import os
 import pathlib
 
 import pymysql
@@ -22,20 +21,13 @@ from dear_j import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# SECURITY WARNING: don't run with debug turned on in production!
-if site_env.is_prod():
-    SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
-    DEBUG = False
-else:
-    SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
-    DEBUG = True
+SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
+DEBUG = not site_env.is_prod()
 
 ALLOWED_HOSTS = [
-    "ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com",
+    "ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com",  # Prod Server
+    "ec2-15-164-212-125.ap-northeast-2.compute.amazonaws.com",  # Stage Server
     "127.0.0.1",
     "localhost",
 ]
@@ -43,7 +35,7 @@ ALLOWED_HOSTS = [
 # drf spectacular setting
 SPECTACULAR_SETTINGS = {
     "TITLE": "J-Calendar API Document",
-    "DESCRIPTION": "API document of Calendar J by drf-specatular",
+    "DESCRIPTION": "API document of Calendar J by drf-spectacular",
     "SWAGGER_UI_SETTINGS": {
         "persistAuthorization": True,
         "displayOperationId": True,
@@ -158,12 +150,12 @@ WSGI_APPLICATION = "dear_j.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-if site_env.is_prod():
+if site_env.is_prod_or_stage():
     pymysql.install_as_MySQLdb()
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",
-            "NAME": "DEARJ",
+            "NAME": "dear_j" if site_env.is_prod() else "dear_j_stage",
             "USER": "admin",
             "PASSWORD": ssm.get_ssm_parameter("/database/dearj/master_key"),
             "HOST": "database-dear-j.c8csrf4cdshb.ap-northeast-2.rds.amazonaws.com",
