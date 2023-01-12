@@ -50,9 +50,6 @@ class UserLogoutView(dj_auth_views.LogoutView):
 
 class KakaoView(rest_views.APIView):
     def get(self, request):
-        if request.user.is_authenticated:
-            params = {"error": "user_already_logged_in"}
-            return shortcuts.redirect(common.get_fe_redirect_url(FE_LOGIN_URI, params))
         return shortcuts.redirect(kakao.kauth_authorize_string(KAKAO_CLIENT_ID, KAKAO_REDIRECT_URI))
 
 
@@ -123,9 +120,6 @@ class KakaoLogin(dj_reg_views.SocialLoginView):
 
 class GoogleView(rest_views.APIView):
     def get(self, request):
-        if request.user.is_authenticated:
-            params = {"error": "user_already_logged_in"}
-            return shortcuts.redirect(common.get_fe_redirect_url(FE_LOGIN_URI, params))
         return shortcuts.redirect(google.google_oauth_string(GOOGLE_CLIENT_ID, GOOGLE_REDIRECT_URI))
 
 
