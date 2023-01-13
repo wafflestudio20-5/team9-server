@@ -45,3 +45,13 @@ class ScheduleRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = calendar_models.Schedule.objects.all()
     permission_classes = [calendar_permissions.IsScheduleCreator]
     serializer_class = calendar_serializers.ScheduleSerializer
+
+
+class ScheduleAttendenceResponseView(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = [
+        jwt_auth.JWTCookieAuthentication,
+        authentication.SessionAuthentication,
+    ]
+    queryset = calendar_models.Schedule.objects.all()
+    permission_classes = [calendar_permissions.IsScheduleCreator]
+    serializer_class = calendar_serializers.ScheduleSerializer
