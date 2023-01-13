@@ -15,7 +15,7 @@ class Schedule(models.Model):
     start_at = models.DateTimeField()
     end_at = models.DateTimeField()
     participants = models.ManyToManyField(user_models.User, through="Participant")
-    description = models.TextField()
+    description = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
