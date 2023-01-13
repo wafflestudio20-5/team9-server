@@ -32,4 +32,4 @@ class ScheduleSerializer(serializers.ModelSerializer):
 class ParticipantSerializer(serializers.ModelSerializer):
     class Meta:
         model = calendar_model.Participant
-        fields = "__all__"
+        fields = ["id", "status", "participant", "schedule"]

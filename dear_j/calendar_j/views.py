@@ -53,16 +53,14 @@ class ScheduleAttendenceResponseView(generics.UpdateAPIView):
         jwt_auth.JWTCookieAuthentication,
         authentication.SessionAuthentication,
     ]
-    queryset = calendar_models.Schedule.objects.all()
+    queryset = calendar_models.Participant.objects.all()
     permission_classes = [calendar_permissions.IsScheduleParticipant]
-    serializer_class = calendar_serializers.ScheduleSerializer
+    serializer_class = calendar_serializers.ParticipantSerializer
 
-    def patch(self, request, *args, **kwargs):
-        pk = kwargs["pk"]
+    def get_queryset(self) -> query.QuerySet:
+        pk = self.kwargs["pk"]
         schedule = calendar_models.Schedule.objects.get(pk=pk)
-        user = schedule.participants.get(pk=request.user.pk)
-        participant = calendar_models.Participant.objects.get(schedule=schedule, participant=user)
-        participant.status = int(request.data["status"])
-        participant.save()
-        schedule.save()
-        return super().patch(request, *args, **kwargs)
+
+        queryset: query.QuerySet = super().get_queryset()
+        refined_queryset = queryset.filter(participant=self.request.user, schedule=schedule)
+        return refined_queryset

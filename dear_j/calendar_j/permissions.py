@@ -4,6 +4,7 @@ from rest_framework import request as req
 from calendar_j import models as calendar_models
 from calendar_j.services.protection import protection
 from social import models as social_models
+from user import models as user_models
 
 
 class IsScheduleCreator(permissions.IsAuthenticatedOrReadOnly):
@@ -25,6 +26,6 @@ class IsScheduleCreator(permissions.IsAuthenticatedOrReadOnly):
 
 class IsScheduleParticipant(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request: req.HttpRequest, view, obj: calendar_models.Schedule) -> bool:
-        if obj.participants.filter(pk=request.user.pk).first() is not None:
+        if obj.participant == request.user:
             return True
         return False
