@@ -12,6 +12,7 @@ class Schedule(models.Model):
         choices=protection.ProtectionLevel.choices,
         default=protection.ProtectionLevel.get_default(),
     )
+    open_content = models.BooleanField(default=True)
     start_at = models.DateTimeField()
     end_at = models.DateTimeField()
     participants = models.ManyToManyField(user_models.User, through="Participant")
