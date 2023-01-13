@@ -301,27 +301,7 @@ class CalendarAPITest(test.APITestCase):
             format="json",
         )
 
-        expected = {
-            "id": 1,
-            "participants": [
-                {
-                    "pk": 2,
-                    "username": "user2",
-                    "email": "user2@example.com",
-                },
-                {
-                    "pk": 3,
-                    "username": "user3",
-                    "email": "user3@example.com",
-                },
-            ],
-            "title": "Test Schedule1",
-            "protection_level": 1,
-            "start_at": "2022-12-11 00:00:00",
-            "end_at": "2022-12-12 00:00:00",
-            "description": "Test description",
-            "created_by": 1,
-        }
+        expected = {"id": 1, "status": 3, "participant": 2, "schedule": 1}
         actual = response.json()
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -365,6 +345,4 @@ class CalendarAPITest(test.APITestCase):
             format="json",
         )
 
-        actual = response.json()
-
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
