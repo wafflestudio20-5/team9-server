@@ -2,6 +2,7 @@ from dj_rest_auth import jwt_auth
 from django.db.models import query
 from rest_framework import authentication
 from rest_framework import generics
+from rest_framework import mixins
 
 from calendar_j import exceptions as calendar_exceptions
 from calendar_j import models as calendar_models
@@ -47,11 +48,21 @@ class ScheduleRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = calendar_serializers.ScheduleSerializer
 
 
-class ScheduleAttendenceResponseView(generics.RetrieveUpdateDestroyAPIView):
+class ScheduleAttendenceResponseView(generics.UpdateAPIView):
     authentication_classes = [
         jwt_auth.JWTCookieAuthentication,
         authentication.SessionAuthentication,
     ]
     queryset = calendar_models.Schedule.objects.all()
-    permission_classes = [calendar_permissions.IsScheduleCreator]
+    permission_classes = [calendar_permissions.IsScheduleParticipant]
     serializer_class = calendar_serializers.ScheduleSerializer
+
+    def patch(self, request, *args, **kwargs):
+        pk = kwargs["pk"]
+        schedule = calendar_models.Schedule.objects.get(pk=pk)
+        user = schedule.participants.get(pk=request.user.pk)
+        participant = calendar_models.Participant.objects.get(schedule=schedule, participant=user)
+        participant.status = int(request.data["status"])
+        participant.save()
+        schedule.save()
+        return super().patch(request, *args, **kwargs)
