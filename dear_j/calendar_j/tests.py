@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework import test
 
+from calendar_j.services.protection import protection
 from utils import test_data as test_data_utils
 from utils import uri as uri_utils
 
@@ -65,7 +66,7 @@ class CalendarAPITest(test.APITestCase):
             assert key in actual.keys()
             assert actual[key] == value
 
-    def test_get_schedule_list(self):
+    def test_get_schedule_list_success(self):
         user1_data = test_data_utils.UserData.create_nth_user_data(1)
         user2_data = test_data_utils.UserData.create_nth_user_data(2)
 
@@ -150,6 +151,41 @@ class CalendarAPITest(test.APITestCase):
             for key, value in expected_row.items():
                 assert key in actual_row.keys()
                 assert actual_row[key] == value
+
+    def test_get_schedule_list_fail(self):
+        user1_data = test_data_utils.UserData.create_nth_user_data(1)
+        user2_data = test_data_utils.UserData.create_nth_user_data(2)
+
+        self.client.post("/api/v1/user/registration/", data=user1_data.for_registration, format="json")
+        self.client.post("/api/v1/user/registration/", data=user2_data.for_registration, format="json")
+
+        self.client.post("/api/v1/user/login/", data=user2_data.for_login, format="json")
+        self.client.post(
+            path="/api/v1/calendar/schedule/",
+            data={
+                "title": "Test Schedule 2",
+                "start_at": "2022-12-11 00:00:00",
+                "end_at": "2022-12-12 00:00:00",
+                "description": "Test description 2",
+                "protection_level": protection.ProtectionLevel.CLOSED,
+                "participants": [
+                    {
+                        "pk": 1,
+                    },
+                ],
+            },
+            format="json",
+        )
+        self.client.post("/api/v1/user/logout/")
+        self.client.post("/api/v1/user/login/", data=user1_data.for_login, format="json")
+
+        target_uri = uri_utils.get_uri_with_extra_params(
+            url="/api/v1/calendar/schedule/1/",
+            extra_params={"email": user2_data.email},
+        )
+        response = self.client.get(target_uri)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_schedule(self):
         user1_data = test_data_utils.UserData.create_nth_user_data(1)
