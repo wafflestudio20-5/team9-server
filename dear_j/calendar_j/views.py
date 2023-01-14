@@ -9,6 +9,7 @@ from calendar_j import models as calendar_models
 from calendar_j import paginations as calendar_paginations
 from calendar_j import permissions as calendar_permissions
 from calendar_j import serializers as calendar_serializers
+from calendar_j.services.protection import protection as calendar_protection
 from utils import time as time_utils
 
 
@@ -32,10 +33,14 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         end_date = time_utils.normal_date_formatter.parse(params.get("to"))
 
         queryset: query.QuerySet = super().get_queryset()
-        refined_queryset = queryset.filter(created_by__email=target_email, start_at__range=(start_date, end_date)) | queryset.filter(
+        # request.user와 user의 관계를 고려해서 볼 수 있는 것만 filtering 필요
+        email_refined_queryset = queryset.filter(created_by__email=target_email, start_at__range=(start_date, end_date)) | queryset.filter(
             participants__email=target_email, end_at__range=(start_date, end_date)
         )
-        return refined_queryset
+        permission_refined_queryset = email_refined_queryset.filter(
+            protection_level__lte=calendar_protection.ProtectionLevel.get_allowed_threshold(self.request.user, target_email)
+        )
+        return permission_refined_queryset
 
 
 class ScheduleRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):

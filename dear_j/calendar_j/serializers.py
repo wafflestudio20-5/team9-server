@@ -33,3 +33,8 @@ class ParticipantSerializer(serializers.ModelSerializer):
     class Meta:
         model = calendar_model.Participant
         fields = ["id", "status", "participant", "schedule"]
+        read_only_fields = (
+            "id",
+            "participant",
+            "schedule",
+        )
