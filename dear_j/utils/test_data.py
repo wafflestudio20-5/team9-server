@@ -36,3 +36,22 @@ class UserData:
             password=f"password@{n}",
             birthdate="2000-01-01",
         )
+
+
+@dataclasses.dataclass
+class CalendarData:
+    title: str
+    start_at: str
+    end_at: str
+    description: str
+    protection_level: int
+
+    @classmethod
+    def create_nth_user_data(cls, n: int, protection_level: int) -> CalendarData:
+        return cls(
+            title=f"Test Schedule {n}",
+            start_at="2022-12-11 00:00:00",
+            end_at="2022-12-12 00:00:00",
+            description=f"Test Description {n}",
+            protection_level=protection_level,
+        )
