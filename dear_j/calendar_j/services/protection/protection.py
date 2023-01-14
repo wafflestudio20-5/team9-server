@@ -20,3 +20,17 @@ class ProtectionLevel(django_models.IntegerChoices):
         if social_models.Network.objects.filter(follower=request_user, followee=target_user).first() is not None:
             return cls.FOLLOWER
         return cls.OPEN
+
+    @classmethod
+    def is_allowed(cls, protection_level, request_user, target_user):
+        if target_user == request_user:
+            return True
+        if protection_level == cls.CLOSED:
+            return False
+        if protection_level == cls.FOLLOWER:
+            if social_models.Network.objects.filter(follower=request_user, followee=target_user).first() is not None:
+                return True
+            return False
+        if protection_level == cls.OPEN:
+            return True
+        return False

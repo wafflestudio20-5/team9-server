@@ -11,17 +11,9 @@ class IsScheduleCreator(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request: req.HttpRequest, view, obj: calendar_models.Schedule) -> bool:
         if obj.created_by == request.user:
             return True
-        if obj.protection_level == protection.ProtectionLevel.CLOSED:
-            return False
         if request.method not in permissions.SAFE_METHODS:
             return False
-        if obj.protection_level == protection.ProtectionLevel.FOLLOWER:
-            if social_models.Network.objects.filter(follower=request.user, followee=obj.created_by).first() is not None:
-                return True
-            return False
-        if obj.protection_level == protection.ProtectionLevel.OPEN:
-            return True
-        return False
+        return protection.ProtectionLevel.is_allowed(obj.protection_level, request.user, obj.created_by)
 
 
 class IsScheduleParticipant(permissions.IsAuthenticatedOrReadOnly):
