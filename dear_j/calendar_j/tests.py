@@ -66,7 +66,7 @@ class CalendarAPITest(test.APITestCase):
             assert key in actual.keys()
             assert actual[key] == value
 
-    def test_get_schedule_closed_list_success(self):
+    def test_get_schedule_list_success(self):
         user1_data = test_data_utils.UserData.create_nth_user_data(1)
         user2_data = test_data_utils.UserData.create_nth_user_data(2)
 
@@ -152,7 +152,181 @@ class CalendarAPITest(test.APITestCase):
                 assert key in actual_row.keys()
                 assert actual_row[key] == value
 
-    def test_get_closed_schedule_list_fail(self):
+    def test_get_schedule_list_open_permission_success(self):
+        user1_data = test_data_utils.UserData.create_nth_user_data(1)
+        user2_data = test_data_utils.UserData.create_nth_user_data(2)
+
+        self.client.post("/api/v1/user/registration/", data=user1_data.for_registration, format="json")
+        self.client.post("/api/v1/user/registration/", data=user2_data.for_registration, format="json")
+
+        self.client.post("/api/v1/user/login/", data=user2_data.for_login, format="json")
+        self.client.post(
+            path="/api/v1/calendar/schedule/",
+            data={
+                "title": "Test Schedule 2",
+                "start_at": "2022-12-11 00:00:00",
+                "end_at": "2022-12-12 00:00:00",
+                "description": "Test description 2",
+                "protection_level": protection.ProtectionLevel.OPEN,
+                "participants": [
+                    {
+                        "pk": 1,
+                    },
+                ],
+            },
+            format="json",
+        )
+        self.client.post(
+            path="/api/v1/calendar/schedule/",
+            data={
+                "title": "Test Schedule 3",
+                "start_at": "2022-12-11 00:00:00",
+                "end_at": "2022-12-12 00:00:00",
+                "description": "Test description 3",
+                "protection_level": protection.ProtectionLevel.CLOSED,
+            },
+            format="json",
+        )
+        self.client.post(
+            path="/api/v1/calendar/schedule/",
+            data={
+                "title": "Test Schedule 3",
+                "start_at": "2022-12-11 00:00:00",
+                "end_at": "2022-12-12 00:00:00",
+                "description": "Test description 3",
+                "protection_level": protection.ProtectionLevel.FOLLOWER,
+            },
+            format="json",
+        )
+        self.client.post("/api/v1/user/logout/")
+        self.client.post("/api/v1/user/login/", data=user1_data.for_login, format="json")
+
+        target_uri = uri_utils.get_uri_with_extra_params(
+            url="/api/v1/calendar/schedule/",
+            extra_params={
+                "email": user2_data.email,
+                "from": "2022-12-11",
+                "to": "2022-12-12",
+            },
+        )
+        response = self.client.get(target_uri)
+        expected = [
+            {
+                "id": 1,
+                "participants": [{"pk": 1, "username": "user1", "email": "user1@example.com"}],
+                "title": "Test Schedule 2",
+                "protection_level": 1,
+                "show_content": True,
+                "start_at": "2022-12-11 00:00:00",
+                "end_at": "2022-12-12 00:00:00",
+                "description": "Test description 2",
+                "created_by": 2,
+            }
+        ]
+        actual = response.json()["results"]
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for actual_row, expected_row in zip(actual, expected):
+            for key, value in expected_row.items():
+                assert key in actual_row.keys()
+                if key not in ["created_at", "updated_at"]:
+                    assert actual_row[key] == value
+
+    def test_get_schedule_list_follower_permission_success(self):
+        user1_data = test_data_utils.UserData.create_nth_user_data(1)
+        user2_data = test_data_utils.UserData.create_nth_user_data(2)
+
+        self.client.post("/api/v1/user/registration/", data=user1_data.for_registration, format="json")
+        self.client.post("/api/v1/user/registration/", data=user2_data.for_registration, format="json")
+
+        self.client.post("/api/v1/user/login/", data=user2_data.for_login, format="json")
+        self.client.post(
+            path="/api/v1/calendar/schedule/",
+            data={
+                "title": "Test Schedule 2",
+                "start_at": "2022-12-11 00:00:00",
+                "end_at": "2022-12-12 00:00:00",
+                "description": "Test description 2",
+                "protection_level": protection.ProtectionLevel.OPEN,
+                "participants": [
+                    {
+                        "pk": 1,
+                    },
+                ],
+            },
+            format="json",
+        )
+        self.client.post(
+            path="/api/v1/calendar/schedule/",
+            data={
+                "title": "Test Schedule 3",
+                "start_at": "2022-12-11 00:00:00",
+                "end_at": "2022-12-12 00:00:00",
+                "description": "Test description 3",
+                "protection_level": protection.ProtectionLevel.CLOSED,
+            },
+            format="json",
+        )
+        self.client.post(
+            path="/api/v1/calendar/schedule/",
+            data={
+                "title": "Test Schedule 3",
+                "start_at": "2022-12-11 00:00:00",
+                "end_at": "2022-12-12 00:00:00",
+                "description": "Test description 3",
+                "protection_level": protection.ProtectionLevel.FOLLOWER,
+            },
+            format="json",
+        )
+        self.client.post("/api/v1/user/logout/")
+        self.client.post("/api/v1/user/login/", data=user1_data.for_login, format="json")
+
+        response = self.client.post(path="/api/v1/social/network/", data={"followee": {"pk": 2}}, format="json")
+        response = self.client.patch(path="/api/v1/social/network/1/", data={"approved": True}, format="json")
+
+        target_uri = uri_utils.get_uri_with_extra_params(
+            url="/api/v1/calendar/schedule/",
+            extra_params={
+                "email": user2_data.email,
+                "from": "2022-12-11",
+                "to": "2022-12-12",
+            },
+        )
+        response = self.client.get(target_uri)
+        expected = [
+            {
+                "id": 1,
+                "participants": [{"pk": 1, "username": "user1", "email": "user1@example.com"}],
+                "title": "Test Schedule 2",
+                "protection_level": 1,
+                "show_content": True,
+                "start_at": "2022-12-11 00:00:00",
+                "end_at": "2022-12-12 00:00:00",
+                "description": "Test description 2",
+                "created_by": 2,
+            },
+            {
+                "id": 3,
+                "participants": [],
+                "title": "Test Schedule 3",
+                "protection_level": 2,
+                "show_content": True,
+                "start_at": "2022-12-11 00:00:00",
+                "end_at": "2022-12-12 00:00:00",
+                "description": "Test description 3",
+                "created_by": 2,
+            },
+        ]
+        actual = response.json()["results"]
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for actual_row, expected_row in zip(actual, expected):
+            for key, value in expected_row.items():
+                assert key in actual_row.keys()
+                if key not in ["created_at", "updated_at"]:
+                    assert actual_row[key] == value
+
+    def test_get_closed_schedule_fail(self):
         user1_data = test_data_utils.UserData.create_nth_user_data(1)
         user2_data = test_data_utils.UserData.create_nth_user_data(2)
 
@@ -187,7 +361,7 @@ class CalendarAPITest(test.APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_get_follower_schedule_list_success(self):
+    def test_get_follower_schedule_success(self):
         user1_data = test_data_utils.UserData.create_nth_user_data(1)  # follower
         user2_data = test_data_utils.UserData.create_nth_user_data(2)  # followee
 
@@ -226,7 +400,7 @@ class CalendarAPITest(test.APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_get_follower_schedule_list_fail(self):
+    def test_get_follower_schedule_fail(self):
         user1_data = test_data_utils.UserData.create_nth_user_data(1)
         user2_data = test_data_utils.UserData.create_nth_user_data(2)
 
