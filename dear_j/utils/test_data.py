@@ -42,6 +42,12 @@ class UserData:
 class UserPKData:
     pk: int
 
+    @property
+    def for_schedule(self) -> Dict:
+        return {
+            "pk": self.pk,
+        }
+
     @classmethod
     def create_nth_user_pk_data(cls, pk: int):
         return cls(pk=pk)
@@ -57,10 +63,11 @@ class CalendarData:
     participants: List[UserPKData]
 
     @classmethod
-    def create_nth_user_data(cls, n: int, protection_level: int, participants: List[int]) -> CalendarData:
+    def create_nth_calendar_data(cls, n: int, protection_level: int, participants: List[int]) -> CalendarData:
         participants_list = []
         for pk in participants:
-            participants_list.append(UserPKData.create_nth_user_pk_data(pk))
+            participants_list.append(UserPKData.create_nth_user_pk_data(pk).for_schedule)
+
         return cls(
             title=f"Test Schedule {n}",
             start_at="2022-12-11 00:00:00",

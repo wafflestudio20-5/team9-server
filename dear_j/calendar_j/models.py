@@ -40,3 +40,7 @@ class Participant(models.Model):
         verbose_name = "participant"
         verbose_name_plural = "participants"
         db_table = "tb_participant"
+
+
+class RecurringSchedule(models.Model):
+    pass

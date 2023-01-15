@@ -9,6 +9,7 @@ from calendar_j import models as calendar_models
 from calendar_j import paginations as calendar_paginations
 from calendar_j import permissions as calendar_permissions
 from calendar_j import serializers as calendar_serializers
+from calendar_j.services.attendance import attendance
 from calendar_j.services.protection import protection as calendar_protection
 from utils import time as time_utils
 
@@ -33,7 +34,8 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         end_date = time_utils.normal_date_formatter.parse(params.get("to"))
 
         queryset: query.QuerySet = super().get_queryset()
-        # request.user와 user의 관계를 고려해서 볼 수 있는 것만 filtering 필요
+
+        # participants__status=attendance.AttendanceStatus.PRESENCE,  filtering required
         email_refined_queryset = queryset.filter(created_by__email=target_email, start_at__range=(start_date, end_date)) | queryset.filter(
             participants__email=target_email, end_at__range=(start_date, end_date)
         )
