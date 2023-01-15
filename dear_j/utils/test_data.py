@@ -63,9 +63,9 @@ class ScheduleData:
     participants: List[UserPKData]
 
     @classmethod
-    def create_nth_calendar_data(cls, n: int, protection_level: int, participants: List[int]) -> ScheduleData:
+    def create_nth_calendar_data(cls, n: int, protection_level: int, raw_participants: List[int]) -> ScheduleData:
         participants = []
-        for pk in participants.copy():
+        for pk in raw_participants.copy():
             participants.append(UserPKData.create_nth_user_pk_data(pk).for_schedule)
 
         return cls(

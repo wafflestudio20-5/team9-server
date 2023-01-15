@@ -90,7 +90,7 @@ class CalendarAPITest(test.APITestCase):
         target_uri = uri_utils.get_uri_with_extra_params(
             url="/api/v1/calendar/schedule/",
             extra_params={
-                "email": user2_data.email,
+                "pk": 2,
                 "from": "2022-12-11",
                 "to": "2022-12-12",
             },
@@ -156,7 +156,7 @@ class CalendarAPITest(test.APITestCase):
         target_uri = uri_utils.get_uri_with_extra_params(
             url="/api/v1/calendar/schedule/",
             extra_params={
-                "email": user2_data.email,
+                "pk": 2,
                 "from": "2022-12-11",
                 "to": "2022-12-12",
             },
@@ -217,7 +217,7 @@ class CalendarAPITest(test.APITestCase):
 
         target_uri = uri_utils.get_uri_with_extra_params(
             url="/api/v1/calendar/schedule/1/",
-            extra_params={"email": user2_data.email},
+            extra_params={"pk": 2},
         )
         response = self.client.get(target_uri)
 
@@ -248,7 +248,7 @@ class CalendarAPITest(test.APITestCase):
 
         target_uri = uri_utils.get_uri_with_extra_params(
             url="/api/v1/calendar/schedule/1/",
-            extra_params={"email": user2_data.email},
+            extra_params={"pk": 2},
         )
         response = self.client.get(target_uri)
 
@@ -276,7 +276,7 @@ class CalendarAPITest(test.APITestCase):
 
         target_uri = uri_utils.get_uri_with_extra_params(
             url="/api/v1/calendar/schedule/1/",
-            extra_params={"email": user2_data.email},
+            extra_params={"pk": 2},
         )
         response = self.client.get(target_uri)
 
