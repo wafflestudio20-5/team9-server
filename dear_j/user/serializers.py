@@ -1,9 +1,9 @@
 from typing import Dict
 
-from rest_framework import serializers as rest_serializers
-
 from dj_rest_auth import serializers as dj_auth_serializers
 from dj_rest_auth.registration import serializers as dj_reg_serializers
+from rest_framework import serializers as rest_serializers
+
 from user import models
 
 
@@ -48,3 +48,18 @@ class RegisterSerializer(dj_reg_serializers.RegisterSerializer):
     class Meta:
         model = models.User
         fields = ["username", "email", "password1", "password2", "birthdate"]
+
+
+class EssentialUserInfoFromPKSerializer(rest_serializers.ModelSerializer):
+    pk = rest_serializers.IntegerField()
+
+    class Meta:
+        model = models.User
+        fields = ["pk", "username", "email"]
+        read_only_fields = ["username", "email"]
+
+    def create(self, validated_data):
+        raise NotImplementedError
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError

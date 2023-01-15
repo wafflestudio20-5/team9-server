@@ -6,32 +6,25 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-import os
 import pathlib
 
 import pymysql
 import site_env
 from utils import ssm
+from utils import time as time_utils
 
 from dear_j import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-if site_env.is_prod():
-    SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
-else:
-    SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
+DEBUG = not site_env.is_prod()
 
 ALLOWED_HOSTS = [
-    "ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com",
+    "ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com",  # Prod Server
+    "ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com",  # Stage Server
     "127.0.0.1",
     "localhost",
 ]
@@ -39,7 +32,7 @@ ALLOWED_HOSTS = [
 # drf spectacular setting
 SPECTACULAR_SETTINGS = {
     "TITLE": "J-Calendar API Document",
-    "DESCRIPTION": "API document of Calendar J by drf-specatular",
+    "DESCRIPTION": "API document of Calendar J by drf-spectacular",
     "SWAGGER_UI_SETTINGS": {
         "persistAuthorization": True,
         "displayOperationId": True,
@@ -67,8 +60,9 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.kakao",
-    "user.apps.UserConfig",
     "calendar_j.apps.CalendarJConfig",
+    "user.apps.UserConfig",
+    "social.apps.SocialConfig",
     "documentation.apps.DocumentationConfig",
 ]
 
@@ -82,6 +76,8 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
     ),
+    "DATE_FORMAT": time_utils.NormalDateFormatter.pattern,
+    "DATETIME_FORMAT": time_utils.NormalDatetimeFormatter.pattern,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
@@ -112,7 +108,6 @@ CORS_ORIGIN_ALLOW_ALL = config.CORS_ORIGIN_ALLOW_ALL
 # custom dj-rest-auth serializer
 REST_AUTH_SERIALIZERS = {"USER_DETAILS_SERIALIZER": "user.serializers.UserDetailSerializer"}
 REST_AUTH_REGISTER_SERIALIZERS = {"REGISTER_SERIALIZER": "user.serializers.RegisterSerializer"}
-
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": ACCESS_TOKEN_LIFETIME,
@@ -154,16 +149,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "dear_j.wsgi.application"
 
-
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-if site_env.is_prod():
+if site_env.is_prod_or_stage():
     pymysql.install_as_MySQLdb()
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",
-            "NAME": "DEARJ",
+            "NAME": "dear_j" if site_env.is_prod() else "dear_j_stage",
             "USER": "admin",
             "PASSWORD": ssm.get_ssm_parameter("/database/dearj/master_key"),
             "HOST": "database-dear-j.c8csrf4cdshb.ap-northeast-2.rds.amazonaws.com",
@@ -203,11 +197,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Seoul"
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
