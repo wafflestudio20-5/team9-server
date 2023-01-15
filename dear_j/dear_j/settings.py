@@ -29,6 +29,17 @@ ALLOWED_HOSTS = [
     "localhost",
 ]
 
+if site_env.is_prod():
+    BASE_BE_URI = "http://ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com/"
+    BASE_FE_URI = "https://db5p3zym5dolm.cloudfront.net/"
+elif site_env.is_stage():
+    BASE_BE_URI = "ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com"
+    BASE_FE_URI = "https://db5p3zym5dolm.cloudfront.net/"
+else:
+    BASE_BE_URI = "http://127.0.0.1:8000/"
+    BASE_FE_URI = "http://127.0.0.1:3000/"
+
+
 # drf spectacular setting
 SPECTACULAR_SETTINGS = {
     "TITLE": "J-Calendar API Document",
