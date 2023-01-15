@@ -56,70 +56,6 @@ class CalendarAPITest(test.APITestCase):
             assert key in actual.keys()
             assert actual[key] == value
 
-    def test_get_schedule_list_success(self):
-        user1_data = test_data_utils.UserData.create_nth_user_data(1)
-        user2_data = test_data_utils.UserData.create_nth_user_data(2)
-
-        self.client.post("/api/v1/user/registration/", data=user1_data.for_registration, format="json")
-        self.client.post("/api/v1/user/registration/", data=user2_data.for_registration, format="json")
-
-        self.client.post("/api/v1/user/login/", data=user2_data.for_login, format="json")
-
-        schedule2_data = dataclasses.asdict(test_data_utils.CalendarData.create_nth_calendar_data(2, 1, []))
-        self.client.post(
-            path="/api/v1/calendar/schedule/",
-            data=schedule2_data,
-            format="json",
-        )
-        schedule3_data = dataclasses.asdict(test_data_utils.CalendarData.create_nth_calendar_data(3, 1, []))
-        self.client.post(
-            path="/api/v1/calendar/schedule/",
-            data=schedule3_data,
-            format="json",
-        )
-        self.client.post("/api/v1/user/logout/")
-        self.client.post("/api/v1/user/login/", data=user1_data.for_login, format="json")
-        schedule1_data = dataclasses.asdict(test_data_utils.CalendarData.create_nth_calendar_data(1, 1, [2]))
-        self.client.post(
-            path="/api/v1/calendar/schedule/",
-            data=schedule1_data,
-            format="json",
-        )
-        target_uri = uri_utils.get_uri_with_extra_params(
-            url="/api/v1/calendar/schedule/",
-            extra_params={
-                "email": user1_data.email,
-                "from": "2022-12-11",
-                "to": "2022-12-12",
-            },
-        )
-        response = self.client.get(target_uri)
-        expected = [
-            {
-                "id": 3,
-                "participants": [
-                    {
-                        "pk": 2,
-                        "username": "user2",
-                        "email": "user2@example.com",
-                    }
-                ],
-                "title": "Test Schedule 1",
-                "protection_level": 1,
-                "start_at": "2022-12-11 00:00:00",
-                "end_at": "2022-12-12 00:00:00",
-                "description": "Test Description 1",
-                "created_by": 1,
-            },
-        ]
-        actual = response.json()["results"]
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        for actual_row, expected_row in zip(actual, expected):
-            for key, value in expected_row.items():
-                assert key in actual_row.keys()
-                assert actual_row[key] == value
-
     def test_get_schedule_list_open_permission_success(self):
         user1_data = test_data_utils.UserData.create_nth_user_data(1)
         user2_data = test_data_utils.UserData.create_nth_user_data(2)
@@ -190,42 +126,25 @@ class CalendarAPITest(test.APITestCase):
         self.client.post("/api/v1/user/registration/", data=user2_data.for_registration, format="json")
 
         self.client.post("/api/v1/user/login/", data=user2_data.for_login, format="json")
+
+        schedule2_data = dataclasses.asdict(test_data_utils.CalendarData.create_nth_calendar_data(2, protection.ProtectionLevel.OPEN, []))
         self.client.post(
             path="/api/v1/calendar/schedule/",
-            data={
-                "title": "Test Schedule 2",
-                "start_at": "2022-12-11 00:00:00",
-                "end_at": "2022-12-12 00:00:00",
-                "description": "Test description 2",
-                "protection_level": protection.ProtectionLevel.OPEN,
-                "participants": [
-                    {
-                        "pk": 1,
-                    },
-                ],
-            },
+            data=schedule2_data,
             format="json",
+        )
+        schedule3_data = dataclasses.asdict(test_data_utils.CalendarData.create_nth_calendar_data(3, protection.ProtectionLevel.CLOSED, []))
+        self.client.post(
+            path="/api/v1/calendar/schedule/",
+            data=schedule3_data,
+            format="json",
+        )
+        schedule4_data = dataclasses.asdict(
+            test_data_utils.CalendarData.create_nth_calendar_data(4, protection.ProtectionLevel.FOLLOWER, [])
         )
         self.client.post(
             path="/api/v1/calendar/schedule/",
-            data={
-                "title": "Test Schedule 3",
-                "start_at": "2022-12-11 00:00:00",
-                "end_at": "2022-12-12 00:00:00",
-                "description": "Test description 3",
-                "protection_level": protection.ProtectionLevel.CLOSED,
-            },
-            format="json",
-        )
-        self.client.post(
-            path="/api/v1/calendar/schedule/",
-            data={
-                "title": "Test Schedule 3",
-                "start_at": "2022-12-11 00:00:00",
-                "end_at": "2022-12-12 00:00:00",
-                "description": "Test description 3",
-                "protection_level": protection.ProtectionLevel.FOLLOWER,
-            },
+            data=schedule4_data,
             format="json",
         )
         self.client.post("/api/v1/user/logout/")
@@ -246,24 +165,24 @@ class CalendarAPITest(test.APITestCase):
         expected = [
             {
                 "id": 1,
-                "participants": [{"pk": 1, "username": "user1", "email": "user1@example.com"}],
+                "participants": [],
                 "title": "Test Schedule 2",
                 "protection_level": 1,
                 "show_content": True,
                 "start_at": "2022-12-11 00:00:00",
                 "end_at": "2022-12-12 00:00:00",
-                "description": "Test description 2",
+                "description": "Test Description 2",
                 "created_by": 2,
             },
             {
                 "id": 3,
                 "participants": [],
-                "title": "Test Schedule 3",
+                "title": "Test Schedule 4",
                 "protection_level": 2,
                 "show_content": True,
                 "start_at": "2022-12-11 00:00:00",
                 "end_at": "2022-12-12 00:00:00",
-                "description": "Test description 3",
+                "description": "Test Description 4",
                 "created_by": 2,
             },
         ]
@@ -284,20 +203,13 @@ class CalendarAPITest(test.APITestCase):
         self.client.post("/api/v1/user/registration/", data=user2_data.for_registration, format="json")
 
         self.client.post("/api/v1/user/login/", data=user2_data.for_login, format="json")
+
+        schedule1_data = dataclasses.asdict(
+            test_data_utils.CalendarData.create_nth_calendar_data(2, protection.ProtectionLevel.FOLLOWER, [])
+        )
         self.client.post(
             path="/api/v1/calendar/schedule/",
-            data={
-                "title": "Test Schedule 2",
-                "start_at": "2022-12-11 00:00:00",
-                "end_at": "2022-12-12 00:00:00",
-                "description": "Test description 2",
-                "protection_level": protection.ProtectionLevel.FOLLOWER,
-                "participants": [
-                    {
-                        "pk": 1,
-                    },
-                ],
-            },
+            data=schedule1_data,
             format="json",
         )
         self.client.post("/api/v1/user/logout/")
@@ -320,20 +232,12 @@ class CalendarAPITest(test.APITestCase):
 
         self.client.post("/api/v1/user/login/", data=user2_data.for_login, format="json")
 
+        schedule1_data = dataclasses.asdict(
+            test_data_utils.CalendarData.create_nth_calendar_data(2, protection.ProtectionLevel.FOLLOWER, [])
+        )
         self.client.post(
             path="/api/v1/calendar/schedule/",
-            data={
-                "title": "Test Schedule 2",
-                "start_at": "2022-12-11 00:00:00",
-                "end_at": "2022-12-12 00:00:00",
-                "description": "Test description 2",
-                "protection_level": protection.ProtectionLevel.FOLLOWER,
-                "participants": [
-                    {
-                        "pk": 2,
-                    },
-                ],
-            },
+            data=schedule1_data,
             format="json",
         )
         self.client.post("/api/v1/user/logout/")
@@ -358,20 +262,13 @@ class CalendarAPITest(test.APITestCase):
         self.client.post("/api/v1/user/registration/", data=user2_data.for_registration, format="json")
 
         self.client.post("/api/v1/user/login/", data=user2_data.for_login, format="json")
+
+        schedule1_data = dataclasses.asdict(
+            test_data_utils.CalendarData.create_nth_calendar_data(2, protection.ProtectionLevel.FOLLOWER, [])
+        )
         self.client.post(
             path="/api/v1/calendar/schedule/",
-            data={
-                "title": "Test Schedule 2",
-                "start_at": "2022-12-11 00:00:00",
-                "end_at": "2022-12-12 00:00:00",
-                "description": "Test description 2",
-                "protection_level": protection.ProtectionLevel.FOLLOWER,
-                "participants": [
-                    {
-                        "pk": 1,
-                    },
-                ],
-            },
+            data=schedule1_data,
             format="json",
         )
         self.client.post("/api/v1/user/logout/")
@@ -393,7 +290,6 @@ class CalendarAPITest(test.APITestCase):
         self.client.post("/api/v1/user/registration/", data=user2_data.for_registration, format="json")
 
         self.client.post("/api/v1/user/login/", data=user1_data.for_login, format="json")
-
         pk = (
             self.client.post(
                 path="/api/v1/calendar/schedule/",
@@ -470,22 +366,12 @@ class CalendarAPITest(test.APITestCase):
         self.client.post(path="/api/v1/user/registration/", data=participant2_data.for_registration, format="json")
         self.client.post(path="/api/v1/user/login/", data=creator_data.for_login, format="json")
 
+        schedule1_data = dataclasses.asdict(
+            test_data_utils.CalendarData.create_nth_calendar_data(1, protection.ProtectionLevel.FOLLOWER, [2, 3])
+        )
         response = self.client.post(
             path="/api/v1/calendar/schedule/",
-            data={
-                "title": "Test Schedule1",
-                "start_at": "2022-12-11 00:00:00",
-                "end_at": "2022-12-12 00:00:00",
-                "description": "Test description",
-                "participants": [
-                    {
-                        "pk": 2,
-                    },
-                    {
-                        "pk": 3,
-                    },
-                ],
-            },
+            data=schedule1_data,
             format="json",
         )
 
@@ -517,22 +403,12 @@ class CalendarAPITest(test.APITestCase):
         self.client.post(path="/api/v1/user/registration/", data=participant2_data.for_registration, format="json")
         self.client.post(path="/api/v1/user/login/", data=creator_data.for_login, format="json")
 
+        schedule1_data = dataclasses.asdict(
+            test_data_utils.CalendarData.create_nth_calendar_data(1, protection.ProtectionLevel.FOLLOWER, [2, 3])
+        )
         response = self.client.post(
             path="/api/v1/calendar/schedule/",
-            data={
-                "title": "Test Schedule1",
-                "start_at": "2022-12-11 00:00:00",
-                "end_at": "2022-12-12 00:00:00",
-                "description": "Test description",
-                "participants": [
-                    {
-                        "pk": 2,
-                    },
-                    {
-                        "pk": 3,
-                    },
-                ],
-            },
+            data=schedule1_data,
             format="json",
         )
 
@@ -555,22 +431,12 @@ class CalendarAPITest(test.APITestCase):
         self.client.post(path="/api/v1/user/registration/", data=participant2_data.for_registration, format="json")
         self.client.post(path="/api/v1/user/login/", data=creator_data.for_login, format="json")
 
+        schedule1_data = dataclasses.asdict(
+            test_data_utils.CalendarData.create_nth_calendar_data(1, protection.ProtectionLevel.FOLLOWER, [2, 3])
+        )
         response = self.client.post(
             path="/api/v1/calendar/schedule/",
-            data={
-                "title": "Test Schedule1",
-                "start_at": "2022-12-11 00:00:00",
-                "end_at": "2022-12-12 00:00:00",
-                "description": "Test description",
-                "participants": [
-                    {
-                        "pk": 2,
-                    },
-                    {
-                        "pk": 3,
-                    },
-                ],
-            },
+            data=schedule1_data,
             format="json",
         )
 

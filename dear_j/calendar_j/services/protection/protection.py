@@ -15,7 +15,7 @@ class ProtectionLevel(django_models.IntegerChoices):
         return cls.OPEN.value
 
     @classmethod
-    def get_allowed_threshold(cls, request_user, target_email):
+    def get_allowed_threshold(cls, request_user: user_models.User, target_email):
         target_user = user_models.User.objects.get(email=target_email)
         if social_models.Network.objects.filter(follower=request_user, followee=target_user).first() is not None:
             return cls.FOLLOWER
@@ -23,14 +23,10 @@ class ProtectionLevel(django_models.IntegerChoices):
 
     @classmethod
     def is_allowed(cls, protection_level, request_user, target_user):
-        if target_user == request_user:
+        if target_user == request_user or protection_level == cls.OPEN:
             return True
-        if protection_level == cls.CLOSED:
-            return False
         if protection_level == cls.FOLLOWER:
             if social_models.Network.objects.filter(follower=request_user, followee=target_user).first() is not None:
                 return True
             return False
-        if protection_level == cls.OPEN:
-            return True
         return False
