@@ -33,9 +33,23 @@ class ScheduleSerializer(serializers.ModelSerializer):
     def create(self, validated_data: Dict) -> calendar_model.Schedule:
         participants_data = validated_data.pop("participants", [])
         schedule = super().create(validated_data)
+        recurring_data = validated_data.pop("recurring", [])
 
         for participant_data in participants_data:
             participant = user_models.User.objects.get(**participant_data)
             if participant != self.context["request"].user:
                 calendar_model.Participant.objects.create(schedule=schedule, participant=participant)
+
+        cron_exp = recurring_data.pop("cron_exp", None)
+        end_date = recurring_data.pop("end_date", None)
+        if cron_exp is not None and end_date is not None:
+            recurring = calendar_model.RecurringSchedule.objects.create(schedule=schedule, cron_exp=cron_exp, end_date=end_date)
+        else:
+            raise serializers.ValidationError("wrong recurring request")
         return schedule
+
+
+class RecurringScheduleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = calendar_model.RecurringSchedule
+        fields = "__all__"
