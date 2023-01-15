@@ -36,5 +36,6 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
         for participant_data in participants_data:
             participant = user_models.User.objects.get(**participant_data)
-            calendar_model.Participant.objects.create(schedule=schedule, participant=participant)
+            if participant != self.context["request"].user:
+                calendar_model.Participant.objects.create(schedule=schedule, participant=participant)
         return schedule
