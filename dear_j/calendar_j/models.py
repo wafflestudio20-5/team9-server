@@ -44,4 +44,6 @@ class Participant(models.Model):
 
 
 class RecurringSchedule(models.Model):
-    pass
+    recurring = models.OneToOneField(Schedule, on_delete=models.PROTECT, primary_key=True)
+    cron_exp = models.CharField(max_length=10)
+    end_date = models.DateField()
