@@ -22,7 +22,7 @@ class CalendarAPITest(test.APITestCase):
         self.client.post(path="/api/v1/user/registration/", data=participant2_data.for_registration, format="json")
         self.client.post(path="/api/v1/user/login/", data=creator_data.for_login, format="json")
 
-        schedule_data = dataclasses.asdict(test_data_utils.CalendarData.create_nth_calendar_data(1, 1, [2, 3]))
+        schedule_data = dataclasses.asdict(test_data_utils.ScheduleData.create_nth_calendar_data(1, 1, [2, 3]))
         response = self.client.post(
             path="/api/v1/calendar/schedule/",
             data=schedule_data,
@@ -64,20 +64,20 @@ class CalendarAPITest(test.APITestCase):
         self.client.post("/api/v1/user/registration/", data=user2_data.for_registration, format="json")
 
         self.client.post("/api/v1/user/login/", data=user2_data.for_login, format="json")
-        schedule2_data = dataclasses.asdict(test_data_utils.CalendarData.create_nth_calendar_data(2, protection.ProtectionLevel.OPEN, []))
+        schedule2_data = dataclasses.asdict(test_data_utils.ScheduleData.create_nth_calendar_data(2, protection.ProtectionLevel.OPEN, []))
         self.client.post(
             path="/api/v1/calendar/schedule/",
             data=schedule2_data,
             format="json",
         )
-        schedule3_data = dataclasses.asdict(test_data_utils.CalendarData.create_nth_calendar_data(3, protection.ProtectionLevel.CLOSED, []))
+        schedule3_data = dataclasses.asdict(test_data_utils.ScheduleData.create_nth_calendar_data(3, protection.ProtectionLevel.CLOSED, []))
         self.client.post(
             path="/api/v1/calendar/schedule/",
             data=schedule3_data,
             format="json",
         )
         schedule3_1_data = dataclasses.asdict(
-            test_data_utils.CalendarData.create_nth_calendar_data(3, protection.ProtectionLevel.FOLLOWER, [])
+            test_data_utils.ScheduleData.create_nth_calendar_data(3, protection.ProtectionLevel.FOLLOWER, [])
         )
         self.client.post(
             path="/api/v1/calendar/schedule/",
@@ -127,20 +127,20 @@ class CalendarAPITest(test.APITestCase):
 
         self.client.post("/api/v1/user/login/", data=user2_data.for_login, format="json")
 
-        schedule2_data = dataclasses.asdict(test_data_utils.CalendarData.create_nth_calendar_data(2, protection.ProtectionLevel.OPEN, []))
+        schedule2_data = dataclasses.asdict(test_data_utils.ScheduleData.create_nth_calendar_data(2, protection.ProtectionLevel.OPEN, []))
         self.client.post(
             path="/api/v1/calendar/schedule/",
             data=schedule2_data,
             format="json",
         )
-        schedule3_data = dataclasses.asdict(test_data_utils.CalendarData.create_nth_calendar_data(3, protection.ProtectionLevel.CLOSED, []))
+        schedule3_data = dataclasses.asdict(test_data_utils.ScheduleData.create_nth_calendar_data(3, protection.ProtectionLevel.CLOSED, []))
         self.client.post(
             path="/api/v1/calendar/schedule/",
             data=schedule3_data,
             format="json",
         )
         schedule4_data = dataclasses.asdict(
-            test_data_utils.CalendarData.create_nth_calendar_data(4, protection.ProtectionLevel.FOLLOWER, [])
+            test_data_utils.ScheduleData.create_nth_calendar_data(4, protection.ProtectionLevel.FOLLOWER, [])
         )
         self.client.post(
             path="/api/v1/calendar/schedule/",
@@ -205,7 +205,7 @@ class CalendarAPITest(test.APITestCase):
         self.client.post("/api/v1/user/login/", data=user2_data.for_login, format="json")
 
         schedule1_data = dataclasses.asdict(
-            test_data_utils.CalendarData.create_nth_calendar_data(2, protection.ProtectionLevel.FOLLOWER, [])
+            test_data_utils.ScheduleData.create_nth_calendar_data(2, protection.ProtectionLevel.FOLLOWER, [])
         )
         self.client.post(
             path="/api/v1/calendar/schedule/",
@@ -233,7 +233,7 @@ class CalendarAPITest(test.APITestCase):
         self.client.post("/api/v1/user/login/", data=user2_data.for_login, format="json")
 
         schedule1_data = dataclasses.asdict(
-            test_data_utils.CalendarData.create_nth_calendar_data(2, protection.ProtectionLevel.FOLLOWER, [])
+            test_data_utils.ScheduleData.create_nth_calendar_data(2, protection.ProtectionLevel.FOLLOWER, [])
         )
         self.client.post(
             path="/api/v1/calendar/schedule/",
@@ -264,7 +264,7 @@ class CalendarAPITest(test.APITestCase):
         self.client.post("/api/v1/user/login/", data=user2_data.for_login, format="json")
 
         schedule1_data = dataclasses.asdict(
-            test_data_utils.CalendarData.create_nth_calendar_data(2, protection.ProtectionLevel.FOLLOWER, [])
+            test_data_utils.ScheduleData.create_nth_calendar_data(2, protection.ProtectionLevel.FOLLOWER, [])
         )
         self.client.post(
             path="/api/v1/calendar/schedule/",
@@ -367,7 +367,7 @@ class CalendarAPITest(test.APITestCase):
         self.client.post(path="/api/v1/user/login/", data=creator_data.for_login, format="json")
 
         schedule1_data = dataclasses.asdict(
-            test_data_utils.CalendarData.create_nth_calendar_data(1, protection.ProtectionLevel.FOLLOWER, [2, 3])
+            test_data_utils.ScheduleData.create_nth_calendar_data(1, protection.ProtectionLevel.FOLLOWER, [2, 3])
         )
         response = self.client.post(
             path="/api/v1/calendar/schedule/",
@@ -404,7 +404,7 @@ class CalendarAPITest(test.APITestCase):
         self.client.post(path="/api/v1/user/login/", data=creator_data.for_login, format="json")
 
         schedule1_data = dataclasses.asdict(
-            test_data_utils.CalendarData.create_nth_calendar_data(1, protection.ProtectionLevel.FOLLOWER, [2, 3])
+            test_data_utils.ScheduleData.create_nth_calendar_data(1, protection.ProtectionLevel.FOLLOWER, [2, 3])
         )
         response = self.client.post(
             path="/api/v1/calendar/schedule/",
@@ -432,7 +432,7 @@ class CalendarAPITest(test.APITestCase):
         self.client.post(path="/api/v1/user/login/", data=creator_data.for_login, format="json")
 
         schedule1_data = dataclasses.asdict(
-            test_data_utils.CalendarData.create_nth_calendar_data(1, protection.ProtectionLevel.FOLLOWER, [2, 3])
+            test_data_utils.ScheduleData.create_nth_calendar_data(1, protection.ProtectionLevel.FOLLOWER, [2, 3])
         )
         response = self.client.post(
             path="/api/v1/calendar/schedule/",

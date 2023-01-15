@@ -40,7 +40,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
             participants__email=target_email, end_at__range=(start_date, end_date)
         )
         permission_refined_queryset = email_refined_queryset.filter(
-            protection_level__lte=calendar_protection.ProtectionLevel.get_allowed_threshold(self.request.user, target_email)
+            protection_level__lte=calendar_protection.ProtectionLevel.filter_user_schedule(self.request.user, target_email)
         )
         return permission_refined_queryset
 

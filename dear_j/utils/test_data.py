@@ -54,7 +54,7 @@ class UserPKData:
 
 
 @dataclasses.dataclass
-class CalendarData:
+class ScheduleData:
     title: str
     start_at: str
     end_at: str
@@ -63,10 +63,10 @@ class CalendarData:
     participants: List[UserPKData]
 
     @classmethod
-    def create_nth_calendar_data(cls, n: int, protection_level: int, participants: List[int]) -> CalendarData:
-        participants_list = []
-        for pk in participants:
-            participants_list.append(UserPKData.create_nth_user_pk_data(pk).for_schedule)
+    def create_nth_calendar_data(cls, n: int, protection_level: int, participants: List[int]) -> ScheduleData:
+        participants = []
+        for pk in participants.copy():
+            participants.append(UserPKData.create_nth_user_pk_data(pk).for_schedule)
 
         return cls(
             title=f"Test Schedule {n}",
@@ -74,16 +74,5 @@ class CalendarData:
             end_at="2022-12-12 00:00:00",
             description=f"Test Description {n}",
             protection_level=protection_level,
-            participants=participants_list,
-        )
-
-
-@dataclasses.dataclass
-class AttendenceData:
-    status: int
-
-    @classmethod
-    def create_attendence_data(cls, attendence_status: int) -> AttendenceData:
-        return cls(
-            status=attendence_status,
+            participants=participants,
         )
