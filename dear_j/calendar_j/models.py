@@ -19,6 +19,7 @@ class Schedule(models.Model):
     description = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_opened = models.BooleanField(default=True, blank=True)
 
     class Meta:
         verbose_name = "schedule"

@@ -1,8 +1,9 @@
 from dj_rest_auth import jwt_auth
+from django import http
 from django.db.models import query
 from rest_framework import authentication
 from rest_framework import generics
-from rest_framework import mixins
+from rest_framework import status
 
 from calendar_j import exceptions as calendar_exceptions
 from calendar_j import models as calendar_models
@@ -26,21 +27,27 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self) -> query.QuerySet:
         params = self.request.GET
-        if not all(key in params.keys() for key in ("email", "from", "to")):
+        if not all(key in params.keys() for key in ("pk", "from", "to")):
             raise calendar_exceptions.GetScheduleListKeyException
 
-        target_email = params.get("email")
+        target_pk = params.get("pk")
         start_date = time_utils.normal_date_formatter.parse(params.get("from"))
         end_date = time_utils.normal_date_formatter.parse(params.get("to"))
 
         queryset: query.QuerySet = super().get_queryset()
 
-        # participants__status=attendance.AttendanceStatus.PRESENCE,  filtering required
-        email_refined_queryset = queryset.filter(created_by__email=target_email, start_at__range=(start_date, end_date)) | queryset.filter(
-            participants__email=target_email, end_at__range=(start_date, end_date)
+        created_queryset = queryset.filter(created_by__email=target_pk, start_at__range=(start_date, end_date)) | queryset.filter(
+            created_by__email=target_pk, end_at__range=(start_date, end_date)
         )
-        permission_refined_queryset = email_refined_queryset.filter(
-            protection_level__lte=calendar_protection.ProtectionLevel.filter_user_schedule(self.request.user, target_email)
+        participant = calendar_models.Participant.objects.filter(
+            participant__pk=target_pk, status=attendance.AttendanceStatus.PRESENCE
+        ).values_list("participant_id")
+        parcipating_queryset = queryset.filter(participants__pk__in=participant, start_at__range=(start_date, end_date)) | queryset.filter(
+            participants__pk__in=participant, end_at__range=(start_date, end_date)
+        )
+        total_queryset = created_queryset | parcipating_queryset
+        permission_refined_queryset = total_queryset.filter(
+            protection_level__lte=calendar_protection.ProtectionLevel.filter_user_schedule(self.request.user, target_pk), is_opened=True
         )
         return permission_refined_queryset
 
@@ -53,6 +60,17 @@ class ScheduleRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = calendar_models.Schedule.objects.all()
     permission_classes = [calendar_permissions.IsScheduleCreator]
     serializer_class = calendar_serializers.ScheduleSerializer
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            pk = self.kwargs["pk"]
+            schedule = calendar_models.Schedule.objects.get(pk=pk)
+            schedule.is_opened = False
+            schedule.save()
+            output = http.JsonResponse({}, status=status.HTTP_204_NO_CONTENT)
+        except calendar_models.Schedule.DoesNotExist:
+            output = http.JsonResponse({"error": "schedule object does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        return output
 
 
 class ScheduleAttendenceResponseView(generics.UpdateAPIView):
