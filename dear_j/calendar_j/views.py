@@ -1,8 +1,10 @@
 from dj_rest_auth import jwt_auth
 from django import http
+from django import shortcuts
 from django.db.models import query
 from rest_framework import authentication
 from rest_framework import generics
+from rest_framework import permissions
 from rest_framework import status
 
 from calendar_j import exceptions as calendar_exceptions
@@ -22,7 +24,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
     ]
     queryset = calendar_models.Schedule.objects.all()
     pagination_class = calendar_paginations.ScheduleListPagination
-    permission_classes = [calendar_permissions.IsScheduleReader]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = calendar_serializers.ScheduleSerializer
 
     def get_queryset(self) -> query.QuerySet:
@@ -82,10 +84,9 @@ class ScheduleAttendenceResponseView(generics.UpdateAPIView):
     permission_classes = [calendar_permissions.IsScheduleParticipant]
     serializer_class = calendar_serializers.ParticipantSerializer
 
-    def get_queryset(self) -> query.QuerySet:
+    def get_object(self) -> calendar_models.Participant:
         pk = self.kwargs["pk"]
         schedule = calendar_models.Schedule.objects.get(pk=pk)
 
-        queryset: query.QuerySet = super().get_queryset()
-        refined_queryset = queryset.filter(participant=self.request.user, schedule=schedule)
-        return refined_queryset
+        instance = shortcuts.get_object_or_404(calendar_models.Participant, participant=self.request.user, schedule=schedule)
+        return instance
