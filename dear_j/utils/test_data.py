@@ -39,34 +39,17 @@ class UserData:
 
 
 @dataclasses.dataclass
-class UserPKData:
-    pk: int
-
-    @property
-    def for_schedule(self) -> Dict:
-        return {
-            "pk": self.pk,
-        }
-
-    @classmethod
-    def create_nth_user_pk_data(cls, pk: int):
-        return cls(pk=pk)
-
-
-@dataclasses.dataclass
 class ScheduleData:
     title: str
     start_at: str
     end_at: str
     description: str
     protection_level: int
-    participants: List[UserPKData]
+    participants: List[Dict]
 
     @classmethod
     def create_nth_calendar_data(cls, n: int, protection_level: int, raw_participants: List[int]) -> ScheduleData:
-        participants = []
-        for pk in raw_participants.copy():
-            participants.append(UserPKData.create_nth_user_pk_data(pk).for_schedule)
+        participants = [{"pk": i} for i in raw_participants.copy()]
 
         return cls(
             title=f"Test Schedule {n}",

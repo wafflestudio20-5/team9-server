@@ -2,18 +2,18 @@ from rest_framework import permissions
 from rest_framework import request as req
 
 from calendar_j import models as calendar_models
-from calendar_j.services.protection import protection as calendar_protection
+from calendar_j.services.protection import protection
 from social import models as social_models
 from user import models as user_models
 
 
-class IsScheduleCreator(permissions.IsAuthenticatedOrReadOnly):
+class IsScheduleReader(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request: req.HttpRequest, view, obj: calendar_models.Schedule) -> bool:
         if obj.created_by == request.user:
             return True
         if request.method not in permissions.SAFE_METHODS:
             return False
-        return calendar_protection.ProtectionLevel.allow_request_user(obj.protection_level, request.user, obj.created_by)
+        return protection.ProtectionLevel.allow_request_user(obj.protection_level, request.user, obj.created_by)
 
 
 class IsScheduleParticipant(permissions.IsAuthenticatedOrReadOnly):
