@@ -1,6 +1,6 @@
-from django import urls
-
 from drf_spectacular import views
+
+from django import urls
 
 urlpatterns = [
     urls.path("json/", views.SpectacularJSONAPIView.as_view(), name="schema-json"),

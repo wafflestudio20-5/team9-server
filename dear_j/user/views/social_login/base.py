@@ -1,6 +1,8 @@
 import abc
 from typing import Dict
 
+import requests
+
 from allauth.socialaccount import models as allauth_models
 from allauth.socialaccount.providers.oauth2 import client
 from allauth.socialaccount.providers.oauth2 import views as oauth2_views
@@ -10,8 +12,6 @@ from rest_framework import request as req
 from rest_framework import response as resp
 from rest_framework import status
 from rest_framework import views
-
-import requests
 
 from user import models
 from user.service.social_login import messages
