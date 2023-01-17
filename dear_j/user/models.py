@@ -11,12 +11,13 @@ class User(auth_models.AbstractBaseUser, auth_models.PermissionsMixin):
         unique=True,
     )
     username = db_models.CharField(max_length=30)
-    birthdate = db_models.DateField()
+    birthdate = db_models.DateField(null=True)
     is_active = db_models.BooleanField(default=True)
     is_admin = db_models.BooleanField(default=False)
     is_superuser = db_models.BooleanField(default=False)
     is_staff = db_models.BooleanField(default=False)
     created_at = db_models.DateTimeField(auto_now_add=True)
+    image = db_models.ImageField(upload_to="profile/", default="default.png")
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 

@@ -16,6 +16,7 @@ class UserDetailSerializer(dj_auth_serializers.UserDetailsSerializer):
         instance.email = validated_data.get("email", instance.email)
         instance.username = validated_data.get("username", instance.username)
         instance.birthdate = validated_data.get("birthdate", instance.birthdate)
+        instance.image = validated_data.get("image", instance.image)
         instance.save()
         return instance
 
@@ -23,6 +24,7 @@ class UserDetailSerializer(dj_auth_serializers.UserDetailsSerializer):
         fields = dj_auth_serializers.UserDetailsSerializer.Meta.fields + (
             "birthdate",
             "username",
+            "image",
         )
 
 
