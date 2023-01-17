@@ -1,4 +1,4 @@
-from user.service.social_login import platforms
+from user.service.social_login.models import platforms
 
 
 class SocialLoginExceptionMessageMixin:

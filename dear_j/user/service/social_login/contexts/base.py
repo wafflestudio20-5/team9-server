@@ -2,7 +2,7 @@ import abc
 import os
 
 from dear_j import settings
-from user.service.social_login import platforms
+from user.service.social_login.models import platforms
 from utils import ssm as ssm_utils
 from utils import uri as uri_utils
 

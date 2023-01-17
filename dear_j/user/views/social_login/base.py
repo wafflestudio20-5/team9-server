@@ -14,8 +14,9 @@ from rest_framework import status
 from rest_framework import views
 
 from user import models
-from user.service.social_login import messages
 from user.service.social_login.contexts import base
+from user.service.social_login.models import messages
+from user.service.social_login.models import profile
 
 
 class SocialPlatformView(views.APIView, base.SocialPlatformContextMixin):
@@ -42,7 +43,7 @@ class SocialPlatformCallBackView(
         user_info = self._get_user_raw_info(access_token)
         if user_info.keys().__contains__("error"):
             return self._redirect_to_front_for_exception(self.invalid_access_token)
-        user_profile = self._get_user_profile(user_info)
+        user_profile = self._get_user_profile(user_info, access_token)
 
         # Step III. Only for existing user
         is_new_user = not models.User.objects.filter(email=user_profile.get("email"))
@@ -69,12 +70,16 @@ class SocialPlatformCallBackView(
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _get_user_profile(self, user_raw_info: Dict) -> Dict:
+    def _get_user_profile(self, user_raw_info: Dict, access_token: str) -> Dict:
         raise NotImplementedError
 
-    @abc.abstractmethod
-    def _update_user_info(self, user_profile):
-        raise NotImplementedError
+    def _update_user_info(self, user_profile: profile.SocialProfile):
+        user: models.User = models.User.objects.get(email=user_profile.email)
+        if user_profile.birthdate:
+            user.birthdate = user_profile.birthdate
+        if user_profile.username:
+            user.username = user_profile.username
+        user.save()
 
     def _login(self, access_token: str, code: str) -> resp.Response:
         return requests.post(self.finish_url, data={"access_token": access_token, "code": code})

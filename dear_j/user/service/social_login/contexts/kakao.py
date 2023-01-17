@@ -1,7 +1,7 @@
 import os
 
-from user.service.social_login import platforms
 from user.service.social_login.contexts import base
+from user.service.social_login.models import platforms
 from utils import uri as uri_utils
 
 
