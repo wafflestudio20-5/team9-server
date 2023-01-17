@@ -7,7 +7,7 @@ from social import models as social_models
 from user import models as user_models
 
 
-class IsScheduleReader(permissions.IsAuthenticatedOrReadOnly):
+class IsScheduleCreaterOrReader(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request: req.HttpRequest, view, obj: calendar_models.Schedule) -> bool:
         if obj.created_by == request.user:
             return True

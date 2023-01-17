@@ -41,9 +41,3 @@ class Participant(models.Model):
         verbose_name = "participant"
         verbose_name_plural = "participants"
         db_table = "tb_participant"
-
-
-class RecurringSchedule(models.Model):
-    schedule = models.OneToOneField(Schedule, on_delete=models.PROTECT, primary_key=True)
-    cron_exp = models.CharField(max_length=10)
-    end_date = models.DateField()

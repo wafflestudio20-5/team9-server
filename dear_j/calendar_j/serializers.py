@@ -48,9 +48,3 @@ class ScheduleSerializer(serializers.ModelSerializer):
             else:
                 raise serializers.ValidationError("wrong recurring request")
         return schedule
-
-
-class RecurringScheduleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = calendar_model.RecurringSchedule
-        fields = "__all__"

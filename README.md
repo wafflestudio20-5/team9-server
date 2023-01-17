@@ -43,9 +43,11 @@ $ make run-dev # Start Dev Server - automatically migrate db
 $ make down-dev # Terminate Dev Server
 ```
 
-# 
 
 ## Convention
 - [Python Google Style Guide](https://google.github.io/styleguide/pyguide.html)
 - [black](https://black.readthedocs.io/en/stable/)
 - [isort](https://pycqa.github.io/isort/)
+
+## API Documentation
+- [구글 캘린더 Design Doc](https://historical-garage-3bd.notion.site/Design-Doc-a2887ef59aea4f628c668729c18feecb)
