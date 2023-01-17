@@ -9,11 +9,11 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import pathlib
 
 import pymysql
+
+from dear_j import config
 import site_env
 from utils import ssm
 from utils import time as time_utils
-
-from dear_j import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent

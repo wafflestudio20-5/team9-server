@@ -3,6 +3,7 @@ from typing import Dict
 from allauth.socialaccount.providers.google import views
 
 import requests
+
 from user.service.social_login.contexts import google
 from user.views.social_login import base
 
