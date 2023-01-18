@@ -20,6 +20,7 @@ class Schedule(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_opened = models.BooleanField(default=True, blank=True)
+    is_recurring = models.BooleanField(default=False, blank=True)
 
     class Meta:
         verbose_name = "schedule"
@@ -41,3 +42,12 @@ class Participant(models.Model):
         verbose_name = "participant"
         verbose_name_plural = "participants"
         db_table = "tb_participant"
+
+class RecurringRule(models.Model):
+    schedule = models.ForeignKey(Schedule, on_delete=models.PROTECT)
+    cronjob = models.CharField(max_length=10)
+    end_date = models.DateField()
+
+class RecurringSchedule(Schedule):
+    schedule = models.ForeignKey(Schedule, on_delete=models.PROTECT)
+    recurring_rule = models.ForeignKey(RecurringRule, on_delete=models.PROTECT)
