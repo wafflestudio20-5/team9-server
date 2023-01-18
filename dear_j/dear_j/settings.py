@@ -42,7 +42,7 @@ if site_env.is_prod():
 elif site_env.is_stage():
     BASE_BE_URI = "http://ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com/"
     BASE_FE_URI = "http://127.0.0.1:3000/"
-    DOMAIN = "ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com:8000"
+    DOMAIN = "ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com"
     NAME = "ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com"
 elif site_env.is_dev():
     BASE_BE_URI = "http://0.0.0.0/"
