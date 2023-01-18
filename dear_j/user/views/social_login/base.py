@@ -19,7 +19,7 @@ from user.service.social_login.models import messages
 from user.service.social_login.models import profile
 
 
-class SocialPlatformView(views.APIView, base.SocialPlatformContextMixin):
+class SocialPlatformView(views.APIView, base.SocialPlatformContextMixin, abc.ABC):
     def get(self, _: req.HttpRequest) -> resp.Response:
         return shortcuts.redirect(self.authorize_uri)
 
@@ -46,9 +46,9 @@ class SocialPlatformCallBackView(
         user_profile = self._get_user_profile(user_info, access_token)
 
         # Step III. Only for existing user
-        is_new_user = not models.User.objects.filter(email=user_profile.get("email"))
+        is_new_user = not models.User.objects.filter(email=user_profile.email)
         if not is_new_user:
-            user = models.User.objects.get(email=user_profile.get("email"))
+            user = models.User.objects.get(email=user_profile.email)
             if not self._is_valid_user_type(user):
                 return self._redirect_to_front_for_exception(self.invalid_social_user)
 
@@ -70,7 +70,7 @@ class SocialPlatformCallBackView(
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _get_user_profile(self, user_raw_info: Dict, access_token: str) -> Dict:
+    def _get_user_profile(self, user_raw_info: Dict, access_token: str) -> profile.SocialProfile:
         raise NotImplementedError
 
     def _update_user_info(self, user_profile: profile.SocialProfile):
@@ -96,6 +96,6 @@ class SocialPlatformCallBackView(
         return shortcuts.redirect(self.get_redirect_to_front(error=error_message))
 
 
-class SocialPlatformLoginView(dj_reg_views.SocialLoginView, base.SocialPlatformContextMixin):
+class SocialPlatformLoginView(dj_reg_views.SocialLoginView, base.SocialPlatformContextMixin, abc.ABC):
     adapter_class = oauth2_views.OAuth2Adapter
     client_class = client.OAuth2Client

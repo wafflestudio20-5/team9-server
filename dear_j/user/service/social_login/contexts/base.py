@@ -9,7 +9,6 @@ from utils import uri as uri_utils
 
 class SocialPlatformContextMixin(abc.ABC):
     platform: platforms.SocialPlatform
-    oauth_url: str
     response_type: str = "code"
 
     @property

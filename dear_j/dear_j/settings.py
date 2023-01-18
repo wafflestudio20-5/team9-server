@@ -32,12 +32,23 @@ ALLOWED_HOSTS = [
 if site_env.is_prod():
     BASE_BE_URI = "http://ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com/"
     BASE_FE_URI = "https://db5p3zym5dolm.cloudfront.net/"
+    DOMAIN = "ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com"
+    NAME = DOMAIN
 elif site_env.is_stage():
-    BASE_BE_URI = "ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com"
+    BASE_BE_URI = "http://ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com/"
     BASE_FE_URI = "https://db5p3zym5dolm.cloudfront.net/"
+    DOMAIN = "ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com"
+    NAME = DOMAIN
+elif site_env.is_dev():
+    BASE_BE_URI = "http://127.0.0.1/"
+    BASE_FE_URI = "http://127.0.0.1:3000/"
+    DOMAIN = "127.0.0.1"
+    NAME = "localhost"
 else:
     BASE_BE_URI = "http://127.0.0.1:8000/"
     BASE_FE_URI = "http://127.0.0.1:3000/"
+    DOMAIN = "127.0.0.1:8000"
+    NAME = "localhost"
 
 
 # drf spectacular setting
@@ -119,6 +130,24 @@ CORS_ORIGIN_ALLOW_ALL = config.CORS_ORIGIN_ALLOW_ALL
 # custom dj-rest-auth serializer
 REST_AUTH_SERIALIZERS = {"USER_DETAILS_SERIALIZER": "user.serializers.UserDetailSerializer"}
 REST_AUTH_REGISTER_SERIALIZERS = {"REGISTER_SERIALIZER": "user.serializers.RegisterSerializer"}
+
+# allauth setting : https://django-allauth.readthedocs.io/en/latest/configuration.html
+SOCIALACCOUNT_PROVIDERS = {
+    "kakao": {
+        "APP": {
+            "client_id": ssm.get_ssm_parameter(alias="/backend/dearj/kakao/client-id"),
+            "secret": ssm.get_ssm_parameter(alias="/backend/dearj/kakao/client-pw"),
+            "key": "",
+        },
+    },
+    "google": {
+        "APP": {
+            "client_id": ssm.get_ssm_parameter(alias="/backend/dearj/google/client-id"),
+            "secret": ssm.get_ssm_parameter(alias="/backend/dearj/google/client-pw"),
+            "key": "",
+        },
+    },
+}
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": ACCESS_TOKEN_LIFETIME,
