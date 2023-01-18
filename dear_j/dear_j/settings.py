@@ -36,7 +36,7 @@ if site_env.is_prod():
     NAME = DOMAIN
 elif site_env.is_stage():
     BASE_BE_URI = "http://ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com/"
-    BASE_FE_URI = "https://db5p3zym5dolm.cloudfront.net/"
+    BASE_FE_URI = "http://127.0.0.1:3000/"
     DOMAIN = "ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com"
     NAME = DOMAIN
 elif site_env.is_dev():
