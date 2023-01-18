@@ -25,6 +25,7 @@ DEBUG = not site_env.is_prod()
 ALLOWED_HOSTS = [
     "ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com",  # Prod Server
     "ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com",  # Stage Server
+    "0.0.0.0",
     "127.0.0.1",
     "localhost",
 ]
@@ -40,10 +41,10 @@ elif site_env.is_stage():
     DOMAIN = "ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com"
     NAME = DOMAIN
 elif site_env.is_dev():
-    BASE_BE_URI = "http://127.0.0.1/"
+    BASE_BE_URI = "http://0.0.0.0/"
     BASE_FE_URI = "http://127.0.0.1:3000/"
-    DOMAIN = "127.0.0.1"
-    NAME = "localhost"
+    DOMAIN = "0.0.0.0"
+    NAME = DOMAIN
 else:
     BASE_BE_URI = "http://127.0.0.1:8000/"
     BASE_FE_URI = "http://127.0.0.1:3000/"

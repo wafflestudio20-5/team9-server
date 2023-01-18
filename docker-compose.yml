@@ -8,6 +8,8 @@ services:
     environment:
       SITE: DEV
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+    volumes:
+      - $HOME/.aws/:/root/.aws/:ro
     ports:
       - 8000:8000
 
