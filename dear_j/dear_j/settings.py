@@ -22,6 +22,8 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
 DEBUG = not site_env.is_prod()
 
+SESSION_EXPIRE_SECONDS = 1500
+
 ALLOWED_HOSTS = [
     "ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com",  # Prod Server
     "ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com",  # Stage Server
