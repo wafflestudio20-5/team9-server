@@ -15,6 +15,9 @@ class KakaoView(base.SocialPlatformView, kakao.KakaoContextMixin):
 
 
 class KakaoCallBackView(base.SocialPlatformCallBackView, kakao.KakaoContextMixin):
+    def _get_access_token(self, code: str) -> Dict:
+        return requests.get(self.get_token_uri(code)).json()
+
     def _get_user_raw_info(self, access_token) -> Dict:
         return requests.get(
             url=self.profile_url,

@@ -7,12 +7,13 @@ from utils import uri as uri_utils
 
 class GoogleContextMixin(base.SocialPlatformContextMixin):
     platform = platforms.SocialPlatform.GOOGLE.value
-    account_url: str = "https://accounts.google.com/"
-    personal_api_url: str = "https://people.googleapis.com/v1/people/me"
+    api_url: str = "https://www.googleapis.com/"
+    account_api_url: str = "https://accounts.google.com/"
+    people_api_url: str = "https://people.googleapis.com/"
 
     @property
     def authorize_uri(self) -> str:
-        authorize_url = os.path.join(self.account_url, "o/oauth2/v2/auth")
+        authorize_url = os.path.join(self.account_api_url, "o/oauth2/v2/auth")
         extra_params = {
             "client_id": self.client_id,
             "redirect_uri": self.callback_url,
@@ -38,8 +39,9 @@ class GoogleContextMixin(base.SocialPlatformContextMixin):
         return uri_utils.get_uri_with_extra_params(token_url, extra_params)
 
     def get_email_uri(self, access_token: str):
-        email_url = os.path.join(self.account_url, "oauth2/v1/tokeninfo")
+        email_url = os.path.join(self.api_url, "oauth2/v1/tokeninfo")
         return uri_utils.get_uri_with_extra_params(email_url, {"access_token": access_token})
 
     def get_personal_api_uri(self, field: str):
-        return uri_utils.get_uri_with_extra_params(self.personal_api_url, {"personFields": field})
+        user_api_url = os.path.join(self.people_api_url, "v1/people/me")
+        return uri_utils.get_uri_with_extra_params(user_api_url, {"personFields": field})

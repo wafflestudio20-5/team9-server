@@ -62,8 +62,9 @@ class SocialPlatformCallBackView(
             self._update_user_info(user_profile)
         return shortcuts.redirect(self.get_redirect_to_front(**response.json()))
 
+    @abc.abstractmethod
     def _get_access_token(self, code: str) -> Dict:
-        return requests.get(self.get_token_uri(code)).json()
+        raise NotImplementedError
 
     @abc.abstractmethod
     def _get_user_raw_info(self, access_token: str) -> Dict:

@@ -16,6 +16,9 @@ class GoogleView(base.SocialPlatformView, google.GoogleContextMixin):
 
 
 class GoogleCallBackView(base.SocialPlatformCallBackView, google.GoogleContextMixin):
+    def _get_access_token(self, code: str) -> Dict:
+        return requests.post(self.get_token_uri(code)).json()
+
     def _get_user_raw_info(self, access_token: str) -> Dict:
         return requests.get(self.get_email_uri(access_token)).json()
 
