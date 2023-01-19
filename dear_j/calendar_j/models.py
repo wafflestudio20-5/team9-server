@@ -6,6 +6,7 @@ from user import models as user_models
 
 
 class BaseSchedule(models.Model):
+    id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=250)
     created_by = models.ForeignKey(user_models.User, on_delete=models.PROTECT, related_name="schedules")
     protection_level = models.IntegerField(

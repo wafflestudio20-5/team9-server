@@ -53,6 +53,8 @@ class CalendarAPITest(test.APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         for key, value in expected.items():
+            if key not in actual.keys():
+                print(key)
             assert key in actual.keys()
             assert actual[key] == value
 
@@ -457,3 +459,52 @@ class CalendarAPITest(test.APITestCase):
         for key, value in expected.items():
             assert key in actual.keys()
             assert actual[key] == value
+
+    def test_create_recurring_schedule(self):
+        creator_data = test_data_utils.UserData.create_nth_user_data(1)
+        participant1_data = test_data_utils.UserData.create_nth_user_data(2)
+        participant2_data = test_data_utils.UserData.create_nth_user_data(3)
+
+        self.client.post(path="/api/v1/user/registration/", data=creator_data.for_registration, format="json")
+        self.client.post(path="/api/v1/user/registration/", data=participant1_data.for_registration, format="json")
+        self.client.post(path="/api/v1/user/registration/", data=participant2_data.for_registration, format="json")
+        self.client.post(path="/api/v1/user/login/", data=creator_data.for_login, format="json")
+
+        schedule_data = dataclasses.asdict(test_data_utils.ScheduleData.create_nth_calendar_data(1, 1, [2, 3]))
+        response = self.client.post(
+            path="/api/v1/calendar/schedule/",
+            data=schedule_data,
+            format="json",
+        )
+        expected = {
+            "id": 1,
+            "participants": [
+                {
+                    "pk": 2,
+                    "username": "user2",
+                    "email": "user2@example.com",
+                },
+                {
+                    "pk": 3,
+                    "username": "user3",
+                    "email": "user3@example.com",
+                },
+            ],
+            "title": "Test Schedule 1",
+            "protection_level": 1,
+            "start_at": "2022-12-11 00:00:00",
+            "end_at": "2022-12-12 00:00:00",
+            "description": "Test Description 1",
+            "created_by": 1,
+        }
+        actual = response.json()
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        for key, value in expected.items():
+            if key not in actual.keys():
+                print(key)
+            assert key in actual.keys()
+            assert actual[key] == value
+    
+    def test_get_recurring_schedule(self):
+        pass

@@ -27,7 +27,7 @@ class BaseScheduleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = calendar_model.BaseSchedule
-        fields = "__all__"
+        fields = ("id", "title", "created_by", "protection_level", "show_content", "start_at", "end_at", "participants", "description", "created_at", "updated_at", "is_opened")
         extra_kwargs = {
             "created_by": {
                 "default": serializers.CurrentUserDefault(),
@@ -53,8 +53,6 @@ class BaseScheduleSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("wrong recurring request")
         return schedule
 
-    def update(self):
-        pass
 
 class NormalScheduleSerializer(BaseScheduleSerializer):
     class Meta:

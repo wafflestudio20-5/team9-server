@@ -25,7 +25,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
     queryset = calendar_models.BaseSchedule.objects.all()
     pagination_class = calendar_paginations.ScheduleListPagination
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = calendar_serializers.ScheduleSerializer
+    serializer_class = calendar_serializers.BaseScheduleSerializer
 
     def get_queryset(self) -> query.QuerySet:
         params = self.request.GET
@@ -62,7 +62,7 @@ class ScheduleRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     ]
     queryset = calendar_models.BaseSchedule.objects.all()
     permission_classes = [calendar_permissions.IsScheduleCreaterOrReader]
-    serializer_class = calendar_serializers.ScheduleSerializer
+    serializer_class = calendar_serializers.BaseScheduleSerializer
 
     def delete(self, request, *args, **kwargs):
         pk = self.kwargs["pk"]
