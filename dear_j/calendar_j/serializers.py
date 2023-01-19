@@ -17,8 +17,12 @@ class ParticipantSerializer(serializers.ModelSerializer):
             "schedule",
         )
 
+class RecurringRuleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = calendar_model.RecurringRule
+        fields = "__all__"
 
-class ScheduleSerializer(serializers.ModelSerializer):
+class BaseScheduleSerializer(serializers.ModelSerializer):
     participants = user_serializers.EssentialUserInfoFromPKSerializer(many=True, required=False)
 
     class Meta:
@@ -48,3 +52,17 @@ class ScheduleSerializer(serializers.ModelSerializer):
             else:
                 raise serializers.ValidationError("wrong recurring request")
         return schedule
+
+    def update(self):
+        pass
+
+class NormalScheduleSerializer(BaseScheduleSerializer):
+    class Meta:
+        model = calendar_model.NormalSchedule
+        fields = BaseScheduleSerializer.Meta.fields + ("is_recurring",)
+
+class RecurringScheduleSerializer(BaseScheduleSerializer):
+    recurring_rule = RecurringRuleSerializer()
+    class Meta:
+        model = calendar_model.RecurringSchedule
+        fields = BaseScheduleSerializer.Meta.fields + ("recurring_rule",)

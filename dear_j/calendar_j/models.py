@@ -6,7 +6,6 @@ from user import models as user_models
 
 
 class BaseSchedule(models.Model):
-    id = models.IntegerField(primary_key=True)
     title = models.CharField(max_length=250)
     created_by = models.ForeignKey(user_models.User, on_delete=models.PROTECT, related_name="schedules")
     protection_level = models.IntegerField(
@@ -25,7 +24,7 @@ class BaseSchedule(models.Model):
     class Meta:
         verbose_name = "schedule"
         verbose_name_plural = "schedules"
-        db_table = "tb_schedule"
+        db_table = "tb_base_schedule"
 
 class NormalSchedule(BaseSchedule):
     is_recurring = models.BooleanField(default=False, blank=True)
@@ -46,7 +45,6 @@ class RecurringRule(models.Model):
         db_table = "tb_recurring_rule"
 
 class RecurringSchedule(BaseSchedule):
-    schedule = models.ForeignKey(BaseSchedule, on_delete=models.PROTECT, related_name="schedule")
     recurring_rule = models.ForeignKey(RecurringRule, on_delete=models.PROTECT, related_name="recurring_rule")
 
     class Meta:
