@@ -25,6 +25,8 @@ DEBUG = not site_env.is_prod()
 SESSION_EXPIRE_SECONDS = 1500
 
 ALLOWED_HOSTS = [
+    "api-dearj-wafflestudio.site", # Prod Domain
+    "api-staging-dearj-wafflestudio.site", # Stage Server
     "ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com",  # Prod Server
     "ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com",  # Stage Server
     "43.201.9.194",  # Prod IPv4
