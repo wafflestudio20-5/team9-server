@@ -22,7 +22,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
     participants = user_serializers.EssentialUserInfoFromPKSerializer(many=True, required=False)
 
     class Meta:
-        model = calendar_model.Schedule
+        model = calendar_model.BaseSchedule
         fields = "__all__"
         extra_kwargs = {
             "created_by": {
@@ -30,7 +30,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
             },
         }
 
-    def create(self, validated_data: Dict) -> calendar_model.Schedule:
+    def create(self, validated_data: Dict) -> calendar_model.BaseSchedule:
         participants_data = validated_data.pop("participants", [])
         schedule = super().create(validated_data)
         recurring_data = validated_data.pop("recurring", [])

@@ -22,7 +22,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         jwt_auth.JWTCookieAuthentication,
         authentication.SessionAuthentication,
     ]
-    queryset = calendar_models.Schedule.objects.all()
+    queryset = calendar_models.BaseSchedule.objects.all()
     pagination_class = calendar_paginations.ScheduleListPagination
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = calendar_serializers.ScheduleSerializer
@@ -60,15 +60,15 @@ class ScheduleRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         jwt_auth.JWTCookieAuthentication,
         authentication.SessionAuthentication,
     ]
-    queryset = calendar_models.Schedule.objects.all()
-    permission_classes = [calendar_permissions.IsScheduleReader]
+    queryset = calendar_models.BaseSchedule.objects.all()
+    permission_classes = [calendar_permissions.IsScheduleCreaterOrReader]
     serializer_class = calendar_serializers.ScheduleSerializer
 
     def delete(self, request, *args, **kwargs):
         pk = self.kwargs["pk"]
         try:
-            schedule = calendar_models.Schedule.objects.get(pk=pk)
-        except calendar_models.Schedule.DoesNotExist:
+            schedule = calendar_models.BaseSchedule.objects.get(pk=pk)
+        except calendar_models.BaseSchedule.DoesNotExist:
             return http.JsonResponse({"error": "schedule object does not exist"}, status=status.HTTP_400_BAD_REQUEST)
         schedule.is_opened = False
         schedule.save()
@@ -86,6 +86,6 @@ class ScheduleAttendenceResponseView(generics.UpdateAPIView):
 
     def get_object(self) -> calendar_models.Participant:
         pk = self.kwargs["pk"]
-        schedule = calendar_models.Schedule.objects.get(pk=pk)
+        schedule = calendar_models.BaseSchedule.objects.get(pk=pk)
 
         return shortcuts.get_object_or_404(calendar_models.Participant, participant=self.request.user, schedule=schedule)
