@@ -61,7 +61,7 @@ class ScheduleRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         authentication.SessionAuthentication,
     ]
     queryset = calendar_models.Schedule.objects.all()
-    permission_classes = [calendar_permissions.IsScheduleReader]
+    permission_classes = [calendar_permissions.IsScheduleCreaterOrReader]
     serializer_class = calendar_serializers.ScheduleSerializer
 
     def delete(self, request, *args, **kwargs):
