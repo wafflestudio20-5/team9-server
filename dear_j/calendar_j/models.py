@@ -5,8 +5,7 @@ from calendar_j.services.protection import protection
 from user import models as user_models
 
 
-class BaseSchedule(models.Model):
-    id = models.AutoField(primary_key=True)
+class Schedule(models.Model):
     title = models.CharField(max_length=250)
     created_by = models.ForeignKey(user_models.User, on_delete=models.PROTECT, related_name="schedules")
     protection_level = models.IntegerField(
@@ -21,22 +20,15 @@ class BaseSchedule(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_opened = models.BooleanField(default=True, blank=True)
+    is_recurring = models.BooleanField(default=False, blank=True)
 
     class Meta:
         verbose_name = "schedule"
         verbose_name_plural = "schedules"
-        db_table = "tb_base_schedule"
-
-class NormalSchedule(BaseSchedule):
-    is_recurring = models.BooleanField(default=False, blank=True)
-
-    class Meta:
-        verbose_name = "normal_schedule"
-        verbose_name_plural = "normal_schedules"
-        db_table = "tb_normal_schedule"
+        db_table = "tb_schedule"
 
 class RecurringRule(models.Model):
-    schedule = models.ForeignKey(BaseSchedule, on_delete=models.PROTECT, related_name="schedule")
+    schedule = models.OneToOneField(Schedule, on_delete=models.PROTECT, related_name="recurring_rule")
     cronjob = models.CharField(max_length=20)
     end_date = models.DateField()
 
@@ -45,17 +37,14 @@ class RecurringRule(models.Model):
         verbose_name_plural = "recurring_rules"
         db_table = "tb_recurring_rule"
 
-class RecurringSchedule(BaseSchedule):
-    recurring_rule = models.ForeignKey(RecurringRule, on_delete=models.PROTECT, related_name="recurring_rule")
-
-    class Meta:
-        verbose_name = "recurring_schedule"
-        verbose_name_plural = "recurring_schedules"
-        db_table = "tb_recurring_schedule"
+class RecurringRecord(models.Model):
+    schedule = models.ForeignKey(Schedule, on_delete=models.PROTECT, related_name="recurring_record")
+    start_at = models.DateTimeField()
+    end_at = models.DateTimeField()
 
 class Participant(models.Model):
     participant = models.ForeignKey(user_models.User, on_delete=models.PROTECT)
-    schedule = models.ForeignKey(BaseSchedule, on_delete=models.PROTECT)
+    schedule = models.ForeignKey(Schedule, on_delete=models.PROTECT)
     status = models.IntegerField(
         choices=attendance.AttendanceStatus.choices,
         default=attendance.AttendanceStatus.get_default(),
