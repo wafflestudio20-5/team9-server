@@ -27,7 +27,7 @@ DEBUG = not site_env.is_prod()
 
 ALLOWED_HOSTS = [
     "api-dearj-wafflestudio.site", # Prod Domain
-    "api-staging-dearj-wafflestudio.site", # Stage Server
+    "api-staging-dearj-wafflestudio.site", # Stage Domain
     "ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com",  # Prod Server
     "ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com",  # Stage Server
     "127.0.0.1",
