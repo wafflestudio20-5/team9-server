@@ -3,6 +3,7 @@ import dataclasses
 from rest_framework import status
 from rest_framework import test
 
+from calendar_j.services.cron import cron
 from calendar_j.services.protection import protection
 from utils import test_data as test_data_utils
 from utils import uri as uri_utils
@@ -469,8 +470,9 @@ class CalendarAPITest(test.APITestCase):
         self.client.post(path="/api/v1/user/registration/", data=participant1_data.for_registration, format="json")
         self.client.post(path="/api/v1/user/registration/", data=participant2_data.for_registration, format="json")
         self.client.post(path="/api/v1/user/login/", data=creator_data.for_login, format="json")
-
-        schedule_data = dataclasses.asdict(test_data_utils.ScheduleData.create_nth_calendar_data(1, 1, [2, 3]))
+        
+        schedule_data = dataclasses.asdict(
+            test_data_utils.ScheduleData.create_recurring_calendar_data(1, 1, [2, 3], cron.CronBasicType.DAY, "2023-01-02"))
         response = self.client.post(
             path="/api/v1/calendar/schedule/",
             data=schedule_data,

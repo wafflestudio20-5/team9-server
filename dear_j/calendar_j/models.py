@@ -1,6 +1,7 @@
 from django.db import models
 
 from calendar_j.services.attendance import attendance
+from calendar_j.services.cron import cron
 from calendar_j.services.protection import protection
 from user import models as user_models
 
@@ -29,7 +30,9 @@ class Schedule(models.Model):
 
 class RecurringRule(models.Model):
     schedule = models.OneToOneField(Schedule, on_delete=models.PROTECT, related_name="recurring_rule")
-    cronjob = models.CharField(max_length=20)
+    cron = models.IntegerField(
+        choices=cron.CronBasicType.choices
+    )
     end_date = models.DateField()
 
     class Meta:

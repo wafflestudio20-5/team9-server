@@ -39,6 +39,18 @@ class UserData:
 
 
 @dataclasses.dataclass
+class RecurringRuleData:
+    cron: int
+    end_date: str
+    
+    @classmethod
+    def create_recurring_data(cls, cron: int, end_date: str) -> RecurringRuleData:
+        return cls(
+            cron=cron,
+            end_date=end_date,
+        )
+
+@dataclasses.dataclass
 class ScheduleData:
     title: str
     start_at: str
@@ -46,6 +58,8 @@ class ScheduleData:
     description: str
     protection_level: int
     participants: List[Dict]
+    is_recurring: bool
+    recurring_rule: RecurringRuleData
 
     @classmethod
     def create_nth_calendar_data(cls, n: int, protection_level: int, raw_participants: List[int]) -> ScheduleData:
@@ -58,4 +72,21 @@ class ScheduleData:
             description=f"Test Description {n}",
             protection_level=protection_level,
             participants=participants,
+            is_recurring=False,
+            recurring_rule=None,
+        )
+
+    @classmethod
+    def create_recurring_calendar_data(cls, n: int, protection_level: int, raw_participants: List[int], cron: int, end_date: str) -> ScheduleData:
+        participants = [{"pk": i} for i in raw_participants.copy()]
+        recurring_rule = RecurringRuleData.create_recurring_data(cron, end_date)
+        return cls(
+            title=f"Test Schedule {n}",
+            start_at="2022-12-11 00:00:00",
+            end_at="2022-12-12 00:00:00",
+            description=f"Test Description {n}",
+            protection_level=protection_level,
+            participants=participants,
+            is_recurring = True, 
+            recurring_rule=recurring_rule,
         )
