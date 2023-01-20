@@ -10,9 +10,9 @@ def setup_default_site(apps: registry.Apps, schema_editor):
     """
     Set up or rename the default example.com site created by Django.
     """
-    Site: models.Site = apps.get_model("sites", "Site")
+    Site = apps.get_model("sites", "Site")
 
-    site = Site.objects.get(pk=settings.SITE_ID)
+    site, _ = Site.objects.get_or_create(pk=settings.SITE_ID)
     site.name = settings.NAME
     site.domain = settings.DOMAIN
     site.save()
