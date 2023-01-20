@@ -105,7 +105,6 @@ class CalendarAPITest(test.APITestCase):
                 "email": "user2@example.com",
             },
             "approved": True,
-            "is_opened": True,
             "follower": 1,
         }
         actual = response.json()
