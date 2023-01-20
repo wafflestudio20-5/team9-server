@@ -22,19 +22,19 @@ class RecurringRuleSerializer(serializers.ModelSerializer):
         model = calendar_model.RecurringRule
         fields = "__all__"
 
-class BaseScheduleSerializer(serializers.ModelSerializer):
+class ScheduleSerializer(serializers.ModelSerializer):
     participants = user_serializers.EssentialUserInfoFromPKSerializer(many=True, required=False)
 
     class Meta:
-        model = calendar_model.BaseSchedule
-        fields = ("id", "title", "created_by", "protection_level", "show_content", "start_at", "end_at", "participants", "description", "created_at", "updated_at", "is_opened")
+        model = calendar_model.Schedule
+        fields = "__all__"
         extra_kwargs = {
             "created_by": {
                 "default": serializers.CurrentUserDefault(),
             },
         }
 
-    def create(self, validated_data: Dict) -> calendar_model.BaseSchedule:
+    def create(self, validated_data: Dict) -> calendar_model.Schedule:
         participants_data = validated_data.pop("participants", [])
         schedule = super().create(validated_data)
         recurring_data = validated_data.pop("recurring", [])
@@ -52,15 +52,3 @@ class BaseScheduleSerializer(serializers.ModelSerializer):
             else:
                 raise serializers.ValidationError("wrong recurring request")
         return schedule
-
-
-class NormalScheduleSerializer(BaseScheduleSerializer):
-    class Meta:
-        model = calendar_model.NormalSchedule
-        fields = BaseScheduleSerializer.Meta.fields + ("is_recurring",)
-
-class RecurringScheduleSerializer(BaseScheduleSerializer):
-    recurring_rule = RecurringRuleSerializer()
-    class Meta:
-        model = calendar_model.RecurringSchedule
-        fields = BaseScheduleSerializer.Meta.fields + ("recurring_rule",)

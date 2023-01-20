@@ -31,7 +31,7 @@ if site_env.is_prod():
     SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
     DEBUG = False
 else:
-    SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+    SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
     DEBUG = True
 
 ALLOWED_HOSTS = [
