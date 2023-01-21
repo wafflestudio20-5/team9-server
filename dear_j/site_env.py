@@ -13,7 +13,7 @@ _site = os.environ.get("SITE", "LOCAL").upper()
 if not _site:
     _site = "LOCAL"
 
-_current_site = SiteEnv["LOCAL"]
+_current_site = SiteEnv[_site]
 
 
 def is_prod() -> bool:
