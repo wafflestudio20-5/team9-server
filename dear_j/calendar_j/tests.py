@@ -479,34 +479,53 @@ class CalendarAPITest(test.APITestCase):
             format="json",
         )
         expected = {
-            "id": 1,
-            "participants": [
+            "id":1,
+            "participants":[
                 {
-                    "pk": 2,
-                    "username": "user2",
-                    "email": "user2@example.com",
+                    "pk":2,
+                    "username":"user2",
+                    "email":"user2@example.com"
                 },
                 {
-                    "pk": 3,
-                    "username": "user3",
-                    "email": "user3@example.com",
-                },
+                    "pk":3,
+                    "username":"user3",
+                    "email":"user3@example.com"
+                }
             ],
-            "title": "Test Schedule 1",
-            "protection_level": 1,
-            "start_at": "2022-12-11 00:00:00",
-            "end_at": "2022-12-12 00:00:00",
-            "description": "Test Description 1",
-            "created_by": 1,
+            "recurring_rule":"None",
+            "recurring_record":[
+                {
+                    "id":1,
+                    "start_at":"2022-12-12 00:00:00",
+                    "end_at":"2022-12-13 00:00:00",
+                    "schedule":1
+                },
+                {
+                    "id":2,
+                    "start_at":"2022-12-13 00:00:00",
+                    "end_at":"2022-12-14 00:00:00",
+                    "schedule":1
+                }
+            ],
+            "title":"Test Schedule 1",
+            "protection_level":1,
+            "show_content":True,
+            "start_at":"2022-12-11 00:00:00",
+            "end_at":"2022-12-12 00:00:00",
+            "description":"Test Description 1",
+            "is_opened":True,
+            "is_recurring":True,
+            "created_by":1
         }
         actual = response.json()
+        results = actual.pop("results", {})
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         for key, value in expected.items():
-            if key not in actual.keys():
+            if key not in results.keys():
                 print(key)
-            assert key in actual.keys()
-            assert actual[key] == value
+            assert key in results.keys()
+            assert results[key] == value
 
     def test_get_recurring_schedule(self):
         creator_data = test_data_utils.UserData.create_nth_user_data(1)
