@@ -507,6 +507,62 @@ class CalendarAPITest(test.APITestCase):
                 print(key)
             assert key in actual.keys()
             assert actual[key] == value
-    
+
     def test_get_recurring_schedule(self):
-        pass
+        creator_data = test_data_utils.UserData.create_nth_user_data(1)
+        participant1_data = test_data_utils.UserData.create_nth_user_data(2)
+        participant2_data = test_data_utils.UserData.create_nth_user_data(3)
+
+        self.client.post(path="/api/v1/user/registration/", data=creator_data.for_registration, format="json")
+        self.client.post(path="/api/v1/user/registration/", data=participant1_data.for_registration, format="json")
+        self.client.post(path="/api/v1/user/registration/", data=participant2_data.for_registration, format="json")
+        self.client.post(path="/api/v1/user/login/", data=creator_data.for_login, format="json")
+
+        schedule_data = dataclasses.asdict(
+            test_data_utils.ScheduleData.create_recurring_calendar_data(1, 1, [2, 3], cron.CronBasicType.DAY, "2023-01-02"))
+        response = self.client.post(
+            path="/api/v1/calendar/schedule/",
+            data=schedule_data,
+            format="json",
+        )
+
+        target_uri = uri_utils.get_uri_with_extra_params(
+            url="/api/v1/calendar/schedule/",
+            extra_params={
+                "pk": 1,
+                "from": "2023-01-01",
+                "to": "2023-01-02",
+            },
+        )
+        response = self.client.get(target_uri)
+        print(response.json())
+
+        expected = {
+            "id": 1,
+            "participants": [
+                {
+                    "pk": 2,
+                    "username": "user2",
+                    "email": "user2@example.com",
+                },
+                {
+                    "pk": 3,
+                    "username": "user3",
+                    "email": "user3@example.com",
+                },
+            ],
+            "title": "Test Schedule 1",
+            "protection_level": 1,
+            "start_at": "2022-12-11 00:00:00",
+            "end_at": "2022-12-12 00:00:00",
+            "description": "Test Description 1",
+            "created_by": 1,
+        }
+        actual = response.json()
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        for key, value in expected.items():
+            if key not in actual.keys():
+                print(key)
+            assert key in actual.keys()
+            assert actual[key] == value

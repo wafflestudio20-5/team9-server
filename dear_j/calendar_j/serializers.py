@@ -47,7 +47,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
                 calendar_model.Participant.objects.create(schedule=schedule, participant=participant)
 
         if recurring_rule != []:
-            cron = recurring_rule.pop("cron_exp", None)
+            cron = recurring_rule.pop("cron", None)
             end_date = recurring_rule.pop("end_date", None)
             if cron is not None and end_date is not None:
                 recurring = calendar_model.RecurringRule.objects.create(
