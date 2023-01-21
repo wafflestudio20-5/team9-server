@@ -24,8 +24,16 @@ class RecurringRuleSerializer(serializers.ModelSerializer):
         model = calendar_model.RecurringRule
         fields = "__all__"
 
+
+class RecurringRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = calendar_model.RecurringRecord
+        fields = "__all__"
+
 class ScheduleSerializer(serializers.ModelSerializer):
     participants = user_serializers.EssentialUserInfoFromPKSerializer(many=True, required=False)
+    recurring_rule = RecurringRuleSerializer(read_only=False, required=False)
+    recurring_record = RecurringRecordSerializer(many=True, required=False)
 
     class Meta:
         model = calendar_model.Schedule
@@ -38,8 +46,8 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data: Dict) -> calendar_model.Schedule:
         participants_data = validated_data.pop("participants", [])
-        schedule = super().create(validated_data)
         recurring_rule = validated_data.pop("recurring_rule", [])
+        schedule = super().create(validated_data)
 
         for participant_data in participants_data:
             participant = user_models.User.objects.get(**participant_data)
@@ -50,9 +58,9 @@ class ScheduleSerializer(serializers.ModelSerializer):
             cron = recurring_rule.pop("cron", None)
             end_date = recurring_rule.pop("end_date", None)
             if cron is not None and end_date is not None:
-                recurring = calendar_model.RecurringRule.objects.create(
+                recurring_rule = calendar_model.RecurringRule.objects.create(
                     schedule=schedule, cron=cron, end_date=end_date)
-                for (start_at, end_at) in create_record.CreateCronRecord.create_record(cron, schedule):
+                for (start_at, end_at) in create_record.create_record(recurring_rule, schedule):
                     calendar_model.RecurringRecord.objects.create(
                         schedule=schedule, start_at=start_at, end_at=end_at
                     )

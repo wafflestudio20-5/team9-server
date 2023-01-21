@@ -5,6 +5,16 @@ from calendar_j.services.cron import cron
 from calendar_j.services.protection import protection
 from user import models as user_models
 
+class RecurringRule(models.Model):
+    cron = models.IntegerField(
+        choices=cron.CronBasicType.choices
+    )
+    end_date = models.DateField()
+
+    class Meta:
+        verbose_name = "recurring_rule"
+        verbose_name_plural = "recurring_rules"
+        db_table = "tb_recurring_rule"
 
 class Schedule(models.Model):
     title = models.CharField(max_length=250)
@@ -22,23 +32,12 @@ class Schedule(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_opened = models.BooleanField(default=True, blank=True)
     is_recurring = models.BooleanField(default=False, blank=True)
+    recurring_rule = models.OneToOneField(RecurringRule, on_delete=models.PROTECT, related_name="schedule", null=True)
 
     class Meta:
         verbose_name = "schedule"
         verbose_name_plural = "schedules"
         db_table = "tb_schedule"
-
-class RecurringRule(models.Model):
-    schedule = models.OneToOneField(Schedule, on_delete=models.PROTECT, related_name="recurring_rule")
-    cron = models.IntegerField(
-        choices=cron.CronBasicType.choices
-    )
-    end_date = models.DateField()
-
-    class Meta:
-        verbose_name = "recurring_rule"
-        verbose_name_plural = "recurring_rules"
-        db_table = "tb_recurring_rule"
 
 class RecurringRecord(models.Model):
     schedule = models.ForeignKey(Schedule, on_delete=models.PROTECT, related_name="recurring_record")

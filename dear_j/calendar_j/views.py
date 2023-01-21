@@ -22,7 +22,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         jwt_auth.JWTCookieAuthentication,
         authentication.SessionAuthentication,
     ]
-    queryset = calendar_models.Schedule.objects.all()
+    queryset = calendar_models.Schedule.objects.prefetch_related("recurring_record").all()
     pagination_class = calendar_paginations.ScheduleListPagination
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = calendar_serializers.ScheduleSerializer
@@ -38,7 +38,6 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         participants = calendar_models.Participant.objects.filter(
             participant__pk=target_user_pk, status=attendance.AttendanceStatus.PRESENCE
         ).values_list("participant_id")
-
         queryset: query.QuerySet = super().get_queryset()
 
         created_queryset = queryset.filter(created_by__email=target_user_pk, start_at__range=(start_date, end_date)) | queryset.filter(
@@ -47,7 +46,10 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         parcipating_queryset = queryset.filter(participants__pk__in=participants, start_at__range=(start_date, end_date)) | queryset.filter(
             participants__pk__in=participants, end_at__range=(start_date, end_date)
         )
-        total_queryset = created_queryset | parcipating_queryset
+        recurring_queryset = queryset.filter(recurring_record__start_at__range=(start_date, end_date)) | queryset.filter(
+            recurring_record__end_at__range=(start_date, end_date)
+        )
+        total_queryset = created_queryset | parcipating_queryset | recurring_queryset
         permission_refined_queryset = total_queryset.filter(
             protection_level__lte=calendar_protection.ProtectionLevel.filter_user_schedule(self.request.user, target_user_pk),
             is_opened=True,
@@ -86,6 +88,5 @@ class ScheduleAttendenceResponseView(generics.UpdateAPIView):
 
     def get_object(self) -> calendar_models.Participant:
         pk = self.kwargs["pk"]
-        schedule = calendar_models.Schedule.objects.get(pk=pk)
-
+        schedule = shortcuts.get_object_or_404(calendar_models.Schedule, pk=pk)
         return shortcuts.get_object_or_404(calendar_models.Participant, participant=self.request.user, schedule=schedule)

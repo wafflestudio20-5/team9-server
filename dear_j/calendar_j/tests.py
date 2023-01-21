@@ -470,7 +470,7 @@ class CalendarAPITest(test.APITestCase):
         self.client.post(path="/api/v1/user/registration/", data=participant1_data.for_registration, format="json")
         self.client.post(path="/api/v1/user/registration/", data=participant2_data.for_registration, format="json")
         self.client.post(path="/api/v1/user/login/", data=creator_data.for_login, format="json")
-        
+
         schedule_data = dataclasses.asdict(
             test_data_utils.ScheduleData.create_recurring_calendar_data(1, 1, [2, 3], cron.CronBasicType.DAY, "2023-01-02"))
         response = self.client.post(
@@ -519,7 +519,7 @@ class CalendarAPITest(test.APITestCase):
         self.client.post(path="/api/v1/user/login/", data=creator_data.for_login, format="json")
 
         schedule_data = dataclasses.asdict(
-            test_data_utils.ScheduleData.create_recurring_calendar_data(1, 1, [2, 3], cron.CronBasicType.DAY, "2023-01-02"))
+            test_data_utils.ScheduleData.create_recurring_calendar_data(1, 1, [2, 3], cron.CronBasicType.DAY.value, "2022-12-14"))
         response = self.client.post(
             path="/api/v1/calendar/schedule/",
             data=schedule_data,
@@ -530,8 +530,8 @@ class CalendarAPITest(test.APITestCase):
             url="/api/v1/calendar/schedule/",
             extra_params={
                 "pk": 1,
-                "from": "2023-01-01",
-                "to": "2023-01-02",
+                "from": "2022-12-10",
+                "to": "2022-12-30",
             },
         )
         response = self.client.get(target_uri)
@@ -560,7 +560,7 @@ class CalendarAPITest(test.APITestCase):
         }
         actual = response.json()
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         for key, value in expected.items():
             if key not in actual.keys():
                 print(key)
