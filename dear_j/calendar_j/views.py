@@ -14,6 +14,7 @@ from calendar_j import permissions as calendar_permissions
 from calendar_j import serializers as calendar_serializers
 from calendar_j.services.attendance import attendance
 from calendar_j.services.protection import protection as calendar_protection
+from user import models as user_models
 from utils import time as time_utils
 
 
@@ -33,6 +34,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
             raise calendar_exceptions.GetScheduleListKeyException
 
         target_user_pk = params.get("pk")
+        target_user = shortcuts.get_object_or_404(user_models.User, pk=target_user_pk)
         start_date = time_utils.normal_date_formatter.parse(params.get("from"))
         end_date = time_utils.normal_date_formatter.parse(params.get("to"))
         participants = calendar_models.Participant.objects.filter(
@@ -49,7 +51,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         )
         total_queryset = created_queryset | parcipating_queryset
         permission_refined_queryset = total_queryset.filter(
-            protection_level__lte=calendar_protection.ProtectionLevel.filter_user_schedule(self.request.user, target_user_pk),
+            protection_level__lte=calendar_protection.ProtectionLevel.filter_user_schedule(self.request.user, target_user),
             is_opened=True,
         )
         return permission_refined_queryset
