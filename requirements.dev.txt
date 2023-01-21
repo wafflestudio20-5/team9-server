@@ -5,4 +5,7 @@ isort==5.10.1
 model-mommy==2.0.0
 pylint==2.13.8
 pytest==7.0.0
+pytest-cov==3.0.0
 pytest-django==4.5.2
+pytest-env==0.6.2
+pytest-mock==3.8.2
