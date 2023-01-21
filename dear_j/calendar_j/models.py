@@ -12,12 +12,14 @@ class Schedule(models.Model):
         choices=protection.ProtectionLevel.choices,
         default=protection.ProtectionLevel.get_default(),
     )
+    show_content = models.BooleanField(default=True, blank=True)
     start_at = models.DateTimeField()
     end_at = models.DateTimeField()
     participants = models.ManyToManyField(user_models.User, through="Participant")
-    description = models.TextField()
+    description = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_opened = models.BooleanField(default=True, blank=True)
 
     class Meta:
         verbose_name = "schedule"

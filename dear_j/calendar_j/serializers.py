@@ -7,6 +7,17 @@ from user import models as user_models
 from user import serializers as user_serializers
 
 
+class ParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = calendar_model.Participant
+        fields = ["id", "status", "participant", "schedule"]
+        read_only_fields = (
+            "id",
+            "participant",
+            "schedule",
+        )
+
+
 class ScheduleSerializer(serializers.ModelSerializer):
     participants = user_serializers.EssentialUserInfoFromPKSerializer(many=True, required=False)
 
@@ -25,11 +36,6 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
         for participant_data in participants_data:
             participant = user_models.User.objects.get(**participant_data)
-            calendar_model.Participant.objects.create(schedule=schedule, participant=participant)
+            if participant != self.context["request"].user:
+                calendar_model.Participant.objects.create(schedule=schedule, participant=participant)
         return schedule
-
-
-class ParticipantSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = calendar_model.Participant
-        fields = "__all__"
