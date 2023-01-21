@@ -44,5 +44,10 @@ class NormalDatetimeFormatter(DatetimeFormatter):
     pattern = "%Y-%m-%d %H:%M:%S"
 
 
+class CompactDateFormatter(DateFormatter):
+    pattern = "%Y%m%d"
+
+
 normal_date_formatter = NormalDateFormatter()
 normal_datetime_formatter = NormalDatetimeFormatter()
+compact_date_formatter = CompactDateFormatter()
