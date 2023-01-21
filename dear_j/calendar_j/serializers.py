@@ -59,7 +59,9 @@ class ScheduleSerializer(serializers.ModelSerializer):
             end_date = recurring_rule.pop("end_date", None)
             if cron is not None and end_date is not None:
                 recurring_rule = calendar_model.RecurringRule.objects.create(
-                    schedule=schedule, cron=cron, end_date=end_date)
+                    cron=cron, end_date=end_date)
+                schedule.recurring_rule = recurring_rule
+                schedule.save()
                 for (start_at, end_at) in create_record.create_record(recurring_rule, schedule):
                     calendar_model.RecurringRecord.objects.create(
                         schedule=schedule, start_at=start_at, end_at=end_at

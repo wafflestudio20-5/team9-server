@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
 @dataclasses.dataclass
@@ -59,7 +59,7 @@ class ScheduleData:
     protection_level: int
     participants: List[Dict]
     is_recurring: bool
-    recurring_rule: RecurringRuleData
+    recurring_rule: Optional[RecurringRuleData] = None
 
     @classmethod
     def create_nth_calendar_data(cls, n: int, protection_level: int, raw_participants: List[int]) -> ScheduleData:
@@ -73,7 +73,6 @@ class ScheduleData:
             protection_level=protection_level,
             participants=participants,
             is_recurring=False,
-            recurring_rule=None,
         )
 
     @classmethod
