@@ -34,8 +34,8 @@ class KakaoCallBackView(base.SocialPlatformCallBackView, kakao.KakaoContextMixin
         email = account_info.get("email")
         username = account_info.get("profile")["nickname"]
 
-        has_birthyear = account_info.get("birthyear_needs_agreement", False)
-        has_birthday = account_info.get("birthday_needs_agreement", False)
+        has_birthyear = "birthyear" in account_info.keys()
+        has_birthday = "birthday" in account_info.keys()
 
         birthyear = int(account_info.get("birthyear")) if has_birthyear else None
         birthday = int(account_info.get("birthday")) if has_birthday else None
