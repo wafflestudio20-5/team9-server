@@ -30,7 +30,7 @@ class HostInfo:
         if site_env.is_local():
             return [self.domain, self.ip]
         if site_env.is_dev():
-            return [self.ip, "0.0.0.0"]
+            return [self.ip]
         return [self.domain]
 
 
