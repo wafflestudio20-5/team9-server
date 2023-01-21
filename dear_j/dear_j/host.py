@@ -1,6 +1,5 @@
 import dataclasses
 import enum
-import os
 from typing import List
 
 import site_env
@@ -22,21 +21,23 @@ class HostInfo:
     @property
     def url(self) -> str:
         url = f"https://{self.domain}" if self.is_https else f"http://{self.domain}"
-        if not self.port and self.port != 80:
-            url = os.path.join(url, self.port)
-        if not url.endswith("/"):
-            url = f"{url}/"
+        if self.port and self.port != 80:
+            url = f"{url}:{self.port}"
         return url
 
     @property
     def ALLOWED_HOSTS(self) -> List:
-        return [self.domain, self.ip] if site_env.is_local() else [self.domain]
+        if site_env.is_local():
+            return [self.domain, self.ip]
+        if site_env.is_dev():
+            return [self.ip, "0.0.0.0"]
+        return [self.domain]
 
 
 class BackendHost(enum.Enum):
     PROD_HOST = HostInfo(domain="api-dearj-wafflestudio.site", ip="43.201.9.194", port=80)
     STAGE_HOST = HostInfo(domain="api-staging-dearj-wafflestudio.site", ip="13.124.64.149", port=80)
-    DEV_HOST = HostInfo(domain="0.0.0.0", ip="0.0.0.0", port=80)
+    DEV_HOST = HostInfo(domain="0.0.0.0", ip="0.0.0.0", port=8000)
     LOCAL_HOST = HostInfo(domain="localhost", ip="127.0.0.1", port=8000)
 
     @classmethod

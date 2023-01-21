@@ -6,6 +6,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+import os
 import pathlib
 
 import pymysql
@@ -58,6 +59,7 @@ INSTALLED_APPS = [
     "dj_rest_auth",
     "dj_rest_auth.registration",
     "drf_spectacular",
+    "allauth",
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
@@ -98,6 +100,7 @@ ACCOUNT_ADAPTER = config.ACCOUNT_ADAPTER
 
 # jwt environment setting
 REST_USE_JWT = config.REST_USE_JWT
+JWT_AUTH_COOKIE = config.JWT_AUTH_COOKIE
 JWT_AUTH_REFRESH_COOKIE = config.JWT_AUTH_REFRESH_COOKIE
 ACCESS_TOKEN_LIFETIME = config.ACCESS_TOKEN_LIFETIME
 REFRESH_TOKEN_LIFETIME = config.REFRESH_TOKEN_LIFETIME
@@ -229,6 +232,8 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR.parent, "static/")
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

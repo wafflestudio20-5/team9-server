@@ -9,13 +9,13 @@ test: ## Run test code
 run-local: ## Run local server (127.0.0.1:8000)
 	cd ./dear_j && python manage.py runserver
 
-run-dev: ## Run dev server
+run-dev: ## Run dev server (0.0.0.0:80)
 	export SITE=DEV && ./scripts/run-local.sh
 
 down-dev: ## Shut down dev server
 	pkill -f gunicorn
 
-run-dev-with-docker: ## Run dev container
+run-dev-with-docker: ## Run dev container (0.0.0.0:80)
 	docker-compose down && docker-compose up --build -d
 
 down-dev-with-docker: ## Shut down dev container

@@ -25,7 +25,8 @@ class KakaoContextMixin(base.SocialPlatformContextMixin):
         extra_params = {
             "grant_type": "authorization_code",
             "client_id": self.client_id,
-            "redirect_uri": self.callback_url,
+            "client_secret": self.client_pw,
             "code": code,
+            "redirect_uri": self.callback_url,
         }
         return uri_utils.get_uri_with_extra_params(token_url, extra_params)

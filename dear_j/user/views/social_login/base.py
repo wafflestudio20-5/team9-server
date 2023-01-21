@@ -32,7 +32,6 @@ class SocialPlatformCallBackView(
 ):
     def get(self, request: req.HttpRequest):
         code = request.GET.get("code")
-
         # Step I. Get access token for accessing user info from social platform
         token = self._get_access_token(code)
         if token.keys().__contains__("error"):
@@ -41,6 +40,7 @@ class SocialPlatformCallBackView(
 
         # Step II. Get user info from social platform
         user_info = self._get_user_raw_info(access_token)
+
         if user_info.keys().__contains__("error"):
             return self._redirect_to_front_for_exception(self.invalid_access_token)
         user_profile = self._get_user_profile(user_info, access_token)
@@ -78,6 +78,10 @@ class SocialPlatformCallBackView(
         user: models.User = models.User.objects.get(email=user_profile.email)
         if user_profile.birthdate:
             user.birthdate = user_profile.birthdate
+        if user_profile.birthyear:
+            user.birthyear = user_profile.birthyear
+        if user_profile.birthday:
+            user.birthday = user_profile.birthday
         if user_profile.username:
             user.username = user_profile.username
         user.save()

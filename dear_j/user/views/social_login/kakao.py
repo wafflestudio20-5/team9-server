@@ -16,12 +16,17 @@ class KakaoView(base.SocialPlatformView, kakao.KakaoContextMixin):
 
 class KakaoCallBackView(base.SocialPlatformCallBackView, kakao.KakaoContextMixin):
     def _get_access_token(self, code: str) -> Dict:
-        return requests.get(self.get_token_uri(code)).json()
+        headers = {"Content-Type": "application/x-www-form-urlencoded;charset=utf-8"}
+        return requests.post(self.get_token_uri(code), headers=headers).json()
 
     def _get_user_raw_info(self, access_token) -> Dict:
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+            "Authorization": f"Bearer {access_token}",
+        }
         return requests.get(
             url=self.profile_url,
-            headers={"Authorization": f"Bearer {access_token}"},
+            headers=headers,
         ).json()
 
     def _get_user_profile(self, user_raw_info: Dict, _: str) -> profile.SocialProfile:
@@ -29,13 +34,16 @@ class KakaoCallBackView(base.SocialPlatformCallBackView, kakao.KakaoContextMixin
         email = account_info.get("email")
         username = account_info.get("profile")["nickname"]
 
-        if account_info.get("birthyear_needs_agreement") and account_info.get("birthday_needs_agreement"):
-            year = account_info.get("birthyear")
-            day = account_info.get("birthday")
-            birthdate = time_utils.compact_date_formatter.parse(f"{year}{day}")
-        else:
-            birthdate = None
-        return profile.SocialProfile(email, username, birthdate)
+        has_birthyear = account_info.get("birthyear_needs_agreement", False)
+        has_birthday = account_info.get("birthday_needs_agreement", False)
+
+        birthyear = int(account_info.get("birthyear")) if has_birthyear else None
+        birthday = int(account_info.get("birthday")) if has_birthday else None
+
+        birthdate = None
+        if has_birthyear and has_birthday:
+            birthdate = time_utils.compact_date_formatter.parse(f"{birthyear}{birthday}")
+        return profile.SocialProfile(email, username, birthdate, birthyear, birthday)
 
 
 class KakaoLoginView(base.SocialPlatformLoginView, kakao.KakaoContextMixin):
