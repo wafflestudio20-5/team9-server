@@ -7,33 +7,33 @@ from rest_framework import status
 
 from calendar_j.services.protection import protection
 from utils import uri as uri_utils
-from utils.test import test_data as test_data_utils
+from utils.test import data as data_utils
 
 
 @pytest.fixture(name="user1")
 def fixture_registered_user1(client: test.Client):
-    user1_data = test_data_utils.UserData.create_nth_user_data(1)
+    user1_data = data_utils.UserData.create_nth_user_data(1)
     client.post(path="/api/v1/user/registration/", data=user1_data.for_registration, content_type="application/json")
     return user1_data
 
 
 @pytest.fixture(name="user2")
 def fixture_registered_user2(client: test.Client):
-    user2_data = test_data_utils.UserData.create_nth_user_data(2)
+    user2_data = data_utils.UserData.create_nth_user_data(2)
     client.post(path="/api/v1/user/registration/", data=user2_data.for_registration, content_type="application/json")
     return user2_data
 
 
 @pytest.fixture(name="user3")
 def fixture_registered_user3(client: test.Client):
-    user3_data = test_data_utils.UserData.create_nth_user_data(3)
+    user3_data = data_utils.UserData.create_nth_user_data(3)
     client.post(path="/api/v1/user/registration/", data=user3_data.for_registration, content_type="application/json")
     return user3_data
 
 
 @pytest.fixture(name="user4")
 def fixture_registered_user4(client: test.Client):
-    user4_data = test_data_utils.UserData.create_nth_user_data(4)
+    user4_data = data_utils.UserData.create_nth_user_data(4)
     client.post(path="/api/v1/user/registration/", data=user4_data.for_registration, content_type="application/json")
     return user4_data
 
@@ -41,12 +41,12 @@ def fixture_registered_user4(client: test.Client):
 @pytest.mark.django_db
 def test_create_schedule(
     client: test.Client,
-    user1: test_data_utils.UserData,
-    user2: test_data_utils.UserData,
-    user3: test_data_utils.UserData,
+    user1: data_utils.UserData,
+    user2: data_utils.UserData,
+    user3: data_utils.UserData,
 ):
     client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
-    schedule_data = dataclasses.asdict(test_data_utils.ScheduleData.create_nth_calendar_data(1, 1, [2, 3]))
+    schedule_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(1, 1, [2, 3]))
 
     response = client.post(
         path="/api/v1/calendar/schedule/",
@@ -85,24 +85,24 @@ def test_create_schedule(
 @pytest.mark.django_db
 def test_get_schedule_list_open_permission_success(
     client: test.Client,
-    user1: test_data_utils.UserData,
-    user2: test_data_utils.UserData,
+    user1: data_utils.UserData,
+    user2: data_utils.UserData,
 ):
 
     client.post("/api/v1/user/login/", data=user2.for_login, content_type="application/json")
-    schedule2_data = dataclasses.asdict(test_data_utils.ScheduleData.create_nth_calendar_data(2, protection.ProtectionLevel.OPEN, []))
+    schedule2_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(2, protection.ProtectionLevel.OPEN, []))
     client.post(
         path="/api/v1/calendar/schedule/",
         data=schedule2_data,
         content_type="application/json",
     )
-    schedule3_data = dataclasses.asdict(test_data_utils.ScheduleData.create_nth_calendar_data(3, protection.ProtectionLevel.CLOSED, []))
+    schedule3_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(3, protection.ProtectionLevel.CLOSED, []))
     client.post(
         path="/api/v1/calendar/schedule/",
         data=schedule3_data,
         content_type="application/json",
     )
-    schedule3_1_data = dataclasses.asdict(test_data_utils.ScheduleData.create_nth_calendar_data(3, protection.ProtectionLevel.FOLLOWER, []))
+    schedule3_1_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(3, protection.ProtectionLevel.FOLLOWER, []))
     client.post(
         path="/api/v1/calendar/schedule/",
         data=schedule3_1_data,
@@ -146,24 +146,24 @@ def test_get_schedule_list_open_permission_success(
 @pytest.mark.django_db
 def test_get_schedule_list_follower_permission_success(
     client: test.Client,
-    user1: test_data_utils.UserData,
-    user2: test_data_utils.UserData,
+    user1: data_utils.UserData,
+    user2: data_utils.UserData,
 ):
     client.post("/api/v1/user/login/", data=user2.for_login, content_type="application/json")
 
-    schedule2_data = dataclasses.asdict(test_data_utils.ScheduleData.create_nth_calendar_data(2, protection.ProtectionLevel.OPEN, []))
+    schedule2_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(2, protection.ProtectionLevel.OPEN, []))
     client.post(
         path="/api/v1/calendar/schedule/",
         data=schedule2_data,
         content_type="application/json",
     )
-    schedule3_data = dataclasses.asdict(test_data_utils.ScheduleData.create_nth_calendar_data(3, protection.ProtectionLevel.CLOSED, []))
+    schedule3_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(3, protection.ProtectionLevel.CLOSED, []))
     client.post(
         path="/api/v1/calendar/schedule/",
         data=schedule3_data,
         content_type="application/json",
     )
-    schedule4_data = dataclasses.asdict(test_data_utils.ScheduleData.create_nth_calendar_data(4, protection.ProtectionLevel.FOLLOWER, []))
+    schedule4_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(4, protection.ProtectionLevel.FOLLOWER, []))
     client.post(
         path="/api/v1/calendar/schedule/",
         data=schedule4_data,
@@ -221,12 +221,12 @@ def test_get_schedule_list_follower_permission_success(
 @pytest.mark.django_db
 def test_get_closed_schedule_fail(
     client: test.Client,
-    user1: test_data_utils.UserData,
-    user2: test_data_utils.UserData,
+    user1: data_utils.UserData,
+    user2: data_utils.UserData,
 ):
     client.post("/api/v1/user/login/", data=user2.for_login, content_type="application/json")
 
-    schedule1_data = dataclasses.asdict(test_data_utils.ScheduleData.create_nth_calendar_data(2, protection.ProtectionLevel.FOLLOWER, []))
+    schedule1_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(2, protection.ProtectionLevel.FOLLOWER, []))
     client.post(
         path="/api/v1/calendar/schedule/",
         data=schedule1_data,
@@ -247,12 +247,12 @@ def test_get_closed_schedule_fail(
 @pytest.mark.django_db
 def test_get_follower_schedule_success(
     client: test.Client,
-    user1: test_data_utils.UserData,
-    user2: test_data_utils.UserData,
+    user1: data_utils.UserData,
+    user2: data_utils.UserData,
 ):
     client.post("/api/v1/user/login/", data=user2.for_login, content_type="application/json")
 
-    schedule1_data = dataclasses.asdict(test_data_utils.ScheduleData.create_nth_calendar_data(2, protection.ProtectionLevel.FOLLOWER, []))
+    schedule1_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(2, protection.ProtectionLevel.FOLLOWER, []))
     client.post(
         path="/api/v1/calendar/schedule/",
         data=schedule1_data,
@@ -276,12 +276,12 @@ def test_get_follower_schedule_success(
 @pytest.mark.django_db
 def test_get_follower_schedule_fail(
     client: test.Client,
-    user1: test_data_utils.UserData,
-    user2: test_data_utils.UserData,
+    user1: data_utils.UserData,
+    user2: data_utils.UserData,
 ):
     client.post("/api/v1/user/login/", data=user2.for_login, content_type="application/json")
 
-    schedule1_data = dataclasses.asdict(test_data_utils.ScheduleData.create_nth_calendar_data(2, protection.ProtectionLevel.FOLLOWER, []))
+    schedule1_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(2, protection.ProtectionLevel.FOLLOWER, []))
     client.post(
         path="/api/v1/calendar/schedule/",
         data=schedule1_data,
@@ -302,8 +302,8 @@ def test_get_follower_schedule_fail(
 @pytest.mark.django_db
 def test_update_schedule(
     client: test.Client,
-    user1: test_data_utils.UserData,
-    user2: test_data_utils.UserData,
+    user1: data_utils.UserData,
+    user2: data_utils.UserData,
 ):
     client.post("/api/v1/user/login/", data=user1.for_login, content_type="application/json")
     pk = (
@@ -380,15 +380,13 @@ def test_update_schedule(
 @pytest.mark.django_db
 def test_attendance_success(
     client: test.Client,
-    user1: test_data_utils.UserData,
-    user2: test_data_utils.UserData,
-    user3: test_data_utils.UserData,
+    user1: data_utils.UserData,
+    user2: data_utils.UserData,
+    user3: data_utils.UserData,
 ):
     client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
 
-    schedule1_data = dataclasses.asdict(
-        test_data_utils.ScheduleData.create_nth_calendar_data(1, protection.ProtectionLevel.FOLLOWER, [2, 3])
-    )
+    schedule1_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(1, protection.ProtectionLevel.FOLLOWER, [2, 3]))
     response = client.post(
         path="/api/v1/calendar/schedule/",
         data=schedule1_data,
@@ -417,15 +415,13 @@ def test_attendance_success(
 @pytest.mark.django_db
 def test_attendance_fail(
     client: test.Client,
-    user1: test_data_utils.UserData,
-    user2: test_data_utils.UserData,
-    user3: test_data_utils.UserData,
+    user1: data_utils.UserData,
+    user2: data_utils.UserData,
+    user3: data_utils.UserData,
 ):
     client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
 
-    schedule1_data = dataclasses.asdict(
-        test_data_utils.ScheduleData.create_nth_calendar_data(1, protection.ProtectionLevel.FOLLOWER, [2, 3])
-    )
+    schedule1_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(1, protection.ProtectionLevel.FOLLOWER, [2, 3]))
     response = client.post(
         path="/api/v1/calendar/schedule/",
         data=schedule1_data,
@@ -445,15 +441,13 @@ def test_attendance_fail(
 @pytest.mark.django_db
 def test_attendance_read_only_fields_fail(
     client: test.Client,
-    user1: test_data_utils.UserData,
-    user2: test_data_utils.UserData,
-    user3: test_data_utils.UserData,
+    user1: data_utils.UserData,
+    user2: data_utils.UserData,
+    user3: data_utils.UserData,
 ):
     client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
 
-    schedule1_data = dataclasses.asdict(
-        test_data_utils.ScheduleData.create_nth_calendar_data(1, protection.ProtectionLevel.FOLLOWER, [2, 3])
-    )
+    schedule1_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(1, protection.ProtectionLevel.FOLLOWER, [2, 3]))
     response = client.post(
         path="/api/v1/calendar/schedule/",
         data=schedule1_data,
