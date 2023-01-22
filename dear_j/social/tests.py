@@ -3,7 +3,7 @@ import pytest
 from django import test
 from rest_framework import status
 
-from utils import test_data as test_data_utils
+from utils.test import test_data as test_data_utils
 
 
 @pytest.fixture(name="user1")
@@ -35,7 +35,13 @@ def fixture_registered_user4(client: test.Client):
 
 
 @pytest.mark.django_db
-def test_search_candidate(client: test.Client):
+def test_search_candidate(
+    client: test.Client,
+    user1: test_data_utils.UserData,
+    user2: test_data_utils.UserData,
+    user3: test_data_utils.UserData,
+    user4: test_data_utils.UserData,
+):
     response = client.get(path="/api/v1/social/search/candidate/?search=user")
     expected = [
         {
