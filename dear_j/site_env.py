@@ -34,3 +34,7 @@ def is_local() -> bool:
 
 def is_prod_or_stage() -> bool:
     return is_prod() or is_stage()
+
+
+def is_dev_or_local() -> bool:
+    return is_dev() or is_local()

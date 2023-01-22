@@ -7,3 +7,5 @@ class SocialProfile:
     email: str
     username: str = None
     birthdate: datetime.date = None
+    birthyear: int = None
+    birthday: int = None

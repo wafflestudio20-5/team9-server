@@ -6,11 +6,13 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+import os
 import pathlib
 
 import pymysql
 
 from dear_j import config
+from dear_j import host
 import site_env
 from utils import ssm
 from utils import time as time_utils
@@ -22,36 +24,12 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
 DEBUG = not site_env.is_prod()
 
-ALLOWED_HOSTS = [
-    "api-dearj-wafflestudio.site", # Prod Domain
-    "api-staging-dearj-wafflestudio.site", # Stage Domain
-    "ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com",  # Prod Server
-    "ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com",  # Stage Server
-    "0.0.0.0",
-    "127.0.0.1",
-    "localhost",
-]
+ALLOWED_HOSTS = host.BACKEND_HOST.ALLOWED_HOSTS
 
-if site_env.is_prod():
-    BASE_BE_URI = "http://ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com/"
-    BASE_FE_URI = "https://db5p3zym5dolm.cloudfront.net/"
-    DOMAIN = "ec2-43-201-9-194.ap-northeast-2.compute.amazonaws.com"
-    NAME = DOMAIN
-elif site_env.is_stage():
-    BASE_BE_URI = "http://ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com/"
-    BASE_FE_URI = "http://127.0.0.1:3000/"
-    DOMAIN = "ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com"
-    NAME = DOMAIN
-elif site_env.is_dev():
-    BASE_BE_URI = "http://0.0.0.0/"
-    BASE_FE_URI = "http://127.0.0.1:3000/"
-    DOMAIN = "0.0.0.0"
-    NAME = DOMAIN
-else:
-    BASE_BE_URI = "http://127.0.0.1:8000/"
-    BASE_FE_URI = "http://127.0.0.1:3000/"
-    DOMAIN = "127.0.0.1:8000"
-    NAME = "localhost"
+BACKEND_URL = host.BACKEND_HOST.url
+FRONTEND_URL = host.FRONTEND_HOST.url
+DOMAIN = host.BACKEND_HOST.domain
+NAME = host.BACKEND_HOST.get_name()
 
 
 # drf spectacular setting
@@ -81,6 +59,7 @@ INSTALLED_APPS = [
     "dj_rest_auth",
     "dj_rest_auth.registration",
     "drf_spectacular",
+    "allauth",
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
@@ -121,6 +100,7 @@ ACCOUNT_ADAPTER = config.ACCOUNT_ADAPTER
 
 # jwt environment setting
 REST_USE_JWT = config.REST_USE_JWT
+# JWT_AUTH_COOKIE = config.JWT_AUTH_COOKIE # if use this, refresh token is needed to logout
 JWT_AUTH_REFRESH_COOKIE = config.JWT_AUTH_REFRESH_COOKIE
 ACCESS_TOKEN_LIFETIME = config.ACCESS_TOKEN_LIFETIME
 REFRESH_TOKEN_LIFETIME = config.REFRESH_TOKEN_LIFETIME
@@ -252,6 +232,8 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR.parent, "static/")
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

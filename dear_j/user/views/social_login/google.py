@@ -1,5 +1,5 @@
 import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 
 import requests
 
@@ -29,14 +29,15 @@ class GoogleCallBackView(base.SocialPlatformCallBackView, google.GoogleContextMi
         ).json()
 
         email = user_raw_info.get("email")
-        birthdate = self._get_birthdate(birthdate_info)
-        return profile.SocialProfile(email=email, birthdate=birthdate)
+        birthdate, birthyear, birthday = self._get_birthdate(birthdate_info)
+        return profile.SocialProfile(email=email, birthdate=birthdate, birthyear=birthyear, birthday=birthday)
 
-    def _get_birthdate(self, birthdate_raw: Dict):
+    def _get_birthdate(self, birthdate_raw: Dict) -> Optional[Tuple[datetime.date, str, str]]:
         raw_data: List[Dict] = birthdate_raw.get("birthdays", [])
         if not raw_data:
-            return None
-        return datetime.date(**raw_data[0].get("date"))
+            return None, None, None
+        birthdate = datetime.date(**raw_data[0].get("date"))
+        return birthdate, str(birthdate.year), f"{0:02d}{1:02d}".format(birthdate.month, birthdate.day)
 
 
 class GoogleLoginView(base.SocialPlatformLoginView, google.GoogleContextMixin):

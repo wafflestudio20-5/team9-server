@@ -13,15 +13,15 @@ class SocialPlatformContextMixin(abc.ABC):
 
     @property
     def redirect_frontend_url(self):
-        return os.path.join(settings.BASE_FE_URI, "login")
+        return os.path.join(settings.FRONTEND_URL, "login")
 
     @property
     def callback_url(self):
-        return os.path.join(settings.BASE_BE_URI, f"api/v1/user/login/{self.platform}/callback/")
+        return os.path.join(settings.BACKEND_URL, f"api/v1/user/login/{self.platform}/callback/")
 
     @property
     def finish_url(self):
-        return os.path.join(settings.BASE_BE_URI, f"api/v1/user/login/{self.platform}/finish/")
+        return os.path.join(settings.BACKEND_URL, f"api/v1/user/login/{self.platform}/finish/")
 
     @property
     def client_id(self):
