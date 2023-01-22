@@ -31,7 +31,7 @@ jobs:
     - name: Run tests
       run: |
         cd ${GITHUB_WORKSPACE}/dear_j/
-        pytest --junit-xml=${GITHUB_WORKSPACE}/dear_j/test.xml ./dear_j
+        pytest --junit-xml=${GITHUB_WORKSPACE}/dear_j/test.xml ./
         
     - name: Test reports
       uses: dorny/test-reporter@v1
