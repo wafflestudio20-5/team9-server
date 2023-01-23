@@ -53,7 +53,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         permission_refined_queryset = total_queryset.filter(
             protection_level__lte=calendar_protection.ProtectionLevel.filter_user_schedule(self.request.user, target_user_pk),
             is_opened=True,
-        ).distinct()
+        )
         return permission_refined_queryset
 
 
