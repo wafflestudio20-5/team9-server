@@ -14,3 +14,13 @@ class Network(models.Model):
         verbose_name = "network"
         verbose_name_plural = "networks"
         db_table = "tb_network"
+
+class Group(models.Model):
+    participants = models.ManyToManyField(user_models.User, through="Participants")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "group"
+        verbose_name_plural = "groups"
+        db_table = "tb_group"
