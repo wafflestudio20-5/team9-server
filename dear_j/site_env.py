@@ -7,6 +7,7 @@ class SiteEnv(enum.Enum):
     STAGE = "STAGE"
     DEV = "DEV"
     LOCAL = "LOCAL"
+    TEST = "TEST"
 
 
 _site = os.environ.get("SITE", "LOCAL").upper()
@@ -30,6 +31,10 @@ def is_dev() -> bool:
 
 def is_local() -> bool:
     return _current_site is SiteEnv.LOCAL
+
+
+def is_test() -> bool:
+    return _current_site is SiteEnv.TEST
 
 
 def is_prod_or_stage() -> bool:

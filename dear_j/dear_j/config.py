@@ -1,4 +1,8 @@
 import datetime
+import os
+
+import site_env
+from utils import ssm as ssm_utils
 
 # settings regarding login
 SITE_ID = 1
@@ -14,6 +18,16 @@ AUTH_USER_MODEL = "user.User"
 
 # django-allauth
 ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
+if site_env.is_test():
+    KAKAO_CLIENT_ID = os.environ.get("KAKAO_CLIENT_ID")
+    KAKAO_SECRET = os.environ.get("KAKAO_SECRET")
+    GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+    GOOGLE_SECRET = os.environ.get("GOOGLE_SECRET")
+else:
+    KAKAO_CLIENT_ID = ssm_utils.get_ssm_parameter(alias="/backend/dearj/kakao/client-id")
+    KAKAO_SECRET = ssm_utils.get_ssm_parameter(alias="/backend/dearj/kakao/client-pw")
+    GOOGLE_CLIENT_ID = ssm_utils.get_ssm_parameter(alias="/backend/dearj/google/client-id")
+    GOOGLE_SECRET = ssm_utils.get_ssm_parameter(alias="/backend/dearj/google/client-pw")
 
 # jwt environment setting
 REST_USE_JWT = True

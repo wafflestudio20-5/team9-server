@@ -21,7 +21,7 @@ class HostInfo:
     @property
     def url(self) -> str:
         url = f"https://{self.domain}" if self.is_https else f"http://{self.domain}"
-        if self.port and self.port != 80:
+        if self.port and self.port not in (80, 443):
             url = f"{url}:{self.port}"
         return url
 

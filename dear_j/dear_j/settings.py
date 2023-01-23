@@ -14,14 +14,16 @@ import pymysql
 from dear_j import config
 from dear_j import host
 import site_env
-from utils import ssm
+from utils import ssm as ssm_utils
 from utils import time as time_utils
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
-
-SECRET_KEY = ssm.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
+if site_env.is_test():
+    SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+else:
+    SECRET_KEY = ssm_utils.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
 DEBUG = not site_env.is_prod()
 
 ALLOWED_HOSTS = host.BACKEND_HOST.ALLOWED_HOSTS
@@ -119,15 +121,15 @@ REST_AUTH_REGISTER_SERIALIZERS = {"REGISTER_SERIALIZER": "user.serializers.Regis
 SOCIALACCOUNT_PROVIDERS = {
     "kakao": {
         "APP": {
-            "client_id": ssm.get_ssm_parameter(alias="/backend/dearj/kakao/client-id"),
-            "secret": ssm.get_ssm_parameter(alias="/backend/dearj/kakao/client-pw"),
+            "client_id": config.KAKAO_CLIENT_ID,
+            "secret": config.KAKAO_SECRET,
             "key": "",
         },
     },
     "google": {
         "APP": {
-            "client_id": ssm.get_ssm_parameter(alias="/backend/dearj/google/client-id"),
-            "secret": ssm.get_ssm_parameter(alias="/backend/dearj/google/client-pw"),
+            "client_id": config.GOOGLE_CLIENT_ID,
+            "secret": config.GOOGLE_SECRET,
             "key": "",
         },
     },
@@ -183,7 +185,7 @@ if site_env.is_prod_or_stage():
             "ENGINE": "django.db.backends.mysql",
             "NAME": "dear_j" if site_env.is_prod() else "dear_j_stage",
             "USER": "admin",
-            "PASSWORD": ssm.get_ssm_parameter("/database/dearj/master_key"),
+            "PASSWORD": ssm_utils.get_ssm_parameter("/database/dearj/master_key"),
             "HOST": "database-dear-j.c8csrf4cdshb.ap-northeast-2.rds.amazonaws.com",
             "PORT": "3306",
         }
