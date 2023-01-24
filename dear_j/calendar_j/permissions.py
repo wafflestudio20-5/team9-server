@@ -3,8 +3,6 @@ from rest_framework import request as req
 
 from calendar_j import models as calendar_models
 from calendar_j.services.protection import protection
-from social import models as social_models
-from user import models as user_models
 
 
 class IsScheduleCreaterOrReader(permissions.IsAuthenticatedOrReadOnly):

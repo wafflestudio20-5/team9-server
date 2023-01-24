@@ -35,22 +35,22 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
 
         target_user_pk = params.get("pk")
         target_user = shortcuts.get_object_or_404(user_models.User, pk=target_user_pk)
+
         start_date = time_utils.normal_date_formatter.parse(params.get("from"))
         end_date = time_utils.normal_date_formatter.parse(params.get("to"))
+
         participants = calendar_models.Participant.objects.filter(
             participant__pk=target_user_pk, status=attendance.AttendanceStatus.PRESENCE
         ).values_list("participant_id")
 
         queryset: query.QuerySet = super().get_queryset()
 
-        created_queryset = queryset.filter(created_by__email=target_user_pk, start_at__range=(start_date, end_date)) | queryset.filter(
-            created_by__email=target_user_pk, end_at__range=(start_date, end_date)
+        total_queryset = queryset.filter(query.Q(created_by__pk=target_user_pk) | query.Q(participants__pk__in=participants))
+        date_filtered_queryset = total_queryset.filter(
+            query.Q(start_at__range=(start_date, end_date)) | query.Q(end_at__range=(start_date, end_date))
         )
-        parcipating_queryset = queryset.filter(participants__pk__in=participants, start_at__range=(start_date, end_date)) | queryset.filter(
-            participants__pk__in=participants, end_at__range=(start_date, end_date)
-        )
-        total_queryset = created_queryset | parcipating_queryset
-        permission_refined_queryset = total_queryset.filter(
+
+        permission_refined_queryset = date_filtered_queryset.filter(
             protection_level__lte=calendar_protection.ProtectionLevel.filter_user_schedule(self.request.user, target_user),
             is_opened=True,
         )
@@ -89,5 +89,4 @@ class ScheduleAttendenceResponseView(generics.UpdateAPIView):
     def get_object(self) -> calendar_models.Participant:
         pk = self.kwargs["pk"]
         schedule = calendar_models.Schedule.objects.get(pk=pk)
-
         return shortcuts.get_object_or_404(calendar_models.Participant, participant=self.request.user, schedule=schedule)

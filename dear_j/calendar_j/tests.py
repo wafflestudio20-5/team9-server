@@ -99,7 +99,6 @@ def test_create_recurring_schedule(
 ):
     client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
     schedule_data = {
-        "id": 1,
         "participants": [
             {
                 "pk": 2,
@@ -118,7 +117,6 @@ def test_create_recurring_schedule(
         "is_recurring": True,
         "cron_expr": "* * * * 1 *",
         "recurring_end_at": "2023-02-10 00:00:00",
-        "schedule_groups": [],
     }
 
     response = client.post(
@@ -234,6 +232,11 @@ def test_get_schedule_list_open_permission_success(
             "end_at": "2022-12-12 00:00:00",
             "description": "Test Description 2",
             "created_by": 2,
+            "is_opened": True,
+            "is_recurring": False,
+            "cron_expr": None,
+            "recurring_end_at": None,
+            "schedule_groups": [],
         }
     ]
 
@@ -292,6 +295,11 @@ def test_get_schedule_list_follower_permission_success(
             "end_at": "2022-12-12 00:00:00",
             "description": "Test Description 2",
             "created_by": 2,
+            "is_opened": True,
+            "is_recurring": False,
+            "cron_expr": None,
+            "recurring_end_at": None,
+            "schedule_groups": [],
         },
         {
             "id": 3,
@@ -303,6 +311,11 @@ def test_get_schedule_list_follower_permission_success(
             "end_at": "2022-12-12 00:00:00",
             "description": "Test Description 4",
             "created_by": 2,
+            "is_opened": True,
+            "is_recurring": False,
+            "cron_expr": None,
+            "recurring_end_at": None,
+            "schedule_groups": [],
         },
     ]
     compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, _EXCEPTION_COLUMNS)

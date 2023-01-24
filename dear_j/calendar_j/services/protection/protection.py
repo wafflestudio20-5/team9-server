@@ -1,4 +1,3 @@
-from django import shortcuts
 from django.db import models
 
 from social import models as social_models
