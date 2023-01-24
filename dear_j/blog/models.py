@@ -27,8 +27,6 @@ class Comment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_updated = models.BooleanField(default=False)
     content = models.TextField()
-    num_like = models.IntegerField(default=0)
-    num_dislike = models.IntegerField(default=0)
 
     class Meta:
         verbose_name = "comment"

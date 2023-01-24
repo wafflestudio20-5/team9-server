@@ -25,3 +25,8 @@ class CommentSerializer(serializers.ModelSerializer):
                 "default": serializers.CurrentUserDefault(),
             },
         }
+
+    def update(self, instance, validated_data):
+        instance.is_updated = True
+        instance.save()
+        return super().update(instance, validated_data)
