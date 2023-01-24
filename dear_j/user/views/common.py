@@ -19,7 +19,7 @@ class UserLogoutView(dj_auth_views.LogoutView):
     pass
 
 
-class UserProfileView(generics.RetrieveUpdateAPIView):
+class UserProfileView(dj_auth_views.UserDetailsView):
     serializer_class = serializers.UserDetailSerializer
     permission_classes = (permissions.UserIdentification,)
 
