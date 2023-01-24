@@ -12,14 +12,18 @@ class Schedule(models.Model):
         choices=protection.ProtectionLevel.choices,
         default=protection.ProtectionLevel.get_default(),
     )
-    show_content = models.BooleanField(default=True, blank=True)
-    start_at = models.DateTimeField()
-    end_at = models.DateTimeField()
+    show_content = models.BooleanField(default=True, null=False)
+    start_at = models.DateTimeField(null=False)
+    end_at = models.DateTimeField(null=False)
     participants = models.ManyToManyField(user_models.User, through="Participant")
     description = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    is_opened = models.BooleanField(default=True, blank=True)
+    is_opened = models.BooleanField(default=True, null=False)
+    is_recurring = models.BooleanField(default=False, null=False)
+    cron_expr = models.CharField(null=True, max_length=100)
+    recurring_end_at = models.DateTimeField(null=True)
+    schedule_groups = models.ManyToManyField("ScheduleGroup", through="ScheduleToGroup")
 
     class Meta:
         verbose_name = "schedule"
@@ -41,3 +45,24 @@ class Participant(models.Model):
         verbose_name = "participant"
         verbose_name_plural = "participants"
         db_table = "tb_participant"
+
+
+class ScheduleGroup(models.Model):
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name = "schedule_group"
+        verbose_name_plural = "schedule_groups"
+        db_table = "tb_schedule_group"
+
+
+class ScheduleToGroup(models.Model):
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    group = models.ForeignKey(ScheduleGroup, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "schedule_to_group"
+        verbose_name_plural = "schedules_to_groups"
+        db_table = "tb_schedule_to_group"
