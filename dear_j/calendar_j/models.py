@@ -23,7 +23,7 @@ class Schedule(models.Model):
     is_recurring = models.BooleanField(default=False, null=False)
     cron_expr = models.CharField(null=True, max_length=100)
     recurring_end_at = models.DateTimeField(null=True)
-    schedule_groups = models.ManyToManyField("ScheduleGroup", through="ScheduleToGroup")
+    schedule_groups = models.ManyToManyField("ScheduleGroup", through="ScheduleToGroup", related_name="schedules")
 
     class Meta:
         verbose_name = "schedule"
@@ -33,7 +33,7 @@ class Schedule(models.Model):
 
 class Participant(models.Model):
     participant = models.ForeignKey(user_models.User, on_delete=models.PROTECT)
-    schedule = models.ForeignKey(Schedule, on_delete=models.PROTECT)
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     status = models.IntegerField(
         choices=attendance.AttendanceStatus.choices,
         default=attendance.AttendanceStatus.get_default(),
@@ -48,7 +48,8 @@ class Participant(models.Model):
 
 
 class ScheduleGroup(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(null=True, max_length=100)
+    created_by = models.ForeignKey(user_models.User, on_delete=models.PROTECT, related_name="schedule_groups")
 
     class Meta:
         verbose_name = "schedule_group"

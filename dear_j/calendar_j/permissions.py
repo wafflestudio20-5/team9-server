@@ -16,6 +16,9 @@ class IsScheduleCreaterOrReader(permissions.IsAuthenticatedOrReadOnly):
 
 class IsScheduleParticipant(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request: req.HttpRequest, view, obj: calendar_models.Participant) -> bool:
-        if obj.participant == request.user:
-            return True
-        return False
+        return obj.participant == request.user
+
+
+class IsScheduleGroupCreator(permissions.IsAuthenticated):
+    def has_object_permission(self, request: req.HttpRequest, view, obj: calendar_models.ScheduleGroup) -> bool:
+        return obj.created_by == request.user

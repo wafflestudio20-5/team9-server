@@ -81,8 +81,19 @@ class ScheduleSerializer(serializers.ModelSerializer):
                 self.create_participants_with_schedule(child_schedule, participants_data)
                 schedules.append(child_schedule)
 
-            group = calendar_model.ScheduleGroup.objects.create(name="recurring_schedule_group")
+            group = calendar_model.ScheduleGroup.objects.create(
+                name="recurring_schedule_group",
+                created_by=schedule.created_by,
+            )
             for group_schedule in schedules:
                 calendar_model.ScheduleToGroup.objects.create(schedule=group_schedule, group=group)
 
         return schedule
+
+
+class ScheduleGroupSerializer(serializers.ModelSerializer):
+    schedules = ScheduleSerializer(many=True)
+
+    class Meta:
+        model = calendar_model.ScheduleGroup
+        fields = "__all__"

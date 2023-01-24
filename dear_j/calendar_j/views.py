@@ -1,10 +1,16 @@
+import copy
+import datetime
+
 from dj_rest_auth import jwt_auth
 from django import http
 from django import shortcuts
 from django.db.models import query
 from rest_framework import authentication
+from rest_framework import exceptions
 from rest_framework import generics
 from rest_framework import permissions
+from rest_framework import request as req
+from rest_framework import response as resp
 from rest_framework import status
 
 from calendar_j import exceptions as calendar_exceptions
@@ -56,6 +62,13 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         )
         return permission_refined_queryset
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return resp.Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 
 class ScheduleRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = [
@@ -77,7 +90,7 @@ class ScheduleRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         return http.JsonResponse({}, status=status.HTTP_204_NO_CONTENT)
 
 
-class ScheduleAttendenceResponseView(generics.UpdateAPIView):
+class ScheduleAttendanceUpdateView(generics.UpdateAPIView):
     authentication_classes = [
         jwt_auth.JWTCookieAuthentication,
         authentication.SessionAuthentication,
@@ -90,3 +103,59 @@ class ScheduleAttendenceResponseView(generics.UpdateAPIView):
         pk = self.kwargs["pk"]
         schedule = calendar_models.Schedule.objects.get(pk=pk)
         return shortcuts.get_object_or_404(calendar_models.Participant, participant=self.request.user, schedule=schedule)
+
+
+class ScheduleGroupRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = [
+        jwt_auth.JWTCookieAuthentication,
+        authentication.SessionAuthentication,
+    ]
+    queryset = calendar_models.ScheduleGroup.objects.all()
+    permission_classes = [calendar_permissions.IsScheduleGroupCreator]
+    serializer_class = calendar_serializers.ScheduleGroupSerializer
+
+    def update(self, request: req.Request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        params = request.data
+
+        schedules = calendar_models.Schedule.objects.filter(schedule_groups__id=self.kwargs["pk"])
+        for schedule in schedules:
+            updated_params = copy.deepcopy(params)
+            if "cron_expr" in params.keys():
+                raise exceptions.ValidationError("Recurring Rule cannot be updated")
+
+            if ("start_at" in params.keys()) ^ ("end_at" in params.keys()):
+                raise exceptions.ValidationError("start_at, end_at must be existed together")
+
+            if all(key in params.keys() for key in ("start_at", "end_at")):
+                start_at = time_utils.normal_datetime_formatter.parse(params.get("start_at"))
+                end_at = time_utils.normal_datetime_formatter.parse(params.get("end_at"))
+
+                updated_start_at = time_utils.replace_time(schedule.start_at, start_at)
+                updated_end_at = time_utils.replace_time(schedule.end_at, end_at)
+                updated_params.update(
+                    {
+                        "start_at": updated_start_at,
+                        "end_at": updated_end_at,
+                    }
+                )
+
+            schedule_serializer = calendar_serializers.ScheduleSerializer(instance=schedule, data=updated_params, partial=partial)
+            schedule_serializer.is_valid(raise_exception=True)
+            schedule_serializer.save()
+
+            if getattr(schedule, "_prefetched_objects_cache", None):
+                schedule._prefetched_objects_cache = {}
+
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return resp.Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        schedules = calendar_models.Schedule.objects.filter(schedule_groups__id=self.kwargs["pk"])
+        for schedule in schedules:
+            schedule.delete()
+
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return resp.Response(status=status.HTTP_204_NO_CONTENT)

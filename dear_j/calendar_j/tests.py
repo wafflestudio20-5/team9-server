@@ -182,6 +182,45 @@ def test_create_recurring_schedule(
     ]
 
     compare_utils.assert_json_equal(serializer.data, expected_recurring_schedule, _EXCEPTION_COLUMNS)
+    response = client.get(path="/api/v1/calendar/schedule/group/1/")
+
+    new_data = {
+        "start_at": "2023-02-06 02:00:00",
+        "end_at": "2023-02-06 02:30:00",
+    }
+
+    response = client.patch(
+        path="/api/v1/calendar/schedule/group/1/",
+        data=new_data,
+        content_type="application/json",
+    )
+    child_schedule_1.update(
+        {
+            "start_at": "2023-01-23 02:00:00",
+            "end_at": "2023-01-23 02:30:00",
+        }
+    )
+    child_schedule_2.update(
+        {
+            "start_at": "2023-01-30 02:00:00",
+            "end_at": "2023-01-30 02:30:00",
+        }
+    )
+    child_schedule_3.update(
+        {
+            "start_at": "2023-02-06 02:00:00",
+            "end_at": "2023-02-06 02:30:00",
+        }
+    )
+    expected_recurring_schedule = [
+        child_schedule_1,
+        child_schedule_2,
+        child_schedule_3,
+    ]
+    compare_utils.assert_json_equal(response.json()["schedules"], expected_recurring_schedule, _EXCEPTION_COLUMNS)
+
+    response = client.delete(path="/api/v1/calendar/schedule/group/1/")
+    compare_utils.assert_response_equal(response, status.HTTP_204_NO_CONTENT)
 
 
 @pytest.mark.django_db
