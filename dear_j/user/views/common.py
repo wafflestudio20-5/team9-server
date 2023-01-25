@@ -18,6 +18,8 @@ class UserLoginView(dj_auth_views.LoginView):
 class UserLogoutView(dj_auth_views.LogoutView):
     pass
 
+class UserPasswordChangeView(dj_auth_views.PasswordChangeView):
+    pass
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = serializers.UserDetailSerializer
