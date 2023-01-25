@@ -65,8 +65,16 @@ def test_get_post(
         data=post_data,
         content_type="application/json",
     )
-
+    expected = {
+        "pid": 1,
+        "title": "title",
+        "content": "content",
+        "created_by": 1
+    }
     actual = response.json()
+    for key, value in expected.items():
+        assert key in actual.keys()
+        assert actual[key] == value
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -78,7 +86,6 @@ def test_get_post(
         "content": "content",
         "created_by": 1
     }
-
     assert response.status_code == status.HTTP_200_OK
     for key, value in expected.items():
         assert key in actual.keys()
@@ -99,27 +106,30 @@ def test_create_comment(
         data=post_data,
         content_type="application/json",
     )
-    actual = response.json()
-    assert response.status_code == status.HTTP_201_CREATED
-
-    client.post("/api/v1/user/logout/")
-    client.post("/api/v1/user/login/", data=user2.for_login, content_type="application/json")
-
-    comment_data = {"content":"content"}
-    response = client.post(
-        path="/api/v1/blog/post/1/comment/",
-        data=comment_data,
-        content_type="application/json",
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    print(response.json())
-
     expected = {
         "pid": 1,
         "title": "title",
         "content": "content",
         "created_by": 1
     }
+    actual = response.json()
+    for key, value in expected.items():
+        assert key in actual.keys()
+        assert actual[key] == value
+    assert response.status_code == status.HTTP_201_CREATED
+
+    client.post("/api/v1/user/logout/")
+    client.post("/api/v1/user/login/", data=user2.for_login, content_type="application/json")
+
+    comment_data = {"post":1, "content":"content"}
+    response = client.post(
+        path="/api/v1/blog/comment/",
+        data=comment_data,
+        content_type="application/json",
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+    actual = response.json()
+    expected = {"cid": 1, "content": "content", "created_by": 2}
 
     for key, value in expected.items():
         assert key in actual.keys()
@@ -140,22 +150,41 @@ def test_update_comment(
         data=post_data,
         content_type="application/json",
     )
+    expected = {
+        "pid": 1,
+        "title": "title",
+        "content": "content",
+        "created_by": 1
+    }
     actual = response.json()
+    for key, value in expected.items():
+        assert key in actual.keys()
+        assert actual[key] == value
     assert response.status_code == status.HTTP_201_CREATED
 
     client.post("/api/v1/user/logout/")
     client.post("/api/v1/user/login/", data=user2.for_login, content_type="application/json")
 
-    comment_data = {"content":"content"}
+    comment_data = {"post":1, "content":"content"}
     response = client.post(
-        path="/api/v1/blog/post/1/comment/",
+        path="/api/v1/blog/comment/",
         data=comment_data,
         content_type="application/json",
     )
     assert response.status_code == status.HTTP_201_CREATED
+    actual = response.json()
+    expected = {"cid": 1, "content": "content", "created_by": 2}
+
+    for key, value in expected.items():
+        assert key in actual.keys()
+        assert actual[key] == value
+
+    response = client.get("/api/v1/blog/comment/1/")
+    assert response.status_code == status.HTTP_200_OK
+
 
     response = client.patch(
-        path="/api/v1/blog/post/1/comment/1/",
+        path="/api/v1/blog/comment/1/",
         data={"content": "modified"},
         content_type="application/json",
     )

@@ -8,10 +8,10 @@ urlpatterns = [
         "post/<int:pid>/", blog_views.PostRetrieveUpdateDestroyView.as_view()
     ),
     urls.path(
-        "post/<int:pid>/comment/", blog_views.CommentListCreateView.as_view()
+        "comment/", blog_views.CommentListCreateView.as_view()
     ),
     urls.path(
-        "post/<int:pid>/comment/<int:cid>/",
+        "comment/<int:cid>/",
         blog_views.CommentUpdateDestroyView.as_view(),
     ),
 ]

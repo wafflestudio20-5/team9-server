@@ -13,7 +13,7 @@ class Post(models.Model):
     class Meta:
         verbose_name = "post"
         verbose_name_plural = "posts"
-        db_table = "posts"
+        db_table = "tb_posts"
 
     def __str__(self):
         return str(self.title)
@@ -31,4 +31,4 @@ class Comment(models.Model):
     class Meta:
         verbose_name = "comment"
         verbose_name_plural = "comments"
-        db_table = "comments"
+        db_table = "tb_comments"
