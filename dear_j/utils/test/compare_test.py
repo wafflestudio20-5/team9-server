@@ -40,7 +40,7 @@ def test_assert_response_equal():
             "cron_expr": "* * * * 1 *",
             "recurring_end_at": "2023-02-10 00:00:00",
             "created_by": 1,
-            "schedule_groups": [1],
+            "recurring_schedule_group": 1,
         },
         status_code=status.HTTP_201_CREATED,
     )
@@ -70,7 +70,7 @@ def test_assert_response_equal():
         "is_recurring": True,
         "cron_expr": "* * * * 1 *",
         "recurring_end_at": "2023-02-10 00:00:00",
-        "schedule_groups": [1],
+        "recurring_schedule_group": 1,
     }
 
     compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ("created_at", "updated_at"))

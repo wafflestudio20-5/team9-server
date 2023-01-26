@@ -35,21 +35,22 @@ class ScheduleSerializer(serializers.ModelSerializer):
     def create_participants_with_schedule(
         self,
         schedule: calendar_model.Schedule,
-        participants_data: List,
+        user_ids: List[int],
     ) -> List[Optional[calendar_model.Participant]]:
         participants = []
+        candidates = user_models.User.objects.filter(id__in=user_ids)
 
-        for participant_data in participants_data:
-            target_user = user_models.User.objects.get(**participant_data)
-
-            if target_user != schedule.created_by:
-                participant = calendar_model.Participant.objects.create(schedule=schedule, participant=target_user)
+        for candidate in candidates:
+            if candidate != schedule.created_by:
+                participant = calendar_model.Participant.objects.create(schedule=schedule, participant=candidate)
                 participants.append(participant)
 
         return participants
 
     def create(self, validated_data: Dict) -> calendar_model.Schedule:
-        participants_data = validated_data.pop("participants", [])
+        participants_raw_data = validated_data.pop("participants", [])
+        user_ids = [row.get("pk") for row in participants_raw_data]
+
         if validated_data.get("is_recurring"):
             if not any(validated_data.get(key) for key in ("cron_expr", "recurring_end_at")):
                 raise exceptions.ValidationError(
@@ -57,7 +58,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
                 )
 
         schedule: calendar_model.Schedule = super().create(validated_data)
-        self.create_participants_with_schedule(schedule, participants_data)
+        self.create_participants_with_schedule(schedule, user_ids)
 
         if schedule.is_recurring:
             schedules = [schedule]
@@ -78,22 +79,23 @@ class ScheduleSerializer(serializers.ModelSerializer):
                 )
 
                 child_schedule = super().create(child_data)
-                self.create_participants_with_schedule(child_schedule, participants_data)
+                self.create_participants_with_schedule(child_schedule, user_ids)
                 schedules.append(child_schedule)
 
-            group = calendar_model.ScheduleGroup.objects.create(
+            recurring_schedule_group = calendar_model.RecurringScheduleGroup.objects.create(
                 name="recurring_schedule_group",
                 created_by=schedule.created_by,
             )
-            for group_schedule in schedules:
-                calendar_model.ScheduleToGroup.objects.create(schedule=group_schedule, group=group)
+            for child_schedule in schedules:
+                child_schedule.recurring_schedule_group = recurring_schedule_group
+                child_schedule.save()
 
         return schedule
 
 
-class ScheduleGroupSerializer(serializers.ModelSerializer):
+class RecurringScheduleGroupSerializer(serializers.ModelSerializer):
     schedules = ScheduleSerializer(many=True)
 
     class Meta:
-        model = calendar_model.ScheduleGroup
+        model = calendar_model.RecurringScheduleGroup
         fields = "__all__"

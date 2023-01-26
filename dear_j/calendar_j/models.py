@@ -23,7 +23,7 @@ class Schedule(models.Model):
     is_recurring = models.BooleanField(default=False, null=False)
     cron_expr = models.CharField(null=True, max_length=100)
     recurring_end_at = models.DateTimeField(null=True)
-    schedule_groups = models.ManyToManyField("ScheduleGroup", through="ScheduleToGroup", related_name="schedules")
+    recurring_schedule_group = models.ForeignKey("RecurringScheduleGroup", null=True, on_delete=models.PROTECT, related_name="schedules")
 
     class Meta:
         verbose_name = "schedule"
@@ -33,7 +33,7 @@ class Schedule(models.Model):
 
 class Participant(models.Model):
     participant = models.ForeignKey(user_models.User, on_delete=models.PROTECT)
-    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    schedule = models.ForeignKey(Schedule, on_delete=models.PROTECT)
     status = models.IntegerField(
         choices=attendance.AttendanceStatus.choices,
         default=attendance.AttendanceStatus.get_default(),
@@ -47,23 +47,12 @@ class Participant(models.Model):
         db_table = "tb_participant"
 
 
-class ScheduleGroup(models.Model):
+class RecurringScheduleGroup(models.Model):
     name = models.CharField(null=True, max_length=100)
-    created_by = models.ForeignKey(user_models.User, on_delete=models.PROTECT, related_name="schedule_groups")
+    is_opened = models.BooleanField(default=True, null=False)
+    created_by = models.ForeignKey(user_models.User, on_delete=models.PROTECT, related_name="recurring_schedule_groups")
 
     class Meta:
-        verbose_name = "schedule_group"
-        verbose_name_plural = "schedule_groups"
-        db_table = "tb_schedule_group"
-
-
-class ScheduleToGroup(models.Model):
-    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
-    group = models.ForeignKey(ScheduleGroup, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = "schedule_to_group"
-        verbose_name_plural = "schedules_to_groups"
-        db_table = "tb_schedule_to_group"
+        verbose_name = "recurring_schedule_group"
+        verbose_name_plural = "recurring_schedule_groups"
+        db_table = "tb_recurring_schedule_group"

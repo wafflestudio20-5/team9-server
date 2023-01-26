@@ -110,15 +110,15 @@ class ScheduleGroupRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIVi
         jwt_auth.JWTCookieAuthentication,
         authentication.SessionAuthentication,
     ]
-    queryset = calendar_models.ScheduleGroup.objects.all()
-    permission_classes = [calendar_permissions.IsScheduleGroupCreator]
-    serializer_class = calendar_serializers.ScheduleGroupSerializer
+    queryset = calendar_models.RecurringScheduleGroup.objects.all()
+    permission_classes = [calendar_permissions.IsRecurringScheduleGroupCreator]
+    serializer_class = calendar_serializers.RecurringScheduleGroupSerializer
 
     def update(self, request: req.Request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
         params = request.data
 
-        schedules = calendar_models.Schedule.objects.filter(schedule_groups__id=self.kwargs["pk"])
+        schedules = calendar_models.Schedule.objects.filter(recurring_schedule_group=self.kwargs["pk"])
         for schedule in schedules:
             updated_params = copy.deepcopy(params)
             if "cron_expr" in params.keys():
@@ -147,15 +147,17 @@ class ScheduleGroupRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIVi
             if getattr(schedule, "_prefetched_objects_cache", None):
                 schedule._prefetched_objects_cache = {}
 
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
+        recurring_schedule_group = self.get_object()
+        serializer = self.get_serializer(recurring_schedule_group)
         return resp.Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
-        schedules = calendar_models.Schedule.objects.filter(schedule_groups__id=self.kwargs["pk"])
+        schedules = calendar_models.Schedule.objects.filter(recurring_schedule_group=self.kwargs["pk"])
         for schedule in schedules:
-            schedule.delete()
+            schedule.is_opened = False
+            schedule.save()
 
-        instance = self.get_object()
-        self.perform_destroy(instance)
+        recurring_schedule_group: calendar_models.RecurringScheduleGroup = self.get_object()
+        recurring_schedule_group.is_opened = False
+        recurring_schedule_group.save()
         return resp.Response(status=status.HTTP_204_NO_CONTENT)

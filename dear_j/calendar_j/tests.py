@@ -84,7 +84,7 @@ def test_create_schedule(
         "is_recurring": False,
         "cron_expr": None,
         "recurring_end_at": None,
-        "schedule_groups": [],
+        "recurring_schedule_group": None,
     }
 
     compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, _EXCEPTION_COLUMNS)
@@ -149,13 +149,12 @@ def test_create_recurring_schedule(
         "is_recurring": True,
         "cron_expr": "* * * * 1 *",
         "recurring_end_at": "2023-02-10 00:00:00",
-        "schedule_groups": [1],
+        "recurring_schedule_group": 1,
     }
 
     compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, _EXCEPTION_COLUMNS)
-
     serializer = calendar_serializers.ScheduleSerializer(
-        calendar_models.Schedule.objects.filter(schedule_groups__id=1),
+        calendar_models.Schedule.objects.filter(recurring_schedule_group=1),
         many=True,
     )
     child_schedule_1 = copy.deepcopy(expected)
@@ -275,7 +274,7 @@ def test_get_schedule_list_open_permission_success(
             "is_recurring": False,
             "cron_expr": None,
             "recurring_end_at": None,
-            "schedule_groups": [],
+            "recurring_schedule_group": None,
         }
     ]
 
@@ -338,7 +337,7 @@ def test_get_schedule_list_follower_permission_success(
             "is_recurring": False,
             "cron_expr": None,
             "recurring_end_at": None,
-            "schedule_groups": [],
+            "recurring_schedule_group": None,
         },
         {
             "id": 3,
@@ -354,7 +353,7 @@ def test_get_schedule_list_follower_permission_success(
             "is_recurring": False,
             "cron_expr": None,
             "recurring_end_at": None,
-            "schedule_groups": [],
+            "recurring_schedule_group": None,
         },
     ]
     compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, _EXCEPTION_COLUMNS)
@@ -483,7 +482,7 @@ def test_update_schedule(
         "is_recurring": False,
         "cron_expr": None,
         "recurring_end_at": None,
-        "schedule_groups": [],
+        "recurring_schedule_group": None,
     }
     compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, _EXCEPTION_COLUMNS)
 
@@ -512,7 +511,7 @@ def test_update_schedule(
         "is_recurring": False,
         "cron_expr": None,
         "recurring_end_at": None,
-        "schedule_groups": [],
+        "recurring_schedule_group": None,
     }
     compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, _EXCEPTION_COLUMNS)
 
