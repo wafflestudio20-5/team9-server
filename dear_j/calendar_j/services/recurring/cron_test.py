@@ -15,11 +15,13 @@ def test_cron():
         start_at,
         start_at + datetime.timedelta(days=2),
         start_at + datetime.timedelta(days=4),
+        start_at + datetime.timedelta(days=6),
     ]
     expected_end_at_list = [
         end_at,
         end_at + datetime.timedelta(days=2),
         end_at + datetime.timedelta(days=4),
+        end_at + datetime.timedelta(days=6),
     ]
 
     assert start_at_list == expected_start_at_list

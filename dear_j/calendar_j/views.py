@@ -1,5 +1,4 @@
 import copy
-import datetime
 
 from dj_rest_auth import jwt_auth
 from django import http
@@ -8,6 +7,7 @@ from django.db.models import query
 from rest_framework import authentication
 from rest_framework import exceptions
 from rest_framework import generics
+from rest_framework import mixins
 from rest_framework import permissions
 from rest_framework import request as req
 from rest_framework import response as resp
@@ -39,30 +39,29 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         if not all(key in params.keys() for key in ("pk", "from", "to")):
             raise calendar_exceptions.GetScheduleListKeyException
 
-        target_user_pk = params.get("pk")
-        target_user = shortcuts.get_object_or_404(user_models.User, pk=target_user_pk)
+        target_user_id = params.get("pk")
+        target_user = shortcuts.get_object_or_404(user_models.User, pk=target_user_id)
 
         start_date = time_utils.normal_date_formatter.parse(params.get("from"))
         end_date = time_utils.normal_date_formatter.parse(params.get("to"))
 
         participants = calendar_models.Participant.objects.filter(
-            participant__pk=target_user_pk, status=attendance.AttendanceStatus.PRESENCE
+            participant__id=target_user_id, status=attendance.AttendanceStatus.PRESENCE
         ).values_list("participant_id")
 
         queryset: query.QuerySet = super().get_queryset()
+        total_queryset = queryset.filter(is_opened=True)
 
-        total_queryset = queryset.filter(query.Q(created_by__pk=target_user_pk) | query.Q(participants__pk__in=participants))
-        date_filtered_queryset = total_queryset.filter(
-            query.Q(start_at__range=(start_date, end_date)) | query.Q(end_at__range=(start_date, end_date))
-        )
-
+        related_queryset = total_queryset.filter(
+            query.Q(created_by__pk=target_user_id) | query.Q(participants__id__in=participants)
+        ).distinct()
+        date_filtered_queryset = related_queryset.filter(~(query.Q(start_at__gte=end_date) | query.Q(end_at__lte=start_date)))
         permission_refined_queryset = date_filtered_queryset.filter(
             protection_level__lte=calendar_protection.ProtectionLevel.filter_user_schedule(self.request.user, target_user),
-            is_opened=True,
         )
         return permission_refined_queryset
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request: req.Request, *args, **kwargs) -> resp.Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -76,18 +75,21 @@ class ScheduleRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         authentication.SessionAuthentication,
     ]
     queryset = calendar_models.Schedule.objects.all()
-    permission_classes = [calendar_permissions.IsScheduleCreaterOrReader]
+    permission_classes = [calendar_permissions.IsScheduleCreatorOrReader]
     serializer_class = calendar_serializers.ScheduleSerializer
 
-    def delete(self, request, *args, **kwargs):
-        pk = self.kwargs["pk"]
-        try:
-            schedule = calendar_models.Schedule.objects.get(pk=pk)
-        except calendar_models.Schedule.DoesNotExist:
-            return http.JsonResponse({"error": "schedule object does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+    def get_object(self):
+        schedule: calendar_models.Schedule = super().get_object()
+        if not schedule.is_opened:
+            raise http.Http404("No such schedule")
+        return schedule
+
+    def destroy(self, request, *args, **kwargs) -> resp.Response:
+        schedule_id = self.kwargs["pk"]
+        schedule = shortcuts.get_object_or_404(calendar_models.Schedule, id=schedule_id)
         schedule.is_opened = False
         schedule.save()
-        return http.JsonResponse({}, status=status.HTTP_204_NO_CONTENT)
+        return resp.Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ScheduleAttendanceUpdateView(generics.UpdateAPIView):
@@ -102,10 +104,16 @@ class ScheduleAttendanceUpdateView(generics.UpdateAPIView):
     def get_object(self) -> calendar_models.Participant:
         pk = self.kwargs["pk"]
         schedule = calendar_models.Schedule.objects.get(pk=pk)
+        if not schedule.is_opened:
+            raise http.Http404("No such schedule")
         return shortcuts.get_object_or_404(calendar_models.Participant, participant=self.request.user, schedule=schedule)
 
 
-class ScheduleGroupRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+class ScheduleGroupRetrieveUpdateDestroyView(
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView,
+):
     authentication_classes = [
         jwt_auth.JWTCookieAuthentication,
         authentication.SessionAuthentication,
@@ -114,7 +122,16 @@ class ScheduleGroupRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIVi
     permission_classes = [calendar_permissions.IsRecurringScheduleGroupCreator]
     serializer_class = calendar_serializers.RecurringScheduleGroupSerializer
 
-    def update(self, request: req.Request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+    def update(self, request: req.Request, *args, **kwargs) -> resp.Response:
         partial = kwargs.pop("partial", False)
         params = request.data
 
@@ -151,7 +168,7 @@ class ScheduleGroupRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIVi
         serializer = self.get_serializer(recurring_schedule_group)
         return resp.Response(serializer.data)
 
-    def destroy(self, request, *args, **kwargs):
+    def destroy(self, request, *args, **kwargs) -> resp.Response:
         schedules = calendar_models.Schedule.objects.filter(recurring_schedule_group=self.kwargs["pk"])
         for schedule in schedules:
             schedule.is_opened = False
