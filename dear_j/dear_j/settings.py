@@ -117,6 +117,18 @@ CORS_ORIGIN_ALLOW_ALL = config.CORS_ORIGIN_ALLOW_ALL
 REST_AUTH_SERIALIZERS = {"USER_DETAILS_SERIALIZER": "user.serializers.UserDetailSerializer"}
 REST_AUTH_REGISTER_SERIALIZERS = {"REGISTER_SERIALIZER": "user.serializers.RegisterSerializer"}
 
+# aws settings
+DEFAULT_FILE_STORAGE = config.DEFAULT_FILE_STORAGE
+AWS_S3_SECURE_URLS = config.AWS_S3_SECURE_URLS
+AWS_QUERYSTRING_AUTH = config.AWS_QUERYSTRING_AUTH
+
+AWS_REGION = config.AWS_REGION
+AWS_STORAGE_BUCKET_NAME = config.AWS_STORAGE_BUCKET_NAME
+AWS_S3_CUSTOM_DOMAIN = config.AWS_S3_CUSTOM_DOMAIN
+AWS_S3_OBJECT_PARAMETERS = config.AWS_S3_OBJECT_PARAMETERS
+MEDIA_ROOT = config.MEDIA_ROOT
+
+
 # allauth setting : https://django-allauth.readthedocs.io/en/latest/configuration.html
 # Check get_app function in allauth.socialaccount.adapter.py
 SOCIALACCOUNT_PROVIDERS = {
@@ -142,6 +154,7 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": ROTATE_REFRESH_TOKENS,
     "BLACKLIST_AFTER_ROTATION": BLACKLIST_AFTER_ROTATION,
 }
+
 
 AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend", "allauth.account.auth_backends.AuthenticationBackend")
 

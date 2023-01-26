@@ -1,5 +1,6 @@
 import datetime
 import os
+import pathlib
 
 import site_env
 from utils import ssm as ssm_utils
@@ -40,3 +41,15 @@ BLACKLIST_AFTER_ROTATION = True
 
 # cors setting
 CORS_ORIGIN_ALLOW_ALL = True
+
+# aws setting
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+AWS_S3_SECURE_URLS = False
+AWS_QUERYSTRING_AUTH = False
+
+AWS_REGION = "ap-northeast-2"
+AWS_STORAGE_BUCKET_NAME = ssm_utils.get_ssm_parameter(alias="/backend/dearj/s3/blog")
+AWS_S3_CUSTOM_DOMAIN = "%s.s3.%s.amazonaws.com" % (AWS_STORAGE_BUCKET_NAME, AWS_REGION)
+AWS_S3_OBJECT_PARAMETERS = {}
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
+MEDIA_ROOT = os.path.join(BASE_DIR, "path/to/store/my/files/")
