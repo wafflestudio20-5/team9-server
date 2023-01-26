@@ -588,11 +588,10 @@ def test_update_schedule(
     user2: data_utils.UserData,
 ):
     client.post("/api/v1/user/login/", data=user1.for_login, content_type="application/json")
-    response = client.post(
+    client.post(
         path="/api/v1/calendar/schedule/",
         data={
             "title": "Test Schedule 1-1",
-            # "participants": [{"pk":2}],
             "start_at": "2022-12-11 00:00:00",
             "end_at": "2022-12-12 00:00:00",
             "description": "Test description 1-1",
