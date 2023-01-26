@@ -109,7 +109,7 @@ class ScheduleAttendanceUpdateView(generics.UpdateAPIView):
         return shortcuts.get_object_or_404(calendar_models.Participant, participant=self.request.user, schedule=schedule)
 
 
-class ScheduleGroupRetrieveUpdateDestroyView(
+class ScheduleGroupUpdateDestroyView(
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
     generics.GenericAPIView,
@@ -136,8 +136,8 @@ class ScheduleGroupRetrieveUpdateDestroyView(
         params = request.data
 
         schedules = calendar_models.Schedule.objects.filter(recurring_schedule_group=self.kwargs["pk"])
+        updated_params = copy.deepcopy(params)
         for schedule in schedules:
-            updated_params = copy.deepcopy(params)
             if "cron_expr" in params.keys():
                 raise exceptions.ValidationError("Recurring Rule cannot be updated")
 
