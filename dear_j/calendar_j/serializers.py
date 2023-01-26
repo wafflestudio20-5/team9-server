@@ -92,6 +92,18 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
         return schedule
 
+    def update(self, instance, validated_data):
+        participants_raw_data = validated_data.pop("participants", [])
+        user_ids = [row.get("pk") for row in participants_raw_data]
+
+        schedule = super().update(instance, validated_data)
+        participants = calendar_model.Participant.objects.filter(schedule=schedule)
+        for participant in participants:
+            participant.delete()
+
+        self.create_participants_with_schedule(schedule, user_ids)
+        return schedule
+
 
 class RecurringScheduleGroupSerializer(serializers.ModelSerializer):
     schedules = ScheduleSerializer(many=True)

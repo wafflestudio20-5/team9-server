@@ -296,6 +296,7 @@ def test_create_recurring_schedule(
     new_data = {
         "start_at": "2023-02-06 02:00:00",
         "end_at": "2023-02-06 02:30:00",
+        "participants": [{"pk": 2}],
     }
 
     response = client.patch(
@@ -303,22 +304,44 @@ def test_create_recurring_schedule(
         data=new_data,
         content_type="application/json",
     )
+
     child_schedule_1.update(
         {
             "start_at": "2023-01-23 02:00:00",
             "end_at": "2023-01-23 02:30:00",
+            "participants": [
+                {
+                    "pk": 2,
+                    "username": "user2",
+                    "email": "user2@example.com",
+                },
+            ],
         }
     )
     child_schedule_2.update(
         {
             "start_at": "2023-01-30 02:00:00",
             "end_at": "2023-01-30 02:30:00",
+            "participants": [
+                {
+                    "pk": 2,
+                    "username": "user2",
+                    "email": "user2@example.com",
+                },
+            ],
         }
     )
     child_schedule_3.update(
         {
             "start_at": "2023-02-06 02:00:00",
             "end_at": "2023-02-06 02:30:00",
+            "participants": [
+                {
+                    "pk": 2,
+                    "username": "user2",
+                    "email": "user2@example.com",
+                },
+            ],
         }
     )
     expected_recurring_schedule = [
@@ -565,10 +588,11 @@ def test_update_schedule(
     user2: data_utils.UserData,
 ):
     client.post("/api/v1/user/login/", data=user1.for_login, content_type="application/json")
-    client.post(
+    response = client.post(
         path="/api/v1/calendar/schedule/",
         data={
             "title": "Test Schedule 1-1",
+            # "participants": [{"pk":2}],
             "start_at": "2022-12-11 00:00:00",
             "end_at": "2022-12-12 00:00:00",
             "description": "Test description 1-1",
@@ -579,12 +603,21 @@ def test_update_schedule(
     # Check Patch (Partial Update)
     response = client.patch(
         path="/api/v1/calendar/schedule/1/",
-        data={"title": "Modified Test Schedule 1-1"},
+        data={
+            "participants": [{"pk": 2}],
+            "title": "Modified Test Schedule 1-1",
+        },
         content_type="application/json",
     )
     expected = {
         "id": 1,
-        "participants": [],
+        "participants": [
+            {
+                "pk": 2,
+                "username": "user2",
+                "email": "user2@example.com",
+            }
+        ],
         "title": "Modified Test Schedule 1-1",
         "protection_level": 1,
         "show_content": True,
