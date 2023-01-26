@@ -1,10 +1,16 @@
+import copy
+import datetime
+
 from dj_rest_auth import jwt_auth
 from django import http
 from django import shortcuts
 from django.db.models import query
 from rest_framework import authentication
+from rest_framework import exceptions
 from rest_framework import generics
 from rest_framework import permissions
+from rest_framework import request as req
+from rest_framework import response as resp
 from rest_framework import status
 
 from calendar_j import exceptions as calendar_exceptions
@@ -35,26 +41,33 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
 
         target_user_pk = params.get("pk")
         target_user = shortcuts.get_object_or_404(user_models.User, pk=target_user_pk)
+
         start_date = time_utils.normal_date_formatter.parse(params.get("from"))
         end_date = time_utils.normal_date_formatter.parse(params.get("to"))
+
         participants = calendar_models.Participant.objects.filter(
             participant__pk=target_user_pk, status=attendance.AttendanceStatus.PRESENCE
         ).values_list("participant_id")
 
         queryset: query.QuerySet = super().get_queryset()
 
-        created_queryset = queryset.filter(created_by__email=target_user_pk, start_at__range=(start_date, end_date)) | queryset.filter(
-            created_by__email=target_user_pk, end_at__range=(start_date, end_date)
+        total_queryset = queryset.filter(query.Q(created_by__pk=target_user_pk) | query.Q(participants__pk__in=participants))
+        date_filtered_queryset = total_queryset.filter(
+            query.Q(start_at__range=(start_date, end_date)) | query.Q(end_at__range=(start_date, end_date))
         )
-        parcipating_queryset = queryset.filter(participants__pk__in=participants, start_at__range=(start_date, end_date)) | queryset.filter(
-            participants__pk__in=participants, end_at__range=(start_date, end_date)
-        )
-        total_queryset = created_queryset | parcipating_queryset
-        permission_refined_queryset = total_queryset.filter(
+
+        permission_refined_queryset = date_filtered_queryset.filter(
             protection_level__lte=calendar_protection.ProtectionLevel.filter_user_schedule(self.request.user, target_user),
             is_opened=True,
         )
         return permission_refined_queryset
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return resp.Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class ScheduleRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
@@ -77,7 +90,7 @@ class ScheduleRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         return http.JsonResponse({}, status=status.HTTP_204_NO_CONTENT)
 
 
-class ScheduleAttendenceResponseView(generics.UpdateAPIView):
+class ScheduleAttendanceUpdateView(generics.UpdateAPIView):
     authentication_classes = [
         jwt_auth.JWTCookieAuthentication,
         authentication.SessionAuthentication,
@@ -89,5 +102,62 @@ class ScheduleAttendenceResponseView(generics.UpdateAPIView):
     def get_object(self) -> calendar_models.Participant:
         pk = self.kwargs["pk"]
         schedule = calendar_models.Schedule.objects.get(pk=pk)
-
         return shortcuts.get_object_or_404(calendar_models.Participant, participant=self.request.user, schedule=schedule)
+
+
+class ScheduleGroupRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = [
+        jwt_auth.JWTCookieAuthentication,
+        authentication.SessionAuthentication,
+    ]
+    queryset = calendar_models.RecurringScheduleGroup.objects.all()
+    permission_classes = [calendar_permissions.IsRecurringScheduleGroupCreator]
+    serializer_class = calendar_serializers.RecurringScheduleGroupSerializer
+
+    def update(self, request: req.Request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        params = request.data
+
+        schedules = calendar_models.Schedule.objects.filter(recurring_schedule_group=self.kwargs["pk"])
+        for schedule in schedules:
+            updated_params = copy.deepcopy(params)
+            if "cron_expr" in params.keys():
+                raise exceptions.ValidationError("Recurring Rule cannot be updated")
+
+            if ("start_at" in params.keys()) ^ ("end_at" in params.keys()):
+                raise exceptions.ValidationError("start_at, end_at must be existed together")
+
+            if all(key in params.keys() for key in ("start_at", "end_at")):
+                start_at = time_utils.normal_datetime_formatter.parse(params.get("start_at"))
+                end_at = time_utils.normal_datetime_formatter.parse(params.get("end_at"))
+
+                updated_start_at = time_utils.replace_time(schedule.start_at, start_at)
+                updated_end_at = time_utils.replace_time(schedule.end_at, end_at)
+                updated_params.update(
+                    {
+                        "start_at": updated_start_at,
+                        "end_at": updated_end_at,
+                    }
+                )
+
+            schedule_serializer = calendar_serializers.ScheduleSerializer(instance=schedule, data=updated_params, partial=partial)
+            schedule_serializer.is_valid(raise_exception=True)
+            schedule_serializer.save()
+
+            if getattr(schedule, "_prefetched_objects_cache", None):
+                schedule._prefetched_objects_cache = {}
+
+        recurring_schedule_group = self.get_object()
+        serializer = self.get_serializer(recurring_schedule_group)
+        return resp.Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        schedules = calendar_models.Schedule.objects.filter(recurring_schedule_group=self.kwargs["pk"])
+        for schedule in schedules:
+            schedule.is_opened = False
+            schedule.save()
+
+        recurring_schedule_group: calendar_models.RecurringScheduleGroup = self.get_object()
+        recurring_schedule_group.is_opened = False
+        recurring_schedule_group.save()
+        return resp.Response(status=status.HTTP_204_NO_CONTENT)

@@ -1,3 +1,4 @@
+import copy
 import dataclasses
 
 import pytest
@@ -5,9 +6,14 @@ import pytest
 from django import test
 from rest_framework import status
 
+from calendar_j import models as calendar_models
+from calendar_j import serializers as calendar_serializers
 from calendar_j.services.protection import protection
 from utils import uri as uri_utils
+from utils.test import compare as compare_utils
 from utils.test import data as data_utils
+
+_EXCEPTION_COLUMNS = ("created_at", "updated_at")
 
 
 @pytest.fixture(name="user1")
@@ -46,7 +52,7 @@ def test_create_schedule(
     user3: data_utils.UserData,
 ):
     client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
-    schedule_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(1, 1, [2, 3]))
+    schedule_data = data_utils.ScheduleData.create_nth_schedule_data(1, 1, [2, 3]).as_dict()
 
     response = client.post(
         path="/api/v1/calendar/schedule/",
@@ -69,17 +75,151 @@ def test_create_schedule(
         ],
         "title": "Test Schedule 1",
         "protection_level": 1,
+        "show_content": True,
         "start_at": "2022-12-11 00:00:00",
         "end_at": "2022-12-12 00:00:00",
         "description": "Test Description 1",
         "created_by": 1,
+        "is_opened": True,
+        "is_recurring": False,
+        "cron_expr": None,
+        "recurring_end_at": None,
+        "recurring_schedule_group": None,
     }
-    actual = response.json()
 
-    assert response.status_code == status.HTTP_201_CREATED
-    for key, value in expected.items():
-        assert key in actual.keys()
-        assert actual[key] == value
+    compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, _EXCEPTION_COLUMNS)
+
+
+@pytest.mark.django_db
+def test_create_recurring_schedule(
+    client: test.Client,
+    user1: data_utils.UserData,
+    user2: data_utils.UserData,
+    user3: data_utils.UserData,
+):
+    client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
+    schedule_data = {
+        "participants": [
+            {
+                "pk": 2,
+            },
+            {
+                "pk": 3,
+            },
+        ],
+        "title": "Test Schedule 1",
+        "protection_level": 1,
+        "show_content": True,
+        "start_at": "2023-01-23 01:00:00",
+        "end_at": "2023-01-23 01:30:00",
+        "description": "Test Description 1",
+        "is_opened": True,
+        "is_recurring": True,
+        "cron_expr": "* * * * 1 *",
+        "recurring_end_at": "2023-02-10 00:00:00",
+    }
+
+    response = client.post(
+        path="/api/v1/calendar/schedule/",
+        data=schedule_data,
+        content_type="application/json",
+    )
+    expected = {
+        "id": 1,
+        "participants": [
+            {
+                "pk": 2,
+                "username": "user2",
+                "email": "user2@example.com",
+            },
+            {
+                "pk": 3,
+                "username": "user3",
+                "email": "user3@example.com",
+            },
+        ],
+        "title": "Test Schedule 1",
+        "protection_level": 1,
+        "show_content": True,
+        "start_at": "2023-01-23 01:00:00",
+        "end_at": "2023-01-23 01:30:00",
+        "description": "Test Description 1",
+        "created_by": 1,
+        "is_opened": True,
+        "is_recurring": True,
+        "cron_expr": "* * * * 1 *",
+        "recurring_end_at": "2023-02-10 00:00:00",
+        "recurring_schedule_group": 1,
+    }
+
+    compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, _EXCEPTION_COLUMNS)
+    serializer = calendar_serializers.ScheduleSerializer(
+        calendar_models.Schedule.objects.filter(recurring_schedule_group=1),
+        many=True,
+    )
+    child_schedule_1 = copy.deepcopy(expected)
+    child_schedule_2 = copy.deepcopy(expected)
+    child_schedule_2.update(
+        {
+            "id": 2,
+            "start_at": "2023-01-30 01:00:00",
+            "end_at": "2023-01-30 01:30:00",
+        }
+    )
+    child_schedule_3 = copy.deepcopy(expected)
+    child_schedule_3.update(
+        {
+            "id": 3,
+            "start_at": "2023-02-06 01:00:00",
+            "end_at": "2023-02-06 01:30:00",
+        }
+    )
+    expected_recurring_schedule = [
+        child_schedule_1,
+        child_schedule_2,
+        child_schedule_3,
+    ]
+
+    compare_utils.assert_json_equal(serializer.data, expected_recurring_schedule, _EXCEPTION_COLUMNS)
+    response = client.get(path="/api/v1/calendar/schedule/group/1/")
+
+    new_data = {
+        "start_at": "2023-02-06 02:00:00",
+        "end_at": "2023-02-06 02:30:00",
+    }
+
+    response = client.patch(
+        path="/api/v1/calendar/schedule/group/1/",
+        data=new_data,
+        content_type="application/json",
+    )
+    child_schedule_1.update(
+        {
+            "start_at": "2023-01-23 02:00:00",
+            "end_at": "2023-01-23 02:30:00",
+        }
+    )
+    child_schedule_2.update(
+        {
+            "start_at": "2023-01-30 02:00:00",
+            "end_at": "2023-01-30 02:30:00",
+        }
+    )
+    child_schedule_3.update(
+        {
+            "start_at": "2023-02-06 02:00:00",
+            "end_at": "2023-02-06 02:30:00",
+        }
+    )
+    expected_recurring_schedule = [
+        child_schedule_1,
+        child_schedule_2,
+        child_schedule_3,
+    ]
+    compare_utils.assert_json_equal(response.json()["schedules"], expected_recurring_schedule, _EXCEPTION_COLUMNS)
+
+    response = client.delete(path="/api/v1/calendar/schedule/group/1/")
+    compare_utils.assert_response_equal(response, status.HTTP_204_NO_CONTENT)
 
 
 @pytest.mark.django_db
@@ -88,21 +228,20 @@ def test_get_schedule_list_open_permission_success(
     user1: data_utils.UserData,
     user2: data_utils.UserData,
 ):
-
     client.post("/api/v1/user/login/", data=user2.for_login, content_type="application/json")
-    schedule2_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(2, protection.ProtectionLevel.OPEN, []))
+    schedule2_data = data_utils.ScheduleData.create_nth_schedule_data(2, protection.ProtectionLevel.OPEN, []).as_dict()
     client.post(
         path="/api/v1/calendar/schedule/",
         data=schedule2_data,
         content_type="application/json",
     )
-    schedule3_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(3, protection.ProtectionLevel.CLOSED, []))
+    schedule3_data = data_utils.ScheduleData.create_nth_schedule_data(3, protection.ProtectionLevel.CLOSED, []).as_dict()
     client.post(
         path="/api/v1/calendar/schedule/",
         data=schedule3_data,
         content_type="application/json",
     )
-    schedule3_1_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(3, protection.ProtectionLevel.FOLLOWER, []))
+    schedule3_1_data = data_utils.ScheduleData.create_nth_schedule_data(3, protection.ProtectionLevel.FOLLOWER, []).as_dict()
     client.post(
         path="/api/v1/calendar/schedule/",
         data=schedule3_1_data,
@@ -131,16 +270,15 @@ def test_get_schedule_list_open_permission_success(
             "end_at": "2022-12-12 00:00:00",
             "description": "Test Description 2",
             "created_by": 2,
+            "is_opened": True,
+            "is_recurring": False,
+            "cron_expr": None,
+            "recurring_end_at": None,
+            "recurring_schedule_group": None,
         }
     ]
-    actual = response.json()["results"]
 
-    assert response.status_code == status.HTTP_200_OK
-    for actual_row, expected_row in zip(actual, expected):
-        for key, value in expected_row.items():
-            assert key in actual_row.keys()
-            if key not in ["created_at", "updated_at"]:
-                assert actual_row[key] == value
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, _EXCEPTION_COLUMNS)
 
 
 @pytest.mark.django_db
@@ -195,6 +333,11 @@ def test_get_schedule_list_follower_permission_success(
             "end_at": "2022-12-12 00:00:00",
             "description": "Test Description 2",
             "created_by": 2,
+            "is_opened": True,
+            "is_recurring": False,
+            "cron_expr": None,
+            "recurring_end_at": None,
+            "recurring_schedule_group": None,
         },
         {
             "id": 3,
@@ -206,16 +349,14 @@ def test_get_schedule_list_follower_permission_success(
             "end_at": "2022-12-12 00:00:00",
             "description": "Test Description 4",
             "created_by": 2,
+            "is_opened": True,
+            "is_recurring": False,
+            "cron_expr": None,
+            "recurring_end_at": None,
+            "recurring_schedule_group": None,
         },
     ]
-    actual = response.json()["results"]
-
-    assert response.status_code == status.HTTP_200_OK
-    for actual_row, expected_row in zip(actual, expected):
-        for key, value in expected_row.items():
-            assert key in actual_row.keys()
-            if key not in ["created_at", "updated_at"]:
-                assert actual_row[key] == value
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, _EXCEPTION_COLUMNS)
 
 
 @pytest.mark.django_db
@@ -240,8 +381,7 @@ def test_get_closed_schedule_fail(
         extra_params={"pk": 2},
     )
     response = client.get(target_uri)
-
-    assert response.status_code == status.HTTP_403_FORBIDDEN
+    compare_utils.assert_response_equal(response, status.HTTP_403_FORBIDDEN)
 
 
 @pytest.mark.django_db
@@ -270,7 +410,8 @@ def test_get_follower_schedule_success(
     )
     response = client.get(target_uri)
 
-    assert response.status_code == status.HTTP_200_OK
+    # TODO: check response body
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK)
 
 
 @pytest.mark.django_db
@@ -294,9 +435,9 @@ def test_get_follower_schedule_fail(
         url="/api/v1/calendar/schedule/1/",
         extra_params={"pk": 2},
     )
-    response = client.get(target_uri)
 
-    assert response.status_code == status.HTTP_403_FORBIDDEN
+    response = client.get(target_uri)
+    compare_utils.assert_response_equal(response, status.HTTP_403_FORBIDDEN)
 
 
 @pytest.mark.django_db
@@ -332,17 +473,18 @@ def test_update_schedule(
         "participants": [],
         "title": "Modified Test Schedule 1-1",
         "protection_level": 1,
+        "show_content": True,
         "start_at": "2022-12-11 00:00:00",
         "end_at": "2022-12-12 00:00:00",
         "description": "Test description 1-1",
         "created_by": 1,
+        "is_opened": True,
+        "is_recurring": False,
+        "cron_expr": None,
+        "recurring_end_at": None,
+        "recurring_schedule_group": None,
     }
-    actual = response.json()
-
-    assert response.status_code == status.HTTP_200_OK
-    for key, value in expected.items():
-        assert key in actual.keys()
-        assert actual[key] == value
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, _EXCEPTION_COLUMNS)
 
     # Check Put (Total Update)
     response = client.put(
@@ -360,21 +502,23 @@ def test_update_schedule(
         "participants": [],
         "title": "Second Modified Test Schedule 1-1",
         "protection_level": 1,
+        "show_content": True,
         "start_at": "2022-12-12 00:00:00",
         "end_at": "2022-12-13 00:00:00",
         "description": "Second Modified Test description 1-1",
         "created_by": 1,
+        "is_opened": True,
+        "is_recurring": False,
+        "cron_expr": None,
+        "recurring_end_at": None,
+        "recurring_schedule_group": None,
     }
-    actual = response.json()
-
-    assert response.status_code == status.HTTP_200_OK
-    for key, value in expected.items():
-        assert key in actual.keys()
-        assert actual[key] == value
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, _EXCEPTION_COLUMNS)
 
     # Check Delete
     response = client.delete(path=f"/api/v1/calendar/schedule/{pk}/", content_type="application/json")
-    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    compare_utils.assert_response_equal(response, status.HTTP_204_NO_CONTENT)
 
 
 @pytest.mark.django_db
@@ -402,14 +546,9 @@ def test_attendance_success(
         data={"status": 3},
         content_type="application/json",
     )
-
     expected = {"id": 1, "status": 3, "participant": 2, "schedule": 1}
-    actual = response.json()
 
-    assert response.status_code == status.HTTP_200_OK
-    for key, value in expected.items():
-        assert key in actual.keys()
-        assert actual[key] == value
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, _EXCEPTION_COLUMNS)
 
 
 @pytest.mark.django_db
@@ -434,8 +573,7 @@ def test_attendance_fail(
         data={"status": 3},
         content_type="application/json",
     )
-
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    compare_utils.assert_response_equal(response, status.HTTP_404_NOT_FOUND)
 
 
 @pytest.mark.django_db
@@ -463,11 +601,6 @@ def test_attendance_read_only_fields_fail(
         data={"status": 3, "id": 100},
         content_type="application/json",
     )
-
     expected = {"id": 1, "status": 3, "participant": 2, "schedule": 1}
-    actual = response.json()
 
-    assert response.status_code == status.HTTP_200_OK
-    for key, value in expected.items():
-        assert key in actual.keys()
-        assert actual[key] == value
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, _EXCEPTION_COLUMNS)
