@@ -91,6 +91,116 @@ def test_create_schedule(
 
 
 @pytest.mark.django_db
+def test_get_wanted_schedule(
+    client: test.Client,
+    user1: data_utils.UserData,
+    user2: data_utils.UserData,
+    user3: data_utils.UserData,
+):
+    client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
+    schedule_1_data = {
+        "participants": [
+            {"pk": 3},
+        ],
+        "title": "Test Schedule 1",
+        "protection_level": 1,
+        "show_content": True,
+        "start_at": "2022-12-11 00:00:00",
+        "end_at": "2022-12-12 00:00:00",
+        "description": "Test Description 1",
+        "is_opened": True,
+        "is_recurring": False,
+        "cron_expr": None,
+        "recurring_end_at": None,
+        "recurring_schedule_group": None,
+    }
+    schedule_2_data = {
+        "participants": [
+            {"pk": 2},
+        ],
+        "title": "Test Schedule 2",
+        "protection_level": 1,
+        "show_content": True,
+        "start_at": "2022-12-13 00:00:00",
+        "end_at": "2022-12-14 00:00:00",
+        "description": "Test Description 2",
+        "is_opened": True,
+        "is_recurring": False,
+        "cron_expr": None,
+        "recurring_end_at": None,
+        "recurring_schedule_group": None,
+    }
+    schedule_3_data = {
+        "participants": [
+            {"pk": 2},
+            {"pk": 3},
+        ],
+        "title": "Test Schedule 3",
+        "protection_level": 1,
+        "show_content": True,
+        "start_at": "2022-12-15 00:00:00",
+        "end_at": "2022-12-16 00:00:00",
+        "description": "Test Description 3",
+        "is_opened": True,
+        "is_recurring": False,
+        "cron_expr": None,
+        "recurring_end_at": None,
+        "recurring_schedule_group": None,
+    }
+
+    client.post(
+        path="/api/v1/calendar/schedule/",
+        data=schedule_1_data,
+        content_type="application/json",
+    )
+    client.post(
+        path="/api/v1/calendar/schedule/",
+        data=schedule_2_data,
+        content_type="application/json",
+    )
+    client.post(
+        path="/api/v1/calendar/schedule/",
+        data=schedule_3_data,
+        content_type="application/json",
+    )
+
+    target_uri = uri_utils.get_uri_with_extra_params(
+        url="/api/v1/calendar/schedule/",
+        extra_params={
+            "pk": 1,
+            "from": "2022-12-13",
+            "to": "2022-12-14",
+        },
+    )
+    response = client.get(target_uri)
+    expected = [
+        {
+            "id": 2,
+            "participants": [
+                {
+                    "pk": 2,
+                    "username": "user2",
+                    "email": "user2@example.com",
+                }
+            ],
+            "title": "Test Schedule 2",
+            "protection_level": 1,
+            "show_content": True,
+            "start_at": "2022-12-13 00:00:00",
+            "end_at": "2022-12-14 00:00:00",
+            "description": "Test Description 2",
+            "is_opened": True,
+            "is_recurring": False,
+            "cron_expr": None,
+            "recurring_end_at": None,
+            "created_by": 1,
+            "recurring_schedule_group": None,
+        }
+    ]
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, _EXCEPTION_COLUMNS)
+
+
+@pytest.mark.django_db
 def test_create_recurring_schedule(
     client: test.Client,
     user1: data_utils.UserData,
@@ -220,6 +330,17 @@ def test_create_recurring_schedule(
 
     response = client.delete(path="/api/v1/calendar/schedule/group/1/")
     compare_utils.assert_response_equal(response, status.HTTP_204_NO_CONTENT)
+
+    target_uri = uri_utils.get_uri_with_extra_params(
+        url="/api/v1/calendar/schedule/",
+        extra_params={
+            "pk": 1,
+            "from": "2022-01-01",
+            "to": "2023-03-01",
+        },
+    )
+    response = client.get(target_uri)
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, [])
 
 
 @pytest.mark.django_db
@@ -360,11 +481,12 @@ def test_get_schedule_list_follower_permission_success(
 
 
 @pytest.mark.django_db
-def test_get_closed_schedule_fail(
+def test_get_unauthorized_schedule_fail(
     client: test.Client,
     user1: data_utils.UserData,
     user2: data_utils.UserData,
 ):
+    """Test of permissions.IsScheduleCreatorrOrReader for non-follower relationship."""
     client.post("/api/v1/user/login/", data=user2.for_login, content_type="application/json")
 
     schedule1_data = dataclasses.asdict(data_utils.ScheduleData.create_nth_schedule_data(2, protection.ProtectionLevel.FOLLOWER, []))
@@ -376,11 +498,7 @@ def test_get_closed_schedule_fail(
     client.post("/api/v1/user/logout/")
     client.post("/api/v1/user/login/", data=user1.for_login, content_type="application/json")
 
-    target_uri = uri_utils.get_uri_with_extra_params(
-        url="/api/v1/calendar/schedule/1/",
-        extra_params={"pk": 2},
-    )
-    response = client.get(target_uri)
+    response = client.get(path="/api/v1/calendar/schedule/1/")
     compare_utils.assert_response_equal(response, status.HTTP_403_FORBIDDEN)
 
 
@@ -447,24 +565,20 @@ def test_update_schedule(
     user2: data_utils.UserData,
 ):
     client.post("/api/v1/user/login/", data=user1.for_login, content_type="application/json")
-    pk = (
-        client.post(
-            path="/api/v1/calendar/schedule/",
-            data={
-                "title": "Test Schedule 1-1",
-                "start_at": "2022-12-11 00:00:00",
-                "end_at": "2022-12-12 00:00:00",
-                "description": "Test description 1-1",
-            },
-            content_type="application/json",
-        )
-        .json()
-        .get("id")
+    client.post(
+        path="/api/v1/calendar/schedule/",
+        data={
+            "title": "Test Schedule 1-1",
+            "start_at": "2022-12-11 00:00:00",
+            "end_at": "2022-12-12 00:00:00",
+            "description": "Test description 1-1",
+        },
+        content_type="application/json",
     )
 
     # Check Patch (Partial Update)
     response = client.patch(
-        path=f"/api/v1/calendar/schedule/{pk}/",
+        path="/api/v1/calendar/schedule/1/",
         data={"title": "Modified Test Schedule 1-1"},
         content_type="application/json",
     )
@@ -488,7 +602,7 @@ def test_update_schedule(
 
     # Check Put (Total Update)
     response = client.put(
-        path=f"/api/v1/calendar/schedule/{pk}/",
+        path="/api/v1/calendar/schedule/1/",
         data={
             "title": "Second Modified Test Schedule 1-1",
             "start_at": "2022-12-12 00:00:00",
@@ -516,9 +630,11 @@ def test_update_schedule(
     compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, _EXCEPTION_COLUMNS)
 
     # Check Delete
-    response = client.delete(path=f"/api/v1/calendar/schedule/{pk}/", content_type="application/json")
-
+    response = client.delete(path="/api/v1/calendar/schedule/1/", content_type="application/json")
     compare_utils.assert_response_equal(response, status.HTTP_204_NO_CONTENT)
+
+    response = client.get(path="/api/v1/calendar/schedule/1/", content_type="application/json")
+    compare_utils.assert_response_equal(response, status.HTTP_404_NOT_FOUND)
 
 
 @pytest.mark.django_db

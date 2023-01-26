@@ -5,7 +5,7 @@ from calendar_j import models as calendar_models
 from calendar_j.services.protection import protection
 
 
-class IsScheduleCreaterOrReader(permissions.IsAuthenticatedOrReadOnly):
+class IsScheduleCreatorOrReader(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request: req.HttpRequest, view, obj: calendar_models.Schedule) -> bool:
         if obj.created_by == request.user:
             return True

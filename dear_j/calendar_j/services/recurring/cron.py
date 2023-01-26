@@ -145,7 +145,7 @@ def apply_recurring_rule(
     end_at_list = []
 
     for child_start_at, child_end_at in zip(child_start_at_list, child_end_at_list):
-        while child_start_at < recurring_end_at:
+        while child_start_at.date() <= recurring_end_at.date():
             start_at_list.append(child_start_at)
             end_at_list.append(child_end_at)
 
