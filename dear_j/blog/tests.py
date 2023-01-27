@@ -1,8 +1,9 @@
 import dataclasses
-
+import io
 import pytest
 
 from django import test
+from django.core.files import uploadedfile
 from rest_framework import status
 
 from utils import uri as uri_utils
@@ -31,11 +32,17 @@ def test_create_post(
 ):
     client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
 
-    post_data = {"title":"title", "content":"content"}
+    with open("blog/image/image.png", encoding = "ISO-8859-1") as image:
+        img_string = io.StringIO(image.read())
+
+    post_data = dict(
+        title="title",
+        content="content"
+    )
     response = client.post(
         path="/api/v1/blog/post/",
         data=post_data,
-        content_type="application/json",
+        content_type="multipart/form-data",
     )
     expected = {
         "pid": 1,
