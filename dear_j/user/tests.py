@@ -3,8 +3,8 @@ import pytest
 from django import test
 from rest_framework import status
 
+from utils.test import compare
 from utils.test import data as data_utils
-
 
 @pytest.fixture(name="user1")
 def fixture_registered_user1(client: test.Client):
@@ -50,4 +50,7 @@ def test_success_change_pw(client: test.Client, user1: data_utils.UserData):
     data = {"new_password1": "user1password1*", "new_password2": "user1password1*",
             "old_password":user1.password}
     response = client.post(path="/api/v1/user/password/change/", data=data, content_type="application/json")
+    actual = response.json()
+    expected = {"detail":"New password has been saved."}
+    compare.assert_json_equal(actual, expected)
     assert response.status_code == status.HTTP_200_OK
