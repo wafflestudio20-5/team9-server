@@ -3,6 +3,16 @@ import datetime
 from utils import time as time_utils
 
 
+def test_replace_time():
+    origin = datetime.datetime(2022, 1, 1)
+    new = datetime.datetime(2022, 1, 1, 2, 30)
+    assert time_utils.replace_time(origin, new) == datetime.datetime(2022, 1, 1, 2, 30)
+
+    origin = datetime.datetime(2022, 1, 7)
+    new = datetime.datetime(2022, 1, 1, 2, 30)
+    assert time_utils.replace_time(origin, new) == datetime.datetime(2022, 1, 7, 2, 30)
+
+
 def test_normal_date_formatter():
     normal_date = datetime.date(2023, 1, 1)
     normal_date_str = "2023-01-01"
