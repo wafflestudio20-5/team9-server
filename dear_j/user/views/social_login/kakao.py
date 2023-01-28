@@ -36,10 +36,11 @@ class KakaoCallBackView(base.SocialPlatformCallBackView, kakao.KakaoContextMixin
         ).json()
 
     def _get_user_profile(self, user_raw_info: Dict, _: str) -> profile.SocialProfile:
+        print(user_raw_info)
         account_info: Dict = user_raw_info.get("kakao_account")
         # TODO: Email field is not actually required in Kakao API, but it is necessary to us.
         email = account_info.get("email")
-        username = account_info.get("profile").get("nickname", None)
+        username = account_info.get("profile", {}).get("nickname", None)
 
         has_birthyear = "birthyear" in account_info.keys()
         has_birthday = "birthday" in account_info.keys()
