@@ -30,7 +30,7 @@ def fixture_registered_user2(client: test.Client):
 
 @mock_s3
 def create_bucket(bucket_name: str):
-    s3 = boto3.client("s3")
+    s3 = boto3.resource("s3", region_name="ap-northeast-2")
     bucket = s3.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={'LocationConstraint': 'ap-northeast-2'})
     return s3, bucket
 
@@ -41,7 +41,7 @@ def test_create_post(
     user1: data_utils.UserData,
     user2: data_utils.UserData,
 ):
-    BUCKET_NAME = "dear-j-test-test-bucket"
+    BUCKET_NAME = "test-bucket"
     _, bucket = create_bucket(BUCKET_NAME)
     client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
 
