@@ -1,6 +1,5 @@
 import datetime
 import os
-import pathlib
 
 import site_env
 from utils import ssm as ssm_utils

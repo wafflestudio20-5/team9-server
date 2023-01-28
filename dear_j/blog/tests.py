@@ -1,8 +1,11 @@
 import pytest
 
 from django import test
+from django.core.files import base
+from django.core.files import uploadedfile
 from rest_framework import status
 
+from utils import uri as uri_utils
 from utils.test import data as data_utils
 
 
