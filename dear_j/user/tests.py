@@ -53,10 +53,8 @@ def test_success_change_pw(client: test.Client, user1: data_utils.UserData):
     data = {"new_password1": "user1password1*", "new_password2": "user1password1*",
             "old_password":user1.password}
     response = client.post(path="/api/v1/user/password/change/", data=data, content_type="application/json")
-    actual = response.json()
     expected = {"detail":"New password has been saved."}
-    compare_utils.assert_json_equal(actual, expected)
-    assert response.status_code == status.HTTP_200_OK
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected)
 
 
 @pytest.mark.django_db
