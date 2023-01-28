@@ -3,6 +3,10 @@ import datetime
 from rest_framework import exceptions
 
 
+def replace_time(origin: datetime.datetime, new: datetime.datetime) -> datetime.datetime:
+    return datetime.datetime(origin.year, origin.month, origin.day, new.hour, new.minute, new.second)
+
+
 class DateFormatException(exceptions.APIException):
     status_code = 400
     default_detail = "Unexpected Date(time) format"

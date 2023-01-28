@@ -1,8 +1,10 @@
-from typing import Dict
+from typing import Dict, List, Optional
 
+from rest_framework import exceptions
 from rest_framework import serializers
 
 from calendar_j import models as calendar_model
+from calendar_j.services.recurring import cron
 from user import models as user_models
 from user import serializers as user_serializers
 
@@ -30,12 +32,82 @@ class ScheduleSerializer(serializers.ModelSerializer):
             },
         }
 
-    def create(self, validated_data: Dict) -> calendar_model.Schedule:
-        participants_data = validated_data.pop("participants", [])
-        schedule = super().create(validated_data)
+    def create_participants_with_schedule(
+        self,
+        schedule: calendar_model.Schedule,
+        user_ids: List[int],
+    ) -> List[Optional[calendar_model.Participant]]:
+        participants = []
+        candidates = user_models.User.objects.filter(id__in=user_ids)
 
-        for participant_data in participants_data:
-            participant = user_models.User.objects.get(**participant_data)
-            if participant != self.context["request"].user:
-                calendar_model.Participant.objects.create(schedule=schedule, participant=participant)
+        for candidate in candidates:
+            if candidate != schedule.created_by:
+                participant = calendar_model.Participant.objects.create(schedule=schedule, participant=candidate)
+                participants.append(participant)
+
+        return participants
+
+    def create(self, validated_data: Dict) -> calendar_model.Schedule:
+        participants_raw_data = validated_data.pop("participants", [])
+        user_ids = [row.get("pk") for row in participants_raw_data]
+
+        if validated_data.get("is_recurring"):
+            if not any(validated_data.get(key) for key in ("cron_expr", "recurring_end_at")):
+                raise exceptions.ValidationError(
+                    "cron_expr, recurring_end_at must be defined, " "if you want to create recurring schedule."
+                )
+
+        schedule: calendar_model.Schedule = super().create(validated_data)
+        self.create_participants_with_schedule(schedule, user_ids)
+
+        if schedule.is_recurring:
+            schedules = [schedule]
+            start_at_list, end_at_list = cron.apply_recurring_rule(
+                schedule.cron_expr,
+                schedule.start_at,
+                schedule.end_at,
+                schedule.recurring_end_at,
+            )
+
+            for child_start_at, child_end_at in zip(start_at_list[1:], end_at_list[1:]):
+                child_data = validated_data.copy()
+                child_data.update(
+                    {
+                        "start_at": child_start_at,
+                        "end_at": child_end_at,
+                    }
+                )
+
+                child_schedule = super().create(child_data)
+                self.create_participants_with_schedule(child_schedule, user_ids)
+                schedules.append(child_schedule)
+
+            recurring_schedule_group = calendar_model.RecurringScheduleGroup.objects.create(
+                name="recurring_schedule_group",
+                created_by=schedule.created_by,
+            )
+            for child_schedule in schedules:
+                child_schedule.recurring_schedule_group = recurring_schedule_group
+                child_schedule.save()
+
         return schedule
+
+    def update(self, instance, validated_data):
+        participants_raw_data = validated_data.pop("participants", [])
+        user_ids = [row.get("pk") for row in participants_raw_data]
+
+        schedule = super().update(instance, validated_data)
+        participants = calendar_model.Participant.objects.filter(schedule=schedule)
+        for participant in participants:
+            participant.delete()
+
+        self.create_participants_with_schedule(schedule, user_ids)
+        return schedule
+
+
+class RecurringScheduleGroupSerializer(serializers.ModelSerializer):
+    schedules = ScheduleSerializer(many=True)
+
+    class Meta:
+        model = calendar_model.RecurringScheduleGroup
+        fields = "__all__"

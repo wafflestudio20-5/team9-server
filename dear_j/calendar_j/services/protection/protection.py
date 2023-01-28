@@ -1,5 +1,5 @@
-from django import shortcuts
 from django.db import models
+from rest_framework import exceptions
 
 from social import models as social_models
 from user import models as user_models
@@ -30,4 +30,4 @@ class ProtectionLevel(models.IntegerChoices):
             return False
         if protection_level == cls.CLOSED:
             return target_user == request_user
-        raise ValueError("protection_level must be one of ProtectionLevel value")
+        raise exceptions.ValidationError("protection_level must be one of ProtectionLevel value")

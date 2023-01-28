@@ -3,11 +3,9 @@ from rest_framework import request as req
 
 from calendar_j import models as calendar_models
 from calendar_j.services.protection import protection
-from social import models as social_models
-from user import models as user_models
 
 
-class IsScheduleCreaterOrReader(permissions.IsAuthenticatedOrReadOnly):
+class IsScheduleCreatorOrReader(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request: req.HttpRequest, view, obj: calendar_models.Schedule) -> bool:
         if obj.created_by == request.user:
             return True
@@ -18,6 +16,9 @@ class IsScheduleCreaterOrReader(permissions.IsAuthenticatedOrReadOnly):
 
 class IsScheduleParticipant(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request: req.HttpRequest, view, obj: calendar_models.Participant) -> bool:
-        if obj.participant == request.user:
-            return True
-        return False
+        return obj.participant == request.user
+
+
+class IsRecurringScheduleGroupCreator(permissions.IsAuthenticated):
+    def has_object_permission(self, request: req.HttpRequest, view, obj: calendar_models.RecurringScheduleGroup) -> bool:
+        return obj.created_by == request.user

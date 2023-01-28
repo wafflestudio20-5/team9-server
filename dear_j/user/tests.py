@@ -17,7 +17,8 @@ def fixture_registered_user1(client: test.Client):
 def test_success_register(client: test.Client):
     user_data = data_utils.UserData.create_nth_user_data(1)
     response = client.post(path="/api/v1/user/registration/", data=user_data.for_registration, content_type="application/json")
-    assert response.status_code == status.HTTP_201_CREATED
+    expected = {"user": {"pk": 1, "email": "user1@example.com", "birthdate": None, "username": "user1"}}
+    compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ("access_token", "refresh_token"))
 
 
 @pytest.mark.django_db
@@ -27,14 +28,15 @@ def test_fail_register(client: test.Client):
     data["password2"] = "wrong_password"
 
     response = client.post(path="/api/v1/user/registration/", data=data, content_type="application/json")
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    compare_utils.assert_response_equal(response, status.HTTP_400_BAD_REQUEST)
 
 
 @pytest.mark.django_db
 def test_success_login(client: test.Client, user1: data_utils.UserData):
     data = {"email": user1.email, "password": user1.password}
     response = client.post(path="/api/v1/user/login/", data=data, content_type="application/json")
-    assert response.status_code == status.HTTP_200_OK
+    expected = {"user": {"pk": 1, "email": "user1@example.com", "birthdate": None, "username": "user1"}}
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, ("access_token", "refresh_token"))
 
 
 @pytest.mark.django_db
@@ -42,6 +44,7 @@ def test_fail_login(client: test.Client, user1: data_utils.UserData):
     data = {"email": user1.email, "password": "wrong password"}
     response = client.post(path="/api/v1/user/login/", data=data, content_type="application/json")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
 
 @pytest.mark.django_db
 def test_success_change_pw(client: test.Client, user1: data_utils.UserData):
@@ -54,3 +57,22 @@ def test_success_change_pw(client: test.Client, user1: data_utils.UserData):
     expected = {"detail":"New password has been saved."}
     compare_utils.assert_json_equal(actual, expected)
     assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+def test_update_profile(client: test.Client, user1: data_utils.UserData):
+    data = {"email": user1.email, "password": user1.password}
+    client.post(path="/api/v1/user/login/", data=data, content_type="application/json")
+
+    update_data = {
+        "birthdate": "2001-01-01",
+    }
+    response = client.patch(path="/api/v1/user/profile/", data=update_data, content_type="application/json")
+
+    expected = {
+        "pk": 1,
+        "email": "user1@example.com",
+        "birthdate": "2001-01-01",
+        "username": "user1",
+    }
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected)
