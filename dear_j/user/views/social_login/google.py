@@ -5,7 +5,6 @@ import requests
 
 from allauth.socialaccount.providers.google import views
 
-from user import models
 from user.service.social_login.contexts import google
 from user.service.social_login.models import profile
 from user.views.social_login import base
@@ -15,7 +14,13 @@ class GoogleView(base.SocialPlatformView, google.GoogleContextMixin):
     pass
 
 
+class GoogleLoginView(base.SocialPlatformLoginView, google.GoogleContextMixin):
+    adapter_class = views.GoogleOAuth2Adapter
+
+
 class GoogleCallBackView(base.SocialPlatformCallBackView, google.GoogleContextMixin):
+    social_login_view = GoogleLoginView()
+
     def _get_access_token(self, code: str) -> Dict:
         return requests.post(self.get_token_uri(code)).json()
 
@@ -38,7 +43,3 @@ class GoogleCallBackView(base.SocialPlatformCallBackView, google.GoogleContextMi
             return None, None, None
         birthdate = datetime.date(**raw_data[0].get("date"))
         return birthdate, str(birthdate.year), f"{0:02d}{1:02d}".format(birthdate.month, birthdate.day)
-
-
-class GoogleLoginView(base.SocialPlatformLoginView, google.GoogleContextMixin):
-    adapter_class = views.GoogleOAuth2Adapter

@@ -20,10 +20,6 @@ class SocialPlatformContextMixin(abc.ABC):
         return os.path.join(settings.BACKEND_URL, f"api/v1/user/login/{self.platform}/callback/")
 
     @property
-    def finish_url(self):
-        return os.path.join(settings.BACKEND_URL, f"api/v1/user/login/{self.platform}/finish/")
-
-    @property
     def client_id(self):
         return ssm_utils.get_ssm_parameter(alias=f"/backend/dearj/{self.platform}/client-id")
 
