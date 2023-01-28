@@ -6,6 +6,13 @@ from rest_framework import status
 from utils.test import compare as compare_utils
 from utils.test import data as data_utils
 
+import site_env
+
+if site_env.is_test():
+    image_address = "https://%22dear-j-blog%22.s3.ap-northeast-2.amazonaws.com/https%3A/dear-j-blog.s3.ap-northeast-2.amazonaws.com/user/user.png"
+else:
+    image_address = "https://dear-j-blog.s3.ap-northeast-2.amazonaws.com/https%3A/dear-j-blog.s3.ap-northeast-2.amazonaws.com/user/user.png"
+
 @pytest.fixture(name="user1")
 def fixture_registered_user1(client: test.Client):
     user1_data = data_utils.UserData.create_nth_user_data(1)
@@ -21,7 +28,7 @@ def test_success_register(client: test.Client):
                          "email": "user1@example.com",
                          "birthdate": None,
                          "username": "user1",
-                         "image": "https://dear-j-blog.s3.ap-northeast-2.amazonaws.com/https%3A/dear-j-blog.s3.ap-northeast-2.amazonaws.com/user/user.png"
+                         "image": image_address
                          }}
     compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ("access_token", "refresh_token"))
 
@@ -44,7 +51,7 @@ def test_success_login(client: test.Client, user1: data_utils.UserData):
                          "email": "user1@example.com", 
                          "birthdate": "2000-01-01", 
                          "username": "user1", 
-                         "image":"https://dear-j-blog.s3.ap-northeast-2.amazonaws.com/https%3A/dear-j-blog.s3.ap-northeast-2.amazonaws.com/user/user.png"}}
+                         "image":image_address}}
     compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, ("access_token", "refresh_token"))
 
 
@@ -80,6 +87,6 @@ def test_update_profile(client: test.Client, user1: data_utils.UserData):
         "email": "user1@example.com",
         "birthdate": "2001-01-01",
         "username": "user1",
-        "image":"https://dear-j-blog.s3.ap-northeast-2.amazonaws.com/https%3A/dear-j-blog.s3.ap-northeast-2.amazonaws.com/user/user.png"
+        "image":image_address
     }
     compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected)
