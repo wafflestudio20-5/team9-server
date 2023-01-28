@@ -126,7 +126,7 @@ AWS_REGION = config.AWS_REGION
 AWS_STORAGE_BUCKET_NAME = config.AWS_STORAGE_BUCKET_NAME
 AWS_S3_CUSTOM_DOMAIN = config.AWS_S3_CUSTOM_DOMAIN
 AWS_S3_OBJECT_PARAMETERS = config.AWS_S3_OBJECT_PARAMETERS
-MEDIA_ROOT = config.MEDIA_ROOT
+MEDIA_ROOT = os.path.join(BASE_DIR, "path/to/store/my/files/")
 
 
 # allauth setting : https://django-allauth.readthedocs.io/en/latest/configuration.html

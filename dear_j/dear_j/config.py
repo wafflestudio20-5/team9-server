@@ -48,8 +48,9 @@ AWS_S3_SECURE_URLS = False
 AWS_QUERYSTRING_AUTH = False
 
 AWS_REGION = "ap-northeast-2"
-AWS_STORAGE_BUCKET_NAME = ssm_utils.get_ssm_parameter(alias="/backend/dearj/s3/blog")
+if site_env.is_test():
+    AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+else:
+    AWS_STORAGE_BUCKET_NAME = ssm_utils.get_ssm_parameter(alias="/backend/dearj/s3/blog")
 AWS_S3_CUSTOM_DOMAIN = "%s.s3.%s.amazonaws.com" % (AWS_STORAGE_BUCKET_NAME, AWS_REGION)
 AWS_S3_OBJECT_PARAMETERS = {}
-BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
-MEDIA_ROOT = os.path.join(BASE_DIR, "path/to/store/my/files/")
