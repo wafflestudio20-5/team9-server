@@ -41,7 +41,7 @@ def test_create_post(
     user1: data_utils.UserData,
     user2: data_utils.UserData,
 ):
-    BUCKET_NAME = "ttest-bucket"
+    BUCKET_NAME = "dear-j-test-test-bucket"
     _, bucket = create_bucket(BUCKET_NAME)
     client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
 
@@ -64,7 +64,7 @@ def test_create_post(
         "title": "title",
         "content": "content",
         "created_by": 1,
-        "image":"https://dear-j-blog.s3.ap-northeast-2.amazonaws.com/user/image.png"
+        "image":"https://ttest-bucket.s3.ap-northeast-2.amazonaws.com/user/image.png"
     }
     actual = response.json()
 
