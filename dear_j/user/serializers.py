@@ -50,6 +50,17 @@ class RegisterSerializer(dj_reg_serializers.RegisterSerializer):
         fields = ["username", "email", "password1", "password2", "birthdate"]
 
 
+class SocialLoginSerializer(dj_reg_serializers.SocialLoginSerializer):
+    def _get_request(self):
+        return self.context.get("request")
+
+    def create(self, validated_data):
+        raise NotImplementedError
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError
+
+
 class EssentialUserInfoFromPKSerializer(rest_serializers.ModelSerializer):
     pk = rest_serializers.IntegerField()
 
