@@ -3,6 +3,9 @@ import dataclasses
 import pytest
 
 from django import test
+from django.core.files import base
+from django.core.files import uploadedfile
+from django.test import client as test_client
 from rest_framework import status
 
 from utils import uri as uri_utils
@@ -31,17 +34,26 @@ def test_create_post(
 ):
     client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
 
-    post_data = {"title":"title", "content":"content"}
+    image = uploadedfile.SimpleUploadedFile(
+        name="image.png",
+        content=open("blog/image/image.png", "rb").read(),
+        content_type="image/png"
+    )
+    post_data = {
+        "title":"title",
+        "content":"content",
+        "image":image,
+    }
     response = client.post(
         path="/api/v1/blog/post/",
-        data=post_data,
-        content_type="application/json",
+        data=post_data
     )
     expected = {
         "pid": 1,
         "title": "title",
         "content": "content",
-        "created_by": 1
+        "created_by": 1,
+        "image":"https://dear-j-blog.s3.ap-northeast-2.amazonaws.com/user/image.png"
     }
     actual = response.json()
 
