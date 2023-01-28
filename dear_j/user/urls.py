@@ -13,9 +13,7 @@ urlpatterns = [
     # Kakao Social Login
     urls.path("login/kakao/", kakao.KakaoView.as_view()),
     urls.path("login/kakao/callback/", kakao.KakaoCallBackView.as_view()),
-    urls.path("login/kakao/finish/", kakao.KakaoLoginView.as_view()),
     # Google Social Login
     urls.path("login/google/", google.GoogleView.as_view()),
     urls.path("login/google/callback/", google.GoogleCallBackView.as_view()),
-    urls.path("login/google/finish/", google.GoogleLoginView.as_view()),
 ]
