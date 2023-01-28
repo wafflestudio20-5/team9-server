@@ -15,3 +15,4 @@ psycopg2-binary==2.9.3; sys_platform == 'darwin' and platform_machine == 'arm64'
 psycopg2==2.9.3; sys_platform != 'darwin' or platform_machine != 'arm64'
 pymysql==1.0.2
 pillow==9.4.0
+django-storages==1.13.2
