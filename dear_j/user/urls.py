@@ -6,7 +6,7 @@ from user.views.social_login import kakao
 
 urlpatterns = [
     # Common
-    urls.path("registration/", common.UserRegistrationView.as_view()),
+    urls.path("registration/", common.UserRegistrationView.as_view(), name="socialaccount_signup"),
     urls.path("login/", common.UserLoginView.as_view()),
     urls.path("logout/", common.UserLogoutView.as_view()),
     urls.path("profile/", common.UserProfileView.as_view()),
