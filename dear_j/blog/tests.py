@@ -34,8 +34,8 @@ def create_bucket(bucket_name: str):
     bucket = s3.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={'LocationConstraint': 'ap-northeast-2'})
     return s3, bucket
 
-@moto.mock_s3
 @pytest.mark.django_db
+@moto.mock_s3
 def test_create_post(
     client: test.Client,
     user1: data_utils.UserData,
@@ -65,7 +65,7 @@ def test_create_post(
         "title": "title",
         "content": "content",
         "created_by": 1,
-        "image":"https://ttest-bucket.s3.ap-northeast-2.amazonaws.com/user/image.png"
+        "image":"https://dear-j-blog.s3.ap-northeast-2.amazonaws.com/user/image.png"
     }
     actual = response.json()
 
