@@ -14,6 +14,7 @@ class User(auth_models.AbstractBaseUser, auth_models.PermissionsMixin):
     birthdate = db_models.DateField(null=True)
     birthyear = db_models.IntegerField(null=True)
     birthday = db_models.IntegerField(null=True)
+    image = db_models.ImageField(upload_to="user", editable=True, null=True)
     is_active = db_models.BooleanField(default=True)
     is_admin = db_models.BooleanField(default=False)
     is_superuser = db_models.BooleanField(default=False)

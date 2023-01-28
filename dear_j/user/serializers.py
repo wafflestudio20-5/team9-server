@@ -23,6 +23,7 @@ class UserDetailSerializer(dj_auth_serializers.UserDetailsSerializer):
         fields = dj_auth_serializers.UserDetailsSerializer.Meta.fields + (
             "birthdate",
             "username",
+            "image",
         )
 
 
@@ -35,6 +36,8 @@ class RegisterSerializer(dj_reg_serializers.RegisterSerializer):
         return data_dict
 
     def create(self, validated_data: Dict) -> models.User:
+        print("hi")
+        print(validated_data)
         user = models.User.objects.create_user(**validated_data)
         return user
 
@@ -47,7 +50,7 @@ class RegisterSerializer(dj_reg_serializers.RegisterSerializer):
 
     class Meta:
         model = models.User
-        fields = ["username", "email", "password1", "password2", "birthdate"]
+        fields = ["username", "email", "password1", "password2", "birthdate", "image"]
 
 
 class SocialLoginSerializer(dj_reg_serializers.SocialLoginSerializer):
