@@ -6,7 +6,6 @@ from rest_framework import status
 from utils.test import compare as compare_utils
 from utils.test import data as data_utils
 
-
 @pytest.fixture(name="user1")
 def fixture_registered_user1(client: test.Client):
     user1_data = data_utils.UserData.create_nth_user_data(1)
@@ -45,6 +44,16 @@ def test_fail_login(client: test.Client, user1: data_utils.UserData):
     data = {"email": user1.email, "password": "wrong password"}
     response = client.post(path="/api/v1/user/login/", data=data, content_type="application/json")
     compare_utils.assert_response_equal(response, status.HTTP_400_BAD_REQUEST)
+
+@pytest.mark.django_db
+def test_success_change_pw(client: test.Client, user1: data_utils.UserData):
+    data = {"email": user1.email, "password": user1.password}
+    response = client.post(path="/api/v1/user/login/", data=data, content_type="application/json")
+    data = {"new_password1": "user1password1*", "new_password2": "user1password1*",
+            "old_password":user1.password}
+    response = client.post(path="/api/v1/user/password/change/", data=data, content_type="application/json")
+    expected = {"detail":"New password has been saved."}
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected)
 
 
 @pytest.mark.django_db

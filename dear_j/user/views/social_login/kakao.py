@@ -14,7 +14,13 @@ class KakaoView(base.SocialPlatformView, kakao.KakaoContextMixin):
     pass
 
 
+class KakaoLoginView(base.SocialPlatformLoginView, kakao.KakaoContextMixin):
+    adapter_class = views.KakaoOAuth2Adapter
+
+
 class KakaoCallBackView(base.SocialPlatformCallBackView, kakao.KakaoContextMixin):
+    social_login_view = KakaoLoginView()
+
     def _get_access_token(self, code: str) -> Dict:
         headers = {"Content-Type": "application/x-www-form-urlencoded;charset=utf-8"}
         return requests.post(self.get_token_uri(code), headers=headers).json()
@@ -32,6 +38,7 @@ class KakaoCallBackView(base.SocialPlatformCallBackView, kakao.KakaoContextMixin
     def _get_user_profile(self, user_raw_info: Dict, _: str) -> profile.SocialProfile:
         print(user_raw_info)
         account_info: Dict = user_raw_info.get("kakao_account")
+        # TODO: Email field is not actually required in Kakao API, but it is necessary to us.
         email = account_info.get("email")
         username = account_info.get("profile", {}).get("nickname", None)
 
@@ -45,7 +52,3 @@ class KakaoCallBackView(base.SocialPlatformCallBackView, kakao.KakaoContextMixin
         if has_birthyear and has_birthday:
             birthdate = time_utils.compact_date_formatter.parse(f"{birthyear}{birthday}")
         return profile.SocialProfile(email, username, birthdate, birthyear, birthday)
-
-
-class KakaoLoginView(base.SocialPlatformLoginView, kakao.KakaoContextMixin):
-    adapter_class = views.KakaoOAuth2Adapter

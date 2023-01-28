@@ -1,11 +1,12 @@
-import dataclasses
-
 import pytest
 
 from django import test
+from django.core.files import base
+from django.core.files import uploadedfile
 from rest_framework import status
 
 from utils import uri as uri_utils
+from utils.test import compare as compare_utils
 from utils.test import data as data_utils
 
 
@@ -31,11 +32,13 @@ def test_create_post(
 ):
     client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
 
-    post_data = {"title":"title", "content":"content"}
+    post_data = {
+        "title":"title",
+        "content":"content"
+    }
     response = client.post(
         path="/api/v1/blog/post/",
-        data=post_data,
-        content_type="application/json",
+        data=post_data
     )
     expected = {
         "pid": 1,
@@ -43,13 +46,7 @@ def test_create_post(
         "content": "content",
         "created_by": 1
     }
-    actual = response.json()
-
-    assert response.status_code == status.HTTP_201_CREATED
-    for key, value in expected.items():
-        assert key in actual.keys()
-        assert actual[key] == value
-
+    compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ["created_at", "updated_at", "image"])
 
 @pytest.mark.django_db
 def test_get_post(
@@ -71,25 +68,16 @@ def test_get_post(
         "content": "content",
         "created_by": 1
     }
-    actual = response.json()
-    for key, value in expected.items():
-        assert key in actual.keys()
-        assert actual[key] == value
-
-    assert response.status_code == status.HTTP_201_CREATED
+    compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ["created_at", "updated_at", "image"])
 
     response = client.get("/api/v1/blog/post/1/")
-
     expected = {
         "pid": 1,
         "title": "title",
         "content": "content",
         "created_by": 1
     }
-    assert response.status_code == status.HTTP_200_OK
-    for key, value in expected.items():
-        assert key in actual.keys()
-        assert actual[key] == value
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, ["created_at", "updated_at", "image"])
 
 
 @pytest.mark.django_db
@@ -112,11 +100,7 @@ def test_create_comment(
         "content": "content",
         "created_by": 1
     }
-    actual = response.json()
-    for key, value in expected.items():
-        assert key in actual.keys()
-        assert actual[key] == value
-    assert response.status_code == status.HTTP_201_CREATED
+    compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ["created_at", "updated_at", "image"])
 
     client.post("/api/v1/user/logout/")
     client.post("/api/v1/user/login/", data=user2.for_login, content_type="application/json")
@@ -127,13 +111,8 @@ def test_create_comment(
         data=comment_data,
         content_type="application/json",
     )
-    assert response.status_code == status.HTTP_201_CREATED
-    actual = response.json()
-    expected = {"cid": 1, "content": "content", "created_by": 2}
-
-    for key, value in expected.items():
-        assert key in actual.keys()
-        assert actual[key] == value
+    expected = {"post":1, "cid": 1, "content": "content", "created_by": 2, "is_updated": False}
+    compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ["created_at", "updated_at"])
 
 
 @pytest.mark.django_db
@@ -156,11 +135,7 @@ def test_update_comment(
         "content": "content",
         "created_by": 1
     }
-    actual = response.json()
-    for key, value in expected.items():
-        assert key in actual.keys()
-        assert actual[key] == value
-    assert response.status_code == status.HTTP_201_CREATED
+    compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ["created_at", "updated_at", "image"])
 
     client.post("/api/v1/user/logout/")
     client.post("/api/v1/user/login/", data=user2.for_login, content_type="application/json")
@@ -171,32 +146,22 @@ def test_update_comment(
         data=comment_data,
         content_type="application/json",
     )
-    assert response.status_code == status.HTTP_201_CREATED
-    actual = response.json()
-    expected = {"cid": 1, "content": "content", "created_by": 2}
-
-    for key, value in expected.items():
-        assert key in actual.keys()
-        assert actual[key] == value
+    expected = {"post":1, "cid": 1, "content": "content", "created_by": 2, "is_updated": False}
+    compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ["created_at", "updated_at"])
 
     response = client.get("/api/v1/blog/comment/1/")
-    assert response.status_code == status.HTTP_200_OK
-
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK)
 
     response = client.patch(
         path="/api/v1/blog/comment/1/",
         data={"content": "modified"},
         content_type="application/json",
     )
-    actual = response.json()
-
     expected = {
+        "post": 1,
         "cid": 1,
         "content": "modified",
         "created_by": 2,
         "is_updated": True
     }
-
-    for key, value in expected.items():
-        assert key in actual.keys()
-        assert actual[key] == value
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, ["created_at", "updated_at"])
