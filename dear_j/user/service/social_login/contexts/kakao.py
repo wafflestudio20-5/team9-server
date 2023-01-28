@@ -8,7 +8,6 @@ from utils import uri as uri_utils
 class KakaoContextMixin(base.SocialPlatformContextMixin):
     platform = platforms.SocialPlatform.KAKAO.value
     oauth_url: str = "https://kauth.kakao.com/oauth/"
-    profile_url: str = "https://kapi.kakao.com/v2/user/me"
 
     @property
     def authorize_uri(self):
