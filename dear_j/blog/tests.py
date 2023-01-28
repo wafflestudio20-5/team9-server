@@ -1,17 +1,8 @@
-import dataclasses
-import boto3
-
-import moto
-
 import pytest
 
 from django import test
-from django.core.files import base
-from django.core.files import uploadedfile
-from django.test import client as test_client
 from rest_framework import status
 
-from utils import uri as uri_utils
 from utils.test import data as data_utils
 
 
@@ -28,33 +19,18 @@ def fixture_registered_user2(client: test.Client):
     client.post(path="/api/v1/user/registration/", data=user2_data.for_registration, content_type="application/json")
     return user2_data
 
-@moto.mock_s3
-def create_bucket(bucket_name: str):
-    s3 = boto3.resource("s3", region_name="ap-northeast-2")
-    bucket = s3.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={'LocationConstraint': 'ap-northeast-2'})
-    return s3, bucket
 
 @pytest.mark.django_db
-@moto.mock_s3
 def test_create_post(
     client: test.Client,
     user1: data_utils.UserData,
     user2: data_utils.UserData,
 ):
-    s3 = boto3.resource("s3", region_name="ap-northeast-2")
-    bucket = s3.create_bucket(Bucket="dear-j-test-test-bucket", CreateBucketConfiguration={'LocationConstraint': 'ap-northeast-2'})
-
     client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
 
-    image = uploadedfile.SimpleUploadedFile(
-        name="image.png",
-        content=open("blog/image/image.png", "rb").read(),
-        content_type="image/png"
-    )
     post_data = {
         "title":"title",
-        "content":"content",
-        "image":image,
+        "content":"content"
     }
     response = client.post(
         path="/api/v1/blog/post/",
@@ -64,8 +40,7 @@ def test_create_post(
         "pid": 1,
         "title": "title",
         "content": "content",
-        "created_by": 1,
-        "image":"https://dear-j-blog.s3.ap-northeast-2.amazonaws.com/user/image.png"
+        "created_by": 1
     }
     actual = response.json()
 
