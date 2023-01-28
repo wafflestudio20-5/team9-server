@@ -1,7 +1,7 @@
 import dataclasses
 import boto3
 
-from moto import mock_s3
+import moto
 
 import pytest
 
@@ -28,21 +28,22 @@ def fixture_registered_user2(client: test.Client):
     client.post(path="/api/v1/user/registration/", data=user2_data.for_registration, content_type="application/json")
     return user2_data
 
-@mock_s3
+@moto.mock_s3
 def create_bucket(bucket_name: str):
     s3 = boto3.resource("s3", region_name="ap-northeast-2")
     bucket = s3.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={'LocationConstraint': 'ap-northeast-2'})
     return s3, bucket
 
-@mock_s3
+@moto.mock_s3
 @pytest.mark.django_db
 def test_create_post(
     client: test.Client,
     user1: data_utils.UserData,
     user2: data_utils.UserData,
 ):
-    BUCKET_NAME = "test-bucket"
-    _, bucket = create_bucket(BUCKET_NAME)
+    s3 = boto3.resource("s3", region_name="ap-northeast-2")
+    bucket = s3.create_bucket(Bucket="dear-j-test-test-bucket", CreateBucketConfiguration={'LocationConstraint': 'ap-northeast-2'})
+
     client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
 
     image = uploadedfile.SimpleUploadedFile(
