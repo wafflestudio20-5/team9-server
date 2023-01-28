@@ -1,7 +1,6 @@
 import abc
 from typing import Dict
 
-from allauth.socialaccount import models as allauth_models
 from allauth.socialaccount.providers.oauth2 import client
 from allauth.socialaccount.providers.oauth2 import views as oauth2_views
 from dj_rest_auth.registration import views as dj_reg_views
@@ -52,21 +51,13 @@ class SocialPlatformCallBackView(
             return self._redirect_to_front_for_exception(self.invalid_access_token)
         user_profile = self._get_user_profile(user_info, access_token)
 
-        # Step III. Only for existing user
-        is_new_user = not models.User.objects.filter(email=user_profile.email)
-        if not is_new_user:
-            user = models.User.objects.get(email=user_profile.email)
-            if not self._is_valid_user_type(user):
-                return self._redirect_to_front_for_exception(self.invalid_social_user)
-
-        # Step IV. Sign In
+        # Step III. Sign In
         response = self._login(access_token, code)
-
         if response.status_code != status.HTTP_200_OK:
             return self._redirect_to_front_for_exception(self.fail_to_login)
 
-        # Step V. Only for new user
-        if is_new_user:
+        # Step IV. Only for new user
+        if not models.User.objects.filter(email=user_profile.email):
             self._update_user_info(user_profile)
         return shortcuts.redirect(self.get_redirect_to_front(**response.data))
 
@@ -107,14 +98,6 @@ class SocialPlatformCallBackView(
         self.social_login_view.serializer.is_valid(raise_exception=True)
         self.social_login_view.login()
         return self.social_login_view.get_response()
-
-    def _is_valid_user_type(self, user: models.User) -> bool:
-        return bool(
-            allauth_models.SocialAccount.objects.filter(
-                user=user,
-                provider=self.platform,
-            )
-        )
 
     def _redirect_to_front_for_exception(self, error_message: str):
         return shortcuts.redirect(self.get_redirect_to_front(error=error_message))
