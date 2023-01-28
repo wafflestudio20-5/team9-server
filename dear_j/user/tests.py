@@ -43,8 +43,7 @@ def test_success_login(client: test.Client, user1: data_utils.UserData):
 def test_fail_login(client: test.Client, user1: data_utils.UserData):
     data = {"email": user1.email, "password": "wrong password"}
     response = client.post(path="/api/v1/user/login/", data=data, content_type="application/json")
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
+    compare_utils.assert_response_equal(response, status.HTTP_400_BAD_REQUEST)
 
 @pytest.mark.django_db
 def test_success_change_pw(client: test.Client, user1: data_utils.UserData):
