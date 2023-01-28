@@ -41,7 +41,7 @@ def test_create_post(
     user1: data_utils.UserData,
     user2: data_utils.UserData,
 ):
-    BUCKET_NAME = "//testbucket"
+    BUCKET_NAME = "ttestbucket"
     _, bucket = create_bucket(BUCKET_NAME)
     client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
 
