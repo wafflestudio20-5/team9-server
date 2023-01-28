@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "dj_rest_auth",
     "dj_rest_auth.registration",
+    "django_s3_storage",
     "drf_spectacular",
     "allauth",
     "allauth.account",
