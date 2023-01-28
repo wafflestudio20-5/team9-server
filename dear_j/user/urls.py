@@ -11,8 +11,8 @@ urlpatterns = [
     urls.path("logout/", common.UserLogoutView.as_view()),
     urls.path("profile/", common.UserProfileView.as_view()),
     urls.path("password/change/", common.UserPasswordChangeView.as_view()),
-    # # allauth
-    # urls.re_path(r"^accounts/", urls.include("allauth.urls"), name="socialaccount_signup"),
+    # allauth
+    urls.re_path(r"^accounts/", urls.include("allauth.urls"), name="socialaccount_signup"),
     # Kakao Social Login
     urls.path("login/kakao/", kakao.KakaoView.as_view()),
     urls.path("login/kakao/callback/", kakao.KakaoCallBackView.as_view()),
