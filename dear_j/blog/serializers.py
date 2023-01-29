@@ -21,7 +21,8 @@ class PostSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data: Dict) -> blog_models.Post:
-        schedules_raw_data = self.initial_data.pop("schedules", [])
+        schedules_raw_data = dict(self.initial_data).get("schedules", [])
+        print(schedules_raw_data)
         schedule_ids = [row.get("pk") for row in schedules_raw_data]
 
         post: blog_models.Post = super().create(validated_data)

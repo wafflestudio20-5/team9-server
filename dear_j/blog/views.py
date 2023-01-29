@@ -1,3 +1,5 @@
+from django.db.models import query
+
 from rest_framework import authentication
 from rest_framework import generics
 from rest_framework import mixins
@@ -65,3 +67,10 @@ class ScheduleToPostListView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = blog_models.Post.objects.all()
     serializer_class = blog_serializers.ScheduleToPostSerializer
+
+    def get_queryset(self) -> query.QuerySet:
+        params = self.request.GET
+        schedule_pk = params.get("pk")
+
+        queryset: query.QuerySet = super().get_queryset()
+        return queryset.filter(schedules__pk=schedule_pk)
