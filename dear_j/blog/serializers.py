@@ -63,3 +63,16 @@ class CommentSerializer(serializers.ModelSerializer):
         instance.is_updated = True
         instance.save()
         return super().update(instance, validated_data)
+
+
+class ScheduleToPostSerializer(serializers.ModelSerializer):
+    schedules = calendar_serializers.ScheduleSerializer(read_only=True, many=True, required=False)
+
+    class Meta:
+        model = blog_models.Post
+        fields = "__all__"
+        extra_kwargs = {
+            "created_by": {
+                "default": serializers.CurrentUserDefault(),
+            },
+        }

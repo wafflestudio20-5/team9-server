@@ -14,4 +14,8 @@ urlpatterns = [
         "comment/<int:cid>/",
         blog_views.CommentUpdateDestroyView.as_view(),
     ),
+    urls.path(
+        "schedule/<int:pk>/post/",
+        blog_views.ScheduleToPostListView.as_view(),
+    ),
 ]

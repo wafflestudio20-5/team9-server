@@ -54,3 +54,14 @@ class CommentUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = blog_models.Comment.objects.all()
     serializer_class = blog_serializers.CommentSerializer
     lookup_field = "cid"
+
+
+class ScheduleToPostListView(generics.ListCreateAPIView):
+    authentication_classes = [
+        jwt_auth.JWTCookieAuthentication,
+        authentication.SessionAuthentication,
+    ]
+    pagination_class = blog_paginations.PostListPagination
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    queryset = blog_models.Post.objects.all()
+    serializer_class = blog_serializers.ScheduleToPostSerializer
