@@ -6,18 +6,23 @@ from rest_framework import serializers as rest_serializers
 
 from user import models
 
+class UserSerializer(rest_serializers.ModelSerializer):
+    class Meta(dj_auth_serializers.UserDetailsSerializer.Meta):
+        model = models.User
+        fields = ["id", "email", "username", "birthdate", "image"]
+        read_only_fields = (
+            "id",
+            "email",
+            "username",
+        )
+
 
 class UserDetailSerializer(dj_auth_serializers.UserDetailsSerializer):
-    def create(self, validated_data: Dict) -> models.User:
-        user = models.User.objects.create_user(**validated_data)
-        return user
+    def create(self, validated_data):
+        raise NotImplementedError
 
-    def update(self, instance: models.User, validated_data: Dict) -> models.User:
-        instance.email = validated_data.get("email", instance.email)
-        instance.username = validated_data.get("username", instance.username)
-        instance.birthdate = validated_data.get("birthdate", instance.birthdate)
-        instance.save()
-        return instance
+    def update(self, instance, validated_data):
+        raise NotImplementedError
 
     class Meta(dj_auth_serializers.UserDetailsSerializer.Meta):
         fields = dj_auth_serializers.UserDetailsSerializer.Meta.fields + (
@@ -35,18 +40,12 @@ class RegisterSerializer(dj_reg_serializers.RegisterSerializer):
         data_dict["birthdate"] = self.validated_data.get("birthdate", "")
         return data_dict
 
-    def create(self, validated_data: Dict) -> models.User:
-        print("hi")
-        print(validated_data)
-        user = models.User.objects.create_user(**validated_data)
-        return user
+    def create(self, validated_data):
+        raise NotImplementedError
 
-    def update(self, instance: models.User, validated_data: Dict) -> models.User:
-        instance.email = validated_data.get("email", instance.email)
-        instance.username = validated_data.get("username", instance.username)
-        instance.birthdate = validated_data.get("birthdate", instance.birthdate)
-        instance.save()
-        return instance
+    def update(self, instance, validated_data):
+        raise NotImplementedError
+
 
     class Meta:
         model = models.User

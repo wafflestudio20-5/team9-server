@@ -1,27 +1,37 @@
 from dj_rest_auth import views as dj_auth_views
 from dj_rest_auth.registration import views as dj_reg_views
-from rest_framework import generics
+from rest_framework import response as rest_response
+from rest_framework import status
 
 from user import models
 from user import permissions
 from user import serializers
-
+from user.service import s3
 
 class UserRegistrationView(dj_reg_views.RegisterView):
     serializer_class = serializers.RegisterSerializer
 
     def create(self, request, *args, **kwargs):
-        email = request.data.get("email")
-        birthdate = request.data.get("birthdate")
-        image = request.data.get("image")
-        response = super().create(request, *args, **kwargs)
-        user = models.User.objects.get(email=email)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = self.perform_create(serializer)
+        birthdate = request.data.get("birthdate", "")
+
         user.birthdate = birthdate
-        if image is None:
-            user.image = "https://dear-j-blog.s3.ap-northeast-2.amazonaws.com/user/user.png"
-        else:
-            user.image = image
         user.save()
+
+        headers = self.get_success_headers(serializer.data)
+        data = self.get_response_data(user)
+        
+        if data:
+            response = rest_response.Response(
+                data,
+                status=status.HTTP_201_CREATED, 
+                headers=headers,
+            )
+        else:
+            response = rest_response.Response(status=status.HTTP_204_NO_CONTENT, headers=headers)
+
         return response
 
 
@@ -38,7 +48,7 @@ class UserPasswordChangeView(dj_auth_views.PasswordChangeView):
 
 
 class UserProfileView(dj_auth_views.UserDetailsView):
-    serializer_class = serializers.UserDetailSerializer
+    serializer_class = serializers.UserSerializer
     permission_classes = (permissions.UserIdentification,)
 
     def get_object(self) -> models.User:

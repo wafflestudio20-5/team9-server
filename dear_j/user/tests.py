@@ -5,13 +5,14 @@ from rest_framework import status
 
 from utils.test import compare as compare_utils
 from utils.test import data as data_utils
+from user.service import s3
 
 import site_env
 
 if site_env.is_test():
-    image_address = "https://%22dear-j-blog%22.s3.ap-northeast-2.amazonaws.com/https%3A/dear-j-blog.s3.ap-northeast-2.amazonaws.com/user/user.png"
+    image_address = s3.default_pytest_image
 else:
-    image_address = "https://dear-j-blog.s3.ap-northeast-2.amazonaws.com/https%3A/dear-j-blog.s3.ap-northeast-2.amazonaws.com/user/user.png"
+    image_address = s3.default_test_image
 
 @pytest.fixture(name="user1")
 def fixture_registered_user1(client: test.Client):
@@ -26,9 +27,9 @@ def test_success_register(client: test.Client):
     response = client.post(path="/api/v1/user/registration/", data=user_data.for_registration, content_type="application/json")
     expected = {"user": {"pk": 1,
                          "email": "user1@example.com",
-                         "birthdate": None,
+                         "birthdate": "2000-01-01",
                          "username": "user1",
-                         "image": image_address
+                         "image": image_address,
                          }}
     compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ("access_token", "refresh_token"))
 
@@ -51,7 +52,8 @@ def test_success_login(client: test.Client, user1: data_utils.UserData):
                          "email": "user1@example.com", 
                          "birthdate": "2000-01-01", 
                          "username": "user1", 
-                         "image":image_address}}
+                         "image": image_address,
+                         }}
     compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, ("access_token", "refresh_token"))
 
 
@@ -83,10 +85,10 @@ def test_update_profile(client: test.Client, user1: data_utils.UserData):
     response = client.patch(path="/api/v1/user/profile/", data=update_data, content_type="application/json")
 
     expected = {
-        "pk": 1,
+        "id": 1,
         "email": "user1@example.com",
         "birthdate": "2001-01-01",
         "username": "user1",
-        "image":image_address
+        "image": image_address,
     }
     compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected)

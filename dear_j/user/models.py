@@ -2,6 +2,7 @@ from django.contrib.auth import models as auth_models
 from django.db import models as db_models
 
 from user import managers
+from user.service import s3
 
 
 class User(auth_models.AbstractBaseUser, auth_models.PermissionsMixin):
@@ -14,8 +15,8 @@ class User(auth_models.AbstractBaseUser, auth_models.PermissionsMixin):
     birthdate = db_models.DateField(null=True)
     birthyear = db_models.IntegerField(null=True)
     birthday = db_models.IntegerField(null=True)
-    image = db_models.ImageField(upload_to="user", editable=True, null=True, 
-                                 default="https://dear-j-blog.s3.ap-northeast-2.amazonaws.com/user/user.png")
+    image = db_models.ImageField(upload_to="user", editable=True, 
+                                 default=s3.default_image, blank=True)
     is_active = db_models.BooleanField(default=True)
     is_admin = db_models.BooleanField(default=False)
     is_superuser = db_models.BooleanField(default=False)
