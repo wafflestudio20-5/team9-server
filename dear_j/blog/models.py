@@ -11,7 +11,7 @@ class Post(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     content = models.TextField()
     image = models.ImageField(upload_to="user", editable=True, null=True)
-    schedules = models.ManyToManyField("Schedule", through="ScheduleToPost")
+    schedules = models.ManyToManyField(calendar_models.Schedule, through="ScheduleToPost", blank=True)
 
     class Meta:
         verbose_name = "post"
