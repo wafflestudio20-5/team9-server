@@ -1,8 +1,10 @@
 from typing import Dict
 
+from django import shortcuts
 from rest_framework import serializers
 
 from blog import models as blog_models
+from calendar_j import models as calendar_models
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -14,6 +16,18 @@ class PostSerializer(serializers.ModelSerializer):
                 "default": serializers.CurrentUserDefault(),
             },
         }
+
+
+    def create(self, validated_data: Dict) -> blog_models.Post:
+        schedules_raw_data = validated_data.pop("schedules", [])
+        schedule_ids = [row.get("id") for row in schedules_raw_data]
+
+        post: blog_models.Post = super().create(validated_data)
+
+        for schedule_id in schedule_ids:
+            schedule = shortcuts.get_object_or_404(calendar_models.Schedule, id=schedule_id)
+            blog_models.ScheduleToPost.objects.create(post=post, schedule=schedule)
+        return post
 
 
 class CommentSerializer(serializers.ModelSerializer):

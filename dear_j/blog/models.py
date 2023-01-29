@@ -1,5 +1,6 @@
 from django.db import models
 from user import models as user_models
+from calendar_j import models as calendar_models
 
 
 class Post(models.Model):
@@ -10,6 +11,7 @@ class Post(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     content = models.TextField()
     image = models.ImageField(upload_to="user", editable=True, null=True)
+    schedules = models.ManyToManyField("Schedule", through="ScheduleToPost")
 
     class Meta:
         verbose_name = "post"
@@ -33,3 +35,9 @@ class Comment(models.Model):
         verbose_name = "comment"
         verbose_name_plural = "comments"
         db_table = "tb_comments"
+
+
+class ScheduleToPost(models.Model):
+    schedule = models.ForeignKey(calendar_models.Schedule, on_delete=models.PROTECT)
+    post = models.ForeignKey(Post, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True)
