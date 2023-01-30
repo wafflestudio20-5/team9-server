@@ -69,10 +69,20 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         if len(serialized_data) == 1:
             response_data = serialized_data[0]
         else:
-            response_data = {}
-            response_data["results"] = serialized_data
+            queryset = self.queryset.filter(pk__in=[row["id"] for row in serialized_data])
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+            serializer = self.get_serializer(queryset, many=True)
+            response_data = serialized_data.data
 
         return resp.Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def get_paginated_response(self, data, **kwargs):
+        assert self.paginator
+        return self.paginator.get_paginated_response(data, **kwargs)
 
 
 class ScheduleRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
