@@ -2,7 +2,7 @@ from django.contrib.auth import models as auth_models
 from django.db import models as db_models
 
 from user import managers
-from user.service import s3
+
 
 DEFAULT_IMAGE = "user/user.png"
 class User(auth_models.AbstractBaseUser, auth_models.PermissionsMixin):
