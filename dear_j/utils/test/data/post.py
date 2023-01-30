@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 
 @dataclasses.dataclass
@@ -16,5 +16,5 @@ class PostData:
         return cls(
             title="Test Post",
             content="Test Content",
-            schedules=schedules
+            schedules=schedules,
         )

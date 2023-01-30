@@ -43,7 +43,8 @@ def test_create_post_with_schedules(
         data=schedule_data_2,
         content_type="application/json"
     )
-    post_data = data_utils.PostData.create_post_data([1, 2])
+    post_data = {"title":"title", "content":"content", "schedules":[{"pk":1}, {"pk":2}]}
+    #post_data = data_utils.PostData.create_post_data([1, 2])
     print(post_data)
 
     response = client.post(
