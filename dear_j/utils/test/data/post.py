@@ -8,7 +8,7 @@ from typing import Dict, List
 class PostData:
     title: str
     content: str
-    schedules: List[Dict]
+    #schedules: List[Dict]
 
     @classmethod
     def create_post_data(cls, schedules_list: List[int]) -> PostData:
@@ -16,5 +16,4 @@ class PostData:
         return cls(
             title="Test Post",
             content="Test Content",
-            schedules=schedules,
         )

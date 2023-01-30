@@ -1,4 +1,5 @@
 import pytest
+import json
 
 from django import test
 from rest_framework import status
@@ -43,10 +44,11 @@ def test_create_post_with_schedules(
         data=schedule_data_2,
         content_type="application/json"
     )
-    post_data = {"title":"title", "content":"content", "schedules":[{"pk":1}, {"pk":2}]}
     #post_data = data_utils.PostData.create_post_data([1, 2])
-    print(post_data)
 
+    schedules = [{"pk":1}]
+    post_data = {"title":"title","comment":"comment"}
+    post_data["schedules"]=schedules
     response = client.post(
         path="/api/v1/blog/post/",
         data=post_data,
