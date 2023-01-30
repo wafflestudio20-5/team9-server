@@ -5,9 +5,7 @@ from rest_framework import status
 
 from utils.test import compare as compare_utils
 from utils.test import data as data_utils
-from user.service import s3
 
-import site_env
 
 IMAGE_ADDRESS = "https://%22dear-j-blog%22.s3.ap-northeast-2.amazonaws.com/user/user.png"
 
