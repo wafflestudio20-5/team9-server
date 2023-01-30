@@ -6,8 +6,6 @@ from rest_framework import status
 from utils.test import compare as compare_utils
 from utils.test import data as data_utils
 
-_EXCEPTION_COLUMNS = ("created_at", "updated_at")
-
 
 @pytest.fixture(name="user1")
 def fixture_registered_user1(client: test.Client):
@@ -55,11 +53,11 @@ def test_followee_list_and_create_network(
         "approved": None,
         "follower": 1,
     }
-    compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, _EXCEPTION_COLUMNS)
+    compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected)
 
     response = client.get(path="/api/v1/social/network/followee/")
     expected = [expected]
-    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, _EXCEPTION_COLUMNS)
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected)
 
 
 @pytest.mark.django_db

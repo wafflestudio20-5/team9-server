@@ -7,8 +7,6 @@ from social.tests import followee as followee_tests
 from utils.test import compare as compare_utils
 from utils.test import data as data_utils
 
-_EXCEPTION_COLUMNS = ("created_at", "updated_at")
-
 
 @pytest.fixture(name="user1")
 def fixture_registered_user1(client: test.Client):
@@ -60,7 +58,7 @@ def test_follower_list_network(
             "follower": 1,
         }
     ]
-    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, _EXCEPTION_COLUMNS)
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected)
 
 
 @pytest.mark.django_db
@@ -81,4 +79,4 @@ def test_follower_update_network(
         "approved": True,
         "follower": 1,
     }
-    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, _EXCEPTION_COLUMNS)
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected)
