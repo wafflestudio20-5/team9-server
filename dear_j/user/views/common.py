@@ -6,7 +6,7 @@ from rest_framework import status
 from user import models
 from user import permissions
 from user import serializers
-from user.service import s3
+
 
 class UserRegistrationView(dj_reg_views.RegisterView):
     serializer_class = serializers.RegisterSerializer
