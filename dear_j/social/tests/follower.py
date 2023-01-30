@@ -42,6 +42,7 @@ def test_follower_list_network(
     user1: data_utils.UserData,
     user2: data_utils.UserData,
 ):
+    """Test Get List of Follow Requests API."""
     followee_tests.test_followee_list_and_create_network(client, user1, user2)
     client.post(path="/api/v1/user/logout/")
     client.post(path="/api/v1/user/login/", data=user2.for_login, content_type="application/json")
@@ -67,6 +68,7 @@ def test_follower_update_network(
     user1: data_utils.UserData,
     user2: data_utils.UserData,
 ):
+    """Test Response for Follow Requests API."""
     test_follower_list_network(client, user1, user2)
     response = client.patch(path="/api/v1/social/network/follower/1/", data={"approved": True}, content_type="application/json")
     expected = {

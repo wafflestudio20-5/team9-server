@@ -97,11 +97,13 @@ class ScheduleSerializer(serializers.ModelSerializer):
         user_ids = [row.get("pk") for row in participants_raw_data]
 
         schedule = super().update(instance, validated_data)
-        participants = calendar_model.Participant.objects.filter(schedule=schedule)
-        for participant in participants:
-            participant.delete()
 
-        self.create_participants_with_schedule(schedule, user_ids)
+        if (not self.partial) or user_ids:
+            participants = calendar_model.Participant.objects.filter(schedule=schedule)
+            for participant in participants:
+                participant.delete()
+
+            self.create_participants_with_schedule(schedule, user_ids)
         return schedule
 
 

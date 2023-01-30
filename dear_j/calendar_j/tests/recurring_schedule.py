@@ -33,7 +33,7 @@ def fixture_registered_user3(client: test.Client):
 
 
 @pytest.mark.django_db
-def test_create_recurring_schedule(
+def test_create_recurring_schedules(
     client: test.Client,
     user1: data_utils.UserData,
     user2: data_utils.UserData,
@@ -110,7 +110,7 @@ def test_create_recurring_schedule(
 
 
 @pytest.mark.django_db
-def test_update_and_destroy_recurring_schedule(
+def test_update_and_destroy_recurring_schedules(
     client: test.Client,
     user1: data_utils.UserData,
     user2: data_utils.UserData,
@@ -121,7 +121,7 @@ def test_update_and_destroy_recurring_schedule(
         child_schedule_1,
         child_schedule_2,
         child_schedule_3,
-    ) = test_create_recurring_schedule(client, user1, user2, user3)
+    ) = test_create_recurring_schedules(client, user1, user2, user3)
 
     new_data = {
         "start_at": "2023-02-06 02:00:00",

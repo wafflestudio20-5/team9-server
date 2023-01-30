@@ -114,6 +114,9 @@ BLACKLIST_AFTER_ROTATION = config.BLACKLIST_AFTER_ROTATION
 # cors setting
 CORS_ORIGIN_ALLOW_ALL = config.CORS_ORIGIN_ALLOW_ALL
 
+# Test COOP
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
+
 # custom dj-rest-auth serializer
 REST_AUTH_SERIALIZERS = {"USER_DETAILS_SERIALIZER": "user.serializers.UserDetailSerializer"}
 REST_AUTH_REGISTER_SERIALIZERS = {"REGISTER_SERIALIZER": "user.serializers.RegisterSerializer"}

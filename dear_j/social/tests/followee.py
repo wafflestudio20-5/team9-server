@@ -41,6 +41,7 @@ def test_followee_list_and_create_network(
     user1: data_utils.UserData,
     user2: data_utils.UserData,
 ):
+    """Test Request following API."""
     client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
     response = client.post(path="/api/v1/social/network/followee/", data={"followee": {"pk": 2}}, content_type="application/json")
     expected = {
@@ -66,6 +67,7 @@ def test_followee_delete_network(
     user1: data_utils.UserData,
     user2: data_utils.UserData,
 ):
+    """Test Cancel following API."""
     test_followee_list_and_create_network(client, user1, user2)
     response = client.delete(path="/api/v1/social/network/followee/1/")
     compare_utils.assert_response_equal(response, status.HTTP_204_NO_CONTENT)

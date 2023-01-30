@@ -320,12 +320,13 @@ def test_get_authorized_schedules(
 
 
 @pytest.mark.django_db
-def test_update_schedule(
+def test_update_and_delete_schedule(
     client: test.Client,
     user1: data_utils.UserData,
     user2: data_utils.UserData,
     user3: data_utils.UserData,
 ):
+    """Test Schedule (Partial or Total) Update & Delete API."""
     client.post("/api/v1/user/login/", data=user1.for_login, content_type="application/json")
 
     schedule_data = data_utils.ScheduleData.create_nth_schedule_data(

@@ -42,6 +42,7 @@ def test_search_candidate(
     user3: data_utils.UserData,
     user4: data_utils.UserData,
 ):
+    """Test Search Candidate to follow API."""
     response = client.get(path="/api/v1/social/search/candidate/?search=user")
     expected = [
         {
