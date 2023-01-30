@@ -13,9 +13,8 @@ class PostData:
     @classmethod
     def create_post_data(cls, schedules_list: List[int]) -> PostData:
         schedules = [{"pk": i} for i in schedules_list.copy()]
-
         return cls(
             title="Test Post",
             content="Test Content",
-            schedules=schedules,
+            schedules=schedules
         )
