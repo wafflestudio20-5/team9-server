@@ -26,4 +26,41 @@ def test_get_post_by_schedule(
     user1: data_utils.UserData,
     user2: data_utils.UserData,
 ):
-    pass
+    """ Create Post"""
+    client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
+
+    schedule_data_1 = data_utils.ScheduleData.create_nth_schedule_data(1, 1, [2, 3]).as_dict()
+
+    response = client.post(
+        path="/api/v1/calendar/schedule/",
+        data=schedule_data_1,
+        content_type="application/json",
+    )
+    schedule_data_2 = data_utils.ScheduleData.create_nth_schedule_data(1, 1, [2, 3]).as_dict()
+    compare_utils.assert_response_equal(response, status.HTTP_201_CREATED)
+    response = client.post(
+        path="/api/v1/calendar/schedule/",
+        data=schedule_data_2,
+        content_type="application/json",
+    )
+    compare_utils.assert_response_equal(response, status.HTTP_201_CREATED)
+
+    post_data = {"title":"title", "content":"content"}
+    post_data["schedules"] = [{"pk":1}, {"pk":2}]
+    response = client.post(
+        path="/api/v1/blog/post/",
+        data=post_data,
+        content_type="application/json",
+    )
+    compare_utils.assert_response_equal(response, status.HTTP_201_CREATED)
+
+    response = client.get("/api/v1/blog/post/")
+
+    expected = [{
+        "pid": 1,
+        "title": "title",
+        "content": "content",
+        "created_by": 1,
+    }]
+    response = client.get("/api/v1/blog/schedule/post/1/")
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, ["created_at", "updated_at", "image", "schedules"])

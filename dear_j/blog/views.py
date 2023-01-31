@@ -1,3 +1,4 @@
+from django import shortcuts
 from django.db.models import query
 
 from rest_framework import authentication
@@ -12,6 +13,7 @@ from blog import models as blog_models
 from blog import paginations as blog_paginations
 from blog import permissions as blog_permissions
 from blog import serializers as blog_serializers
+from calendar_j import models as calendar_models
 
 
 class PostListCreateView(generics.ListCreateAPIView):
@@ -69,8 +71,8 @@ class ScheduleToPostListView(generics.ListCreateAPIView):
     serializer_class = blog_serializers.ScheduleToPostSerializer
 
     def get_queryset(self) -> query.QuerySet:
-        params = self.request.GET
-        schedule_pk = params.get("pk")
+        schedule_pk = self.kwargs["pk"]
+        schedule = shortcuts.get_object_or_404(calendar_models.Schedule, pk=schedule_pk)
 
         queryset: query.QuerySet = super().get_queryset()
-        return queryset.filter(schedules__pk=schedule_pk)
+        return queryset.filter(schedules=schedule)
