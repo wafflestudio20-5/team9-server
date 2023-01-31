@@ -60,8 +60,8 @@ class ScheduleSerializer(serializers.ModelSerializer):
         schedule: calendar_model.Schedule = super().create(validated_data)
         self.create_participants_with_schedule(schedule, user_ids)
 
+        schedules = [schedule]
         if schedule.is_recurring:
-            schedules = [schedule]
             start_at_list, end_at_list = cron.apply_recurring_rule(
                 schedule.cron_expr,
                 schedule.start_at,
@@ -90,18 +90,20 @@ class ScheduleSerializer(serializers.ModelSerializer):
                 child_schedule.recurring_schedule_group = recurring_schedule_group
                 child_schedule.save()
 
-        return schedule
+        return schedules
 
     def update(self, instance, validated_data):
         participants_raw_data = validated_data.pop("participants", [])
         user_ids = [row.get("pk") for row in participants_raw_data]
 
         schedule = super().update(instance, validated_data)
-        participants = calendar_model.Participant.objects.filter(schedule=schedule)
-        for participant in participants:
-            participant.delete()
 
-        self.create_participants_with_schedule(schedule, user_ids)
+        if (not self.partial) or user_ids:
+            participants = calendar_model.Participant.objects.filter(schedule=schedule)
+            for participant in participants:
+                participant.delete()
+
+            self.create_participants_with_schedule(schedule, user_ids)
         return schedule
 
 

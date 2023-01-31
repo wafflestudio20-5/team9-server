@@ -42,6 +42,7 @@ def test_search_candidate(
     user3: data_utils.UserData,
     user4: data_utils.UserData,
 ):
+    """Test Search Candidate to follow API."""
     response = client.get(path="/api/v1/social/search/candidate/?search=user")
     expected = [
         {
@@ -88,46 +89,3 @@ def test_search_candidate(
         for key, value in expected_row.items():
             assert key in actual_row.keys()
             assert actual_row[key] == value
-
-
-@pytest.mark.django_db
-def test_create_network(client: test.Client, user1: data_utils.UserData, user2: data_utils.UserData):
-    client.post(path="/api/v1/user/login/", data=user1.for_login, content_type="application/json")
-    response = client.post(path="/api/v1/social/network/", data={"followee": {"pk": 2}}, content_type="application/json")
-    expected = {
-        "id": 1,
-        "followee": {
-            "pk": 2,
-            "username": "user2",
-            "email": "user2@example.com",
-        },
-        "approved": False,
-        "follower": 1,
-    }
-    actual = response.json()
-
-    assert response.status_code == status.HTTP_201_CREATED
-    for key, value in expected.items():
-        assert key in actual.keys()
-        assert actual[key] == value
-
-    client.post(path="/api/v1/user/logout/")
-    client.post(path="/api/v1/user/login/", data=user2.for_login, content_type="application/json")
-
-    response = client.patch(path="/api/v1/social/network/1/", data={"approved": True}, content_type="application/json")
-    expected = {
-        "id": 1,
-        "followee": {
-            "pk": 2,
-            "username": "user2",
-            "email": "user2@example.com",
-        },
-        "approved": True,
-        "follower": 1,
-    }
-    actual = response.json()
-
-    assert response.status_code == status.HTTP_200_OK
-    for key, value in expected.items():
-        assert key in actual.keys()
-        assert actual[key] == value

@@ -24,7 +24,7 @@ if site_env.is_test():
     SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 else:
     SECRET_KEY = ssm_utils.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
-DEBUG = not site_env.is_prod()
+DEBUG = True  # not site_env.is_prod()
 
 ALLOWED_HOSTS = host.BACKEND_HOST.ALLOWED_HOSTS
 
@@ -113,6 +113,9 @@ BLACKLIST_AFTER_ROTATION = config.BLACKLIST_AFTER_ROTATION
 
 # cors setting
 CORS_ORIGIN_ALLOW_ALL = config.CORS_ORIGIN_ALLOW_ALL
+
+# Test COOP
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
 # custom dj-rest-auth serializer
 REST_AUTH_SERIALIZERS = {"USER_DETAILS_SERIALIZER": "user.serializers.UserDetailSerializer"}
