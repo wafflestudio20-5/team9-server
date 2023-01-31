@@ -86,7 +86,7 @@ def test_update_profile(client: test.Client, user1: data_utils.UserData):
     response = client.patch(path="/api/v1/user/profile/", data=update_data, content_type="application/json")
 
     expected = {
-        "id": 1,
+        "pk": 1,
         "email": "user1@example.com",
         "birthdate": "2001-01-01",
         "username": "user1",
