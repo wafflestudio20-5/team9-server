@@ -1,13 +1,15 @@
+from typing import Dict
+
 from django import shortcuts
 from rest_framework import serializers
 
+from social import exceptions as social_exceptions
 from social import models as social_models
 from user import models as user_models
 from user import serializers as user_serializers
 
 
 class NetworkSerializer(serializers.ModelSerializer):
-    # TODO: Followee can only update approve state to True when is_opened=True
     followee = user_serializers.EssentialUserInfoFromPKSerializer(many=False, required=True)
 
     class Meta:
@@ -27,3 +29,9 @@ class NetworkSerializer(serializers.ModelSerializer):
             followee=followee,
         )
         return network
+
+    def update(self, instance: social_models.Network, validated_data: Dict):
+        for key in validated_data.keys():
+            if key != "approved":
+                raise social_exceptions.FollowAcceptOrRejectAPIException
+        return super().update(instance, validated_data)

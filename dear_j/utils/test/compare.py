@@ -6,7 +6,7 @@ from rest_framework import response as resp
 def assert_json_equal(
     actual: Union[Dict, List],
     expected: Union[Dict, List],
-    exception_columns: Optional[List[str]] = None,
+    exception_columns: Optional[List[str]] = ("created_at", "updated_at"),
 ):
     if not exception_columns:
         exception_columns = []
@@ -29,7 +29,7 @@ def assert_response_equal(
     response: resp.Response,
     expected_status_code: int,
     expected: Optional[Union[Dict, List]] = None,
-    exception_columns: Optional[List[str]] = None,
+    exception_columns: Optional[List[str]] = ("created_at", "updated_at"),
 ):
     if not exception_columns:
         exception_columns = []
