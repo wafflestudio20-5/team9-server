@@ -6,8 +6,8 @@ from rest_framework import status
 from utils.test import compare as compare_utils
 from utils.test import data as data_utils
 
-
 IMAGE_ADDRESS = "https://%22dear-j-blog%22.s3.ap-northeast-2.amazonaws.com/user/user.png"
+
 
 @pytest.fixture(name="user1")
 def fixture_registered_user1(client: test.Client):
@@ -21,15 +21,14 @@ def test_success_register(client: test.Client):
     user_data = data_utils.UserData.create_nth_user_data(1)
     response = client.post(path="/api/v1/user/registration/", data=user_data.for_registration, content_type="application/json")
     expected = {
-        "user":
-            {
-                "pk": 1,
-                "email": "user1@example.com",
-                "birthdate": "2000-01-01",
-                "username": "user1",
-                "image": IMAGE_ADDRESS,
-            }
+        "user": {
+            "pk": 1,
+            "email": "user1@example.com",
+            "birthdate": "2000-01-01",
+            "username": "user1",
+            "image": IMAGE_ADDRESS,
         }
+    }
     compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ("access_token", "refresh_token"))
 
 
@@ -48,15 +47,14 @@ def test_success_login(client: test.Client, user1: data_utils.UserData):
     data = {"email": user1.email, "password": user1.password}
     response = client.post(path="/api/v1/user/login/", data=data, content_type="application/json")
     expected = {
-        "user":
-            {
-                "pk": 1,
-                "email": "user1@example.com",
-                "birthdate": "2000-01-01",
-                "username": "user1",
-                "image": IMAGE_ADDRESS,
-            }
+        "user": {
+            "pk": 1,
+            "email": "user1@example.com",
+            "birthdate": "2000-01-01",
+            "username": "user1",
+            "image": IMAGE_ADDRESS,
         }
+    }
     compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, ("access_token", "refresh_token"))
 
 
@@ -66,14 +64,14 @@ def test_fail_login(client: test.Client, user1: data_utils.UserData):
     response = client.post(path="/api/v1/user/login/", data=data, content_type="application/json")
     compare_utils.assert_response_equal(response, status.HTTP_400_BAD_REQUEST)
 
+
 @pytest.mark.django_db
 def test_success_change_pw(client: test.Client, user1: data_utils.UserData):
     data = {"email": user1.email, "password": user1.password}
     response = client.post(path="/api/v1/user/login/", data=data, content_type="application/json")
-    data = {"new_password1": "user1password1*", "new_password2": "user1password1*",
-            "old_password":user1.password}
+    data = {"new_password1": "user1password1*", "new_password2": "user1password1*", "old_password": user1.password}
     response = client.post(path="/api/v1/user/password/change/", data=data, content_type="application/json")
-    expected = {"detail":"New password has been saved."}
+    expected = {"detail": "New password has been saved."}
     compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected)
 
 
