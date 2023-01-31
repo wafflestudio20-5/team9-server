@@ -6,22 +6,9 @@ from rest_framework import serializers as rest_serializers
 
 from user import models
 
-class UserSerializer(rest_serializers.ModelSerializer):
-    class Meta(dj_auth_serializers.UserDetailsSerializer.Meta):
-        model = models.User
-        fields = ["id", "email", "username", "birthdate", "image"]
-        read_only_fields = (
-            "id",
-            "email",
-            "username",
-        )
-
 
 class UserDetailSerializer(dj_auth_serializers.UserDetailsSerializer):
     def create(self, validated_data):
-        raise NotImplementedError
-
-    def update(self, instance, validated_data):
         raise NotImplementedError
 
     class Meta(dj_auth_serializers.UserDetailsSerializer.Meta):
@@ -45,7 +32,6 @@ class RegisterSerializer(dj_reg_serializers.RegisterSerializer):
 
     def update(self, instance, validated_data):
         raise NotImplementedError
-
 
     class Meta:
         model = models.User

@@ -22,11 +22,11 @@ class UserRegistrationView(dj_reg_views.RegisterView):
 
         headers = self.get_success_headers(serializer.data)
         data = self.get_response_data(user)
-        
+
         if data:
             response = rest_response.Response(
                 data,
-                status=status.HTTP_201_CREATED, 
+                status=status.HTTP_201_CREATED,
                 headers=headers,
             )
         else:
@@ -48,7 +48,7 @@ class UserPasswordChangeView(dj_auth_views.PasswordChangeView):
 
 
 class UserProfileView(dj_auth_views.UserDetailsView):
-    serializer_class = serializers.UserSerializer
+    serializer_class = serializers.UserDetailSerializer
     permission_classes = (permissions.UserIdentification,)
 
     def get_object(self) -> models.User:
