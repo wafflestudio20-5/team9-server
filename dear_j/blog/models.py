@@ -5,6 +5,7 @@ from user import models as user_models
 
 
 class Post(models.Model):
+    pid = models.AutoField(primary_key=True)
     title = models.CharField(max_length=50)
     created_by = models.ForeignKey(user_models.User, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -23,6 +24,7 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
+    cid = models.AutoField(primary_key=True)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     created_by = models.ForeignKey(user_models.User, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
