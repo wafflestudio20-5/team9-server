@@ -16,6 +16,8 @@ class ProtectionLevel(models.IntegerChoices):
 
     @classmethod
     def filter_user_schedule(cls, request_user: user_models.User, target_user: user_models.User) -> int:
+        if request_user == target_user:
+            return cls.CLOSED
         if social_models.Network.objects.filter(follower=request_user, followee=target_user):
             return cls.FOLLOWER
         return cls.OPEN

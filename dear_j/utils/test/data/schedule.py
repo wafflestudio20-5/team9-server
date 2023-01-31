@@ -19,8 +19,8 @@ class ScheduleData:
     recurring_end_at: Optional[str] = None
 
     @classmethod
-    def create_nth_schedule_data(cls, n: int, protection_level: int, raw_participants: List[int]) -> ScheduleData:
-        participants = [{"pk": i} for i in raw_participants.copy()]
+    def create_nth_schedule_data(cls, n: int, protection_level: int, participant_ids: List[int]) -> ScheduleData:
+        participants = [{"pk": i} for i in participant_ids.copy()]
 
         return cls(
             title=f"Test Schedule {n}",
@@ -35,11 +35,11 @@ class ScheduleData:
     def create_recurring_schedule_data(
         cls,
         protection_level: int,
-        raw_participants: List[int],
+        participant_ids: List[int],
         cron_expr: str,
         recurring_end_at: str,
     ) -> ScheduleData:
-        participants = [{"pk": i} for i in raw_participants.copy()]
+        participants = [{"pk": i} for i in participant_ids.copy()]
 
         return cls(
             title="Test Schedule",
