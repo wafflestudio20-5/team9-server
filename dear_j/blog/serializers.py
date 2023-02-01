@@ -4,6 +4,7 @@ from django import shortcuts
 from rest_framework import serializers
 
 from blog import models as blog_models
+from blog.services import validate
 from calendar_j import models as calendar_models
 from calendar_j import serializers as calendar_serializers
 
@@ -21,9 +22,7 @@ class PostSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data: Dict) -> blog_models.Post:
-        schedules_raw_data = dict(self.initial_data).get("schedules", [])
-        print(schedules_raw_data)
-        schedule_ids = [row.get("pk") for row in schedules_raw_data]
+        schedule_ids = validate.validate_schedule(dict(self.initial_data))
 
         post: blog_models.Post = super().create(validated_data)
 
@@ -35,10 +34,9 @@ class PostSerializer(serializers.ModelSerializer):
         return post
 
     def update(self, instance, validated_data: Dict) -> blog_models.Post:
-        schedules_raw_data = self.initial_data.pop("schedules", [])
-        schedule_ids = [row.get("pk") for row in schedules_raw_data]
+        schedule_ids = validate.validate_schedule(dict(self.initial_data))
 
-        if schedules_raw_data is not []:
+        if schedule_ids != []:
             past_schedule = blog_models.ScheduleToPost.objects.filter(post=instance)
             past_schedule.delete()
 
