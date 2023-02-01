@@ -27,11 +27,17 @@ class RegisterSerializer(dj_reg_serializers.RegisterSerializer):
         data_dict["birthdate"] = self.validated_data.get("birthdate", "")
         return data_dict
 
-    def create(self, validated_data):
-        raise NotImplementedError
+    def save(self, request) -> models.User:
+        user = super().save(request)
+        user.birthdate = self.validated_data.get("birthdate")
+        user.save()
+        return user
 
     def update(self, instance, validated_data):
-        raise NotImplementedError
+        raise NotImplementedError("`update()` must be implemented.")
+
+    def create(self, validated_data):
+        raise NotImplementedError("`create()` must be implemented.")
 
     class Meta:
         model = models.User

@@ -11,29 +11,6 @@ from user import serializers
 class UserRegistrationView(dj_reg_views.RegisterView):
     serializer_class = serializers.RegisterSerializer
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = self.perform_create(serializer)
-        birthdate = request.data.get("birthdate", "")
-
-        user.birthdate = birthdate
-        user.save()
-
-        headers = self.get_success_headers(serializer.data)
-        data = self.get_response_data(user)
-
-        if data:
-            response = rest_response.Response(
-                data,
-                status=status.HTTP_201_CREATED,
-                headers=headers,
-            )
-        else:
-            response = rest_response.Response(status=status.HTTP_204_NO_CONTENT, headers=headers)
-
-        return response
-
 
 class UserLoginView(dj_auth_views.LoginView):
     pass
