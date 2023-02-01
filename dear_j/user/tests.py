@@ -6,6 +6,8 @@ from rest_framework import status
 from utils.test import compare as compare_utils
 from utils.test import data as data_utils
 
+IMAGE_ADDRESS = "https://dear-j-blog.s3.ap-northeast-2.amazonaws.com/user/user.png"
+
 
 @pytest.fixture(name="user1")
 def fixture_registered_user1(client: test.Client):
@@ -18,7 +20,15 @@ def fixture_registered_user1(client: test.Client):
 def test_success_register(client: test.Client):
     user_data = data_utils.UserData.create_nth_user_data(1)
     response = client.post(path="/api/v1/user/registration/", data=user_data.for_registration, content_type="application/json")
-    expected = {"user": {"pk": 1, "email": "user1@example.com", "birthdate": None, "username": "user1"}}
+    expected = {
+        "user": {
+            "pk": 1,
+            "email": "user1@example.com",
+            "birthdate": "2000-01-01",
+            "username": "user1",
+            "image": IMAGE_ADDRESS,
+        }
+    }
     compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ("access_token", "refresh_token"))
 
 
@@ -36,7 +46,15 @@ def test_fail_register(client: test.Client):
 def test_success_login(client: test.Client, user1: data_utils.UserData):
     data = {"email": user1.email, "password": user1.password}
     response = client.post(path="/api/v1/user/login/", data=data, content_type="application/json")
-    expected = {"user": {"pk": 1, "email": "user1@example.com", "birthdate": None, "username": "user1"}}
+    expected = {
+        "user": {
+            "pk": 1,
+            "email": "user1@example.com",
+            "birthdate": "2000-01-01",
+            "username": "user1",
+            "image": IMAGE_ADDRESS,
+        }
+    }
     compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, ("access_token", "refresh_token"))
 
 
@@ -72,6 +90,7 @@ def test_update_profile(client: test.Client, user1: data_utils.UserData):
         "email": "user1@example.com",
         "birthdate": "2001-01-01",
         "username": "user1",
+        "image": IMAGE_ADDRESS,
     }
     compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected)
 

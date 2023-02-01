@@ -9,7 +9,7 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     content = models.TextField()
-    image = models.ImageField(upload_to="user", editable=True, null=True)
+    image = models.ImageField(upload_to="post", editable=True, null=True)
 
     class Meta:
         verbose_name = "post"
