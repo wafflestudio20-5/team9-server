@@ -11,7 +11,10 @@ class HostInfo:
     name: str = None
     ip: str = None
     port: int = None
-    is_https: bool = False
+
+    @property
+    def is_https(self):
+        return self.port == 443
 
     def get_name(self) -> str:
         if self.name:
@@ -35,8 +38,8 @@ class HostInfo:
 
 
 class BackendHost(enum.Enum):
-    PROD_HOST = HostInfo(domain="api-dearj-wafflestudio.site", ip="43.201.9.194", port=80)
-    STAGE_HOST = HostInfo(domain="api-staging-dearj-wafflestudio.site", ip="13.124.64.149", port=80)
+    PROD_HOST = HostInfo(domain="api-dearj-wafflestudio.site", ip="43.201.9.194", port=443)
+    STAGE_HOST = HostInfo(domain="api-staging-dearj-wafflestudio.site", ip="13.124.64.149", port=443)
     DEV_HOST = HostInfo(domain="0.0.0.0", ip="0.0.0.0", port=80)
     LOCAL_HOST = HostInfo(domain="localhost", ip="127.0.0.1", port=8000)
 
