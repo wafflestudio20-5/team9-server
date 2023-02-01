@@ -52,7 +52,11 @@ def test_followee_list_and_create_network(
             "email": "user2@example.com",
         },
         "approved": None,
-        "follower": 1,
+        "follower": {
+            "pk": 1,
+            "username": "user1",
+            "email": "user1@example.com",
+        },
     }
     compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected)
 

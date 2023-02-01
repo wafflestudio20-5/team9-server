@@ -10,16 +10,13 @@ from user import serializers as user_serializers
 
 
 class NetworkSerializer(serializers.ModelSerializer):
+    follower = user_serializers.EssentialUserInfoFromPKSerializer(many=False, required=False)
     followee = user_serializers.EssentialUserInfoFromPKSerializer(many=False, required=True)
 
     class Meta:
         model = social_models.Network
         fields = "__all__"
-        extra_kwargs = {
-            "follower": {
-                "default": serializers.CurrentUserDefault(),
-            },
-        }
+        read_only_fields = ("follower",)
 
     def create(self, validated_data) -> social_models.Network:
         follower = self.context.get("request").user

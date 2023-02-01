@@ -56,7 +56,11 @@ def test_follower_list_network(
                 "email": "user2@example.com",
             },
             "approved": None,
-            "follower": 1,
+            "follower": {
+                "pk": 1,
+                "username": "user1",
+                "email": "user1@example.com",
+            },
         }
     ]
     compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected)
@@ -70,7 +74,13 @@ def test_follower_update_network(
 ):
     """Test Response for Follow Requests API."""
     test_follower_list_network(client, user1, user2)
-    response = client.patch(path="/api/v1/social/network/follower/1/", data={"approved": True}, content_type="application/json")
+    response = client.patch(
+        path="/api/v1/social/network/follower/1/",
+        data={
+            "approved": True,
+        },
+        content_type="application/json",
+    )
     expected = {
         "id": 1,
         "followee": {
@@ -79,6 +89,10 @@ def test_follower_update_network(
             "email": "user2@example.com",
         },
         "approved": True,
-        "follower": 1,
+        "follower": {
+            "pk": 1,
+            "username": "user1",
+            "email": "user1@example.com",
+        },
     }
     compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected)
