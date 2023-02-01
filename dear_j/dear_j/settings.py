@@ -26,7 +26,7 @@ else:
     SECRET_KEY = ssm_utils.get_ssm_parameter(alias="/backend/dearj/django-secret-key")
 DEBUG = True  # not site_env.is_prod()
 
-ALLOWED_HOSTS = host.BACKEND_HOST.ALLOWED_HOSTS
+ALLOWED_HOSTS = ["*"]  # host.BACKEND_HOST.ALLOWED_HOSTS
 
 BACKEND_URL = host.BACKEND_HOST.url
 FRONTEND_URL = host.FRONTEND_HOST.url
