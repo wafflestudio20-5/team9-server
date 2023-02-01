@@ -1,3 +1,4 @@
+from dj_rest_auth import jwt_auth
 from django import urls
 
 from user.views import common
@@ -11,6 +12,7 @@ urlpatterns = [
     urls.path("logout/", common.UserLogoutView.as_view()),
     urls.path("profile/", common.UserProfileView.as_view()),
     urls.path("password/change/", common.UserPasswordChangeView.as_view()),
+    urls.path("token/refresh/", jwt_auth.get_refresh_view().as_view()),
     # Kakao Social Login
     urls.path("login/kakao/", kakao.KakaoView.as_view()),
     urls.path("login/kakao/callback/", kakao.KakaoCallBackView.as_view()),
