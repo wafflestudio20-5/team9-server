@@ -31,7 +31,7 @@ class HostInfo:
             return [self.domain, self.ip]
         if site_env.is_dev():
             return [self.ip]
-        return [self.domain]
+        return [self.domain, self.ip]
 
 
 class BackendHost(enum.Enum):
