@@ -19,7 +19,7 @@ from calendar_j import paginations as calendar_paginations
 from calendar_j import permissions as calendar_permissions
 from calendar_j import serializers as calendar_serializers
 from calendar_j.services.attendance import attendance
-from calendar_j.services.protection import protection as calendar_protection
+from calendar_j.services.protection import protection
 from user import models as user_models
 from utils import time as time_utils
 
@@ -45,28 +45,44 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         start_date = time_utils.normal_date_formatter.parse(params.get("from"))
         end_date = time_utils.normal_date_formatter.parse(params.get("to"))
 
-        participants = calendar_models.Participant.objects.filter(
-            participant__id=target_user_id, status=attendance.AttendanceStatus.PRESENCE
-        ).values_list("participant_id")
-
         queryset: query.QuerySet = super().get_queryset()
         total_queryset = queryset.filter(is_opened=True)
 
         related_queryset = total_queryset.filter(
-            query.Q(created_by__pk=target_user_id) | query.Q(participants__id__in=participants)
+            query.Q(created_by__pk=target_user_id) | query.Q(participants__id__contains=target_user_id)
         ).distinct()
         date_filtered_queryset = related_queryset.filter(~(query.Q(start_at__gte=end_date) | query.Q(end_at__lte=start_date)))
         permission_refined_queryset = date_filtered_queryset.filter(
-            protection_level__lte=calendar_protection.ProtectionLevel.filter_user_schedule(self.request.user, target_user),
+            protection_level__lte=protection.ProtectionLevel.filter_user_schedule(self.request.user, target_user),
         )
         return permission_refined_queryset
 
     def create(self, request: req.Request, *args, **kwargs) -> resp.Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return resp.Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+        data = serializer.save()
+        serialized_data = self.serializer_class(data, many=True).data
+
+        for row in serialized_data:
+            headers = self.get_success_headers(row)
+        if len(serialized_data) == 1:
+            response_data = serialized_data[0]
+        else:
+            queryset = self.queryset.filter(pk__in=[row["id"] for row in serialized_data])
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+            serializer = self.get_serializer(queryset, many=True)
+            response_data = serialized_data.data
+
+        return resp.Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def get_paginated_response(self, data, **kwargs):
+        assert self.paginator
+        return self.paginator.get_paginated_response(data, **kwargs)
 
 
 class ScheduleRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
@@ -178,3 +194,23 @@ class ScheduleGroupUpdateDestroyView(
         recurring_schedule_group.is_opened = False
         recurring_schedule_group.save()
         return resp.Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ScheduleParticipantNotificationView(generics.ListAPIView):
+    authentication_classes = [
+        jwt_auth.JWTCookieAuthentication,
+        authentication.SessionAuthentication,
+    ]
+    queryset = calendar_models.Schedule.objects.all()
+    pagination_class = calendar_paginations.ScheduleListPagination
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = calendar_serializers.ScheduleSerializer
+
+    def get_queryset(self) -> query.QuerySet:
+        participant = self.request.user
+        queryset: query.QuerySet = super().get_queryset()
+        targets = calendar_models.Participant.objects.filter(
+            participant=participant,
+            status=attendance.AttendanceStatus.UNANSWERED,
+        )
+        return queryset.filter(pk__in=targets.only("schedule"))

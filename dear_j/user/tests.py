@@ -74,3 +74,18 @@ def test_update_profile(client: test.Client, user1: data_utils.UserData):
         "username": "user1",
     }
     compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected)
+
+
+@pytest.mark.django_db
+def test_refresh_token(client: test.Client, user1: data_utils.UserData):
+    data = {"email": user1.email, "password": user1.password}
+    response = client.post(path="/api/v1/user/login/", data=data, content_type="application/json")
+
+    refresh = response.json().get("refresh_token")
+    data = {"refresh": refresh}
+    response = client.post(path="/api/v1/user/token/refresh/", data=data, content_type="application/json")
+
+    actual = response.json()
+    assert "access" in actual
+    assert "access_token_expiration" in actual
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK)
