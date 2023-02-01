@@ -8,21 +8,14 @@ from user import models
 
 
 class UserDetailSerializer(dj_auth_serializers.UserDetailsSerializer):
-    def create(self, validated_data: Dict) -> models.User:
-        user = models.User.objects.create_user(**validated_data)
-        return user
-
-    def update(self, instance: models.User, validated_data: Dict) -> models.User:
-        instance.email = validated_data.get("email", instance.email)
-        instance.username = validated_data.get("username", instance.username)
-        instance.birthdate = validated_data.get("birthdate", instance.birthdate)
-        instance.save()
-        return instance
+    def create(self, validated_data):
+        raise NotImplementedError
 
     class Meta(dj_auth_serializers.UserDetailsSerializer.Meta):
         fields = dj_auth_serializers.UserDetailsSerializer.Meta.fields + (
             "birthdate",
             "username",
+            "image",
         )
 
 
@@ -34,20 +27,21 @@ class RegisterSerializer(dj_reg_serializers.RegisterSerializer):
         data_dict["birthdate"] = self.validated_data.get("birthdate", "")
         return data_dict
 
-    def create(self, validated_data: Dict) -> models.User:
-        user = models.User.objects.create_user(**validated_data)
+    def save(self, request) -> models.User:
+        user = super().save(request)
+        user.birthdate = self.validated_data.get("birthdate")
+        user.save()
         return user
 
-    def update(self, instance: models.User, validated_data: Dict) -> models.User:
-        instance.email = validated_data.get("email", instance.email)
-        instance.username = validated_data.get("username", instance.username)
-        instance.birthdate = validated_data.get("birthdate", instance.birthdate)
-        instance.save()
-        return instance
+    def update(self, instance, validated_data):
+        raise NotImplementedError("`update()` must be implemented.")
+
+    def create(self, validated_data):
+        raise NotImplementedError("`create()` must be implemented.")
 
     class Meta:
         model = models.User
-        fields = ["username", "email", "password1", "password2", "birthdate"]
+        fields = ["username", "email", "password1", "password2", "birthdate", "image"]
 
 
 class SocialLoginSerializer(dj_reg_serializers.SocialLoginSerializer):

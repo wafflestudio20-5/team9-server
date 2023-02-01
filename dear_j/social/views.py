@@ -3,6 +3,7 @@ from django.db.models import query
 from rest_framework import authentication
 from rest_framework import filters
 from rest_framework import generics
+from rest_framework import mixins
 from rest_framework import permissions
 
 from social import models as social_models
@@ -45,7 +46,10 @@ class NetworkFollowerListView(generics.ListAPIView):
         return queryset.filter(followee=followee)
 
 
-class NetworkFollowerUpdateView(generics.UpdateAPIView):
+class NetworkFollowerUpdateView(
+    mixins.UpdateModelMixin,
+    generics.GenericAPIView,
+):
     """Accept or Reject follow request."""
 
     authentication_classes = [
@@ -55,6 +59,9 @@ class NetworkFollowerUpdateView(generics.UpdateAPIView):
     queryset = social_models.Network.objects.all()
     permission_classes = [social_permissions.IsNetworkFollowee]
     serializer_class = social_serializers.NetworkSerializer
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
 
 
 class NetworkFolloweeListCreateView(generics.ListCreateAPIView):

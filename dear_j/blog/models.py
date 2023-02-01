@@ -11,7 +11,7 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     content = models.TextField()
-    image = models.ImageField(upload_to="user", editable=True, null=True)
+    image = models.ImageField(upload_to="post", editable=True, null=True)
     schedules = models.ManyToManyField(calendar_models.Schedule, through="ScheduleToPost", blank=True)
 
     class Meta:

@@ -213,4 +213,4 @@ class ScheduleParticipantNotificationView(generics.ListAPIView):
             participant=participant,
             status=attendance.AttendanceStatus.UNANSWERED,
         )
-        return queryset.filter(pk__in=targets.only("schedule"))
+        return queryset.filter(pk__in=[target.schedule.pk for target in targets])
