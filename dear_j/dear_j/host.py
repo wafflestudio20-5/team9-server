@@ -8,6 +8,7 @@ import site_env
 @dataclasses.dataclass
 class HostInfo:
     domain: str
+    sub_domain: str = None
     name: str = None
     ip: str = None
     port: int = None
@@ -31,12 +32,17 @@ class HostInfo:
             return [self.domain, self.ip]
         if site_env.is_dev():
             return [self.ip]
-        return [self.domain, self.ip]
+        return [self.domain, self.sub_domain, self.ip]
 
 
 class BackendHost(enum.Enum):
     PROD_HOST = HostInfo(domain="api-dearj-wafflestudio.site", ip="43.201.9.194", port=80)
-    STAGE_HOST = HostInfo(domain="api-staging-dearj-wafflestudio.site", ip="13.124.64.149", port=80)
+    STAGE_HOST = HostInfo(
+        domain="api-staging-dearj-wafflestudio.site",
+        sub_domain="ec2-13-124-64-149.ap-northeast-2.compute.amazonaws.com",
+        ip="13.124.64.149",
+        port=80,
+    )
     DEV_HOST = HostInfo(domain="0.0.0.0", ip="0.0.0.0", port=80)
     LOCAL_HOST = HostInfo(domain="localhost", ip="127.0.0.1", port=8000)
 
