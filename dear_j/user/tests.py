@@ -6,8 +6,7 @@ from rest_framework import status
 from utils.test import compare as compare_utils
 from utils.test import data as data_utils
 
-
-IMAGE_ADDRESS = "https://%22dear-j-blog%22.s3.ap-northeast-2.amazonaws.com/user/user.png"
+IMAGE_ADDRESS = "https://dear-j-blog.s3.ap-northeast-2.amazonaws.com/user/user.png"
 
 
 @pytest.fixture(name="user1")
