@@ -45,7 +45,7 @@ def test_get_post_by_schedule(
     )
     compare_utils.assert_response_equal(response, status.HTTP_201_CREATED)
 
-    post_data = {"title":"title", "content":"content"}
+    post_data = {"title":"Test Title", "content":"Test Content"}
     post_data["schedules"] = [{"pk":1}, {"pk":2}]
     response = client.post(
         path="/api/v1/blog/post/",
@@ -54,13 +54,13 @@ def test_get_post_by_schedule(
     )
     compare_utils.assert_response_equal(response, status.HTTP_201_CREATED)
 
-    response = client.get("/api/v1/blog/post/")
+    response = client.get(path="/api/v1/blog/post/")
 
     expected = [{
         "pid": 1,
-        "title": "title",
-        "content": "content",
+        "title": "Test Title",
+        "content": "Test Content",
         "created_by": 1,
     }]
-    response = client.get("/api/v1/blog/schedule/post/1/")
+    response = client.get(path="/api/v1/blog/schedule/post/1/")
     compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, ["created_at", "updated_at", "image", "schedules"])

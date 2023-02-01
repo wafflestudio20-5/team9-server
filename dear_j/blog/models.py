@@ -39,6 +39,6 @@ class Comment(models.Model):
 
 
 class ScheduleToPost(models.Model):
-    schedule = models.ForeignKey(calendar_models.Schedule, on_delete=models.PROTECT)
-    post = models.ForeignKey(Post, on_delete=models.PROTECT)
+    schedule = models.ForeignKey(calendar_models.Schedule, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
