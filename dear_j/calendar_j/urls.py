@@ -8,4 +8,5 @@ urlpatterns = [
     urls.path("schedule/<int:pk>/attendance/", views.ScheduleAttendanceUpdateView.as_view()),
     urls.path("schedule/group/<int:pk>/", views.ScheduleGroupUpdateDestroyView.as_view()),
     urls.path("schedule/notification/", views.ScheduleParticipantNotificationView.as_view()),
+    urls.path("schedule/search/", views.ScheduleSearchListView.as_view()),
 ]

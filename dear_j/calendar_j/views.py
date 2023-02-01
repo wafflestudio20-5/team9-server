@@ -6,6 +6,7 @@ from django import shortcuts
 from django.db.models import query
 from rest_framework import authentication
 from rest_framework import exceptions
+from rest_framework import filters
 from rest_framework import generics
 from rest_framework import mixins
 from rest_framework import permissions
@@ -214,3 +215,22 @@ class ScheduleParticipantNotificationView(generics.ListAPIView):
             status=attendance.AttendanceStatus.UNANSWERED,
         )
         return queryset.filter(pk__in=targets.only("schedule"))
+
+
+class ScheduleSearchListView(generics.ListAPIView):
+    """Search User."""
+
+    authentication_classes = [
+        jwt_auth.JWTCookieAuthentication,
+        authentication.SessionAuthentication,
+    ]
+    queryset = calendar_models.Schedule.objects.all()
+    pagination_class = calendar_paginations.ScheduleListPagination
+    serializer_class = calendar_serializers.ScheduleSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = (
+        "title",
+        "created_by",
+        "description",
+        "participants",
+    )
