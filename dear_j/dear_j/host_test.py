@@ -7,7 +7,7 @@ def test_host_info():
     assert "http://example.com:9999" == test_host.url
     assert ["example.com"] == test_host.ALLOWED_HOSTS
 
-    test_host = host.HostInfo(domain="example.com", ip="12.34.56.78", port=443, is_https=True)
+    test_host = host.HostInfo(domain="example.com", ip="12.34.56.78", port=443)
     assert "example.com" == test_host.get_name()
     assert "https://example.com" == test_host.url
     assert ["example.com"] == test_host.ALLOWED_HOSTS
