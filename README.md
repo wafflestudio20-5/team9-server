@@ -4,7 +4,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 
-## 개발환경 세팅
+## Prerequisite
 
 To setup virtualenv, follow below commands. (It is based on pyenv, but it is also fine to use conda or other virtualenv tools)
 ```bash
@@ -25,7 +25,7 @@ $ yarn install
 - [Isort](https://pycqa.github.io/isort/)
 
 #
-## 개발 사이클
+## Development Cycle
 We use 5 environments : `test`, `local`, `dev`, `stage`, `prod`
 1. Test at test & local
 2. Test at dev
