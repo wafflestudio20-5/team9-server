@@ -66,7 +66,7 @@ class SocialPlatformCallBackView(
         user = self.social_login_view.serializer.validated_data["user"]
 
         if models.User.objects.filter(email=user.email) and not allauth_models.SocialAccount.objects.filter(
-            email=user, provider=self.platform
+            user=user, provider=self.platform
         ):
             return self._redirect_to_front_for_exception(self.invalid_social_user)
 
