@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional
 
 from rest_framework import exceptions
+from rest_framework import fields
 from rest_framework import serializers
 
 from calendar_j import models as calendar_model
@@ -18,6 +19,36 @@ class ParticipantSerializer(serializers.ModelSerializer):
             "participant",
             "schedule",
         )
+
+
+class ScheduleFromPKSerializer(serializers.ModelSerializer):
+    pk = serializers.IntegerField()
+
+    class Meta:
+        model = calendar_model.Schedule
+        fields = "__all__"
+        read_only_fields = (
+            "title",
+            "start_at",
+            "end_at",
+            "created_by",
+            "protection_level",
+            "show_content",
+            "start_at",
+            "end_at",
+            "participants",
+            "description",
+            "created_at",
+            "updated_at",
+            "is_opened",
+            "is_recurring",
+            "cron_expr",
+            "recurring_end_at",
+            "recurring_schedule_group",
+        )
+
+    def create(self, validated_data: Dict) -> calendar_model.Schedule:
+        raise NotImplementedError
 
 
 class ScheduleSerializer(serializers.ModelSerializer):
