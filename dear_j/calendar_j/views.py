@@ -30,7 +30,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         authentication.SessionAuthentication,
     ]
     queryset = calendar_models.Schedule.objects.all()
-    pagination_class = calendar_paginations.ScheduleListPagination
+    pagination_class = None
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = calendar_serializers.ScheduleSerializer
 
@@ -51,7 +51,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         related_queryset = total_queryset.filter(
             query.Q(created_by__pk=target_user_id) | query.Q(participants__id__contains=target_user_id)
         ).distinct()
-        date_filtered_queryset = related_queryset.filter(~(query.Q(start_at__gte=end_date) | query.Q(end_at__lte=start_date)))
+        date_filtered_queryset = related_queryset.filter(~(query.Q(start_at__gt=end_date) | query.Q(end_at__lt=start_date)))
         permission_refined_queryset = date_filtered_queryset.filter(
             protection_level__lte=protection.ProtectionLevel.filter_user_schedule(self.request.user, target_user),
         )
@@ -70,19 +70,10 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
             response_data = serialized_data[0]
         else:
             queryset = self.queryset.filter(pk__in=[row["id"] for row in serialized_data])
-            page = self.paginate_queryset(queryset)
-            if page is not None:
-                serializer = self.get_serializer(page, many=True)
-                return self.get_paginated_response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
             serializer = self.get_serializer(queryset, many=True)
-            response_data = serialized_data.data
+            response_data = serializer.data
 
         return resp.Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
-
-    def get_paginated_response(self, data, **kwargs):
-        assert self.paginator
-        return self.paginator.get_paginated_response(data, **kwargs)
 
 
 class ScheduleRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):

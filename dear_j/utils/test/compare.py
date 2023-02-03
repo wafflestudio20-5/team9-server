@@ -39,9 +39,9 @@ def assert_response_equal(
     )
 
     if expected:
-        actual: Dict = response.json()
+        actual: Union[Dict, List] = response.json()
 
-        if "results" in actual.keys():
+        if isinstance(actual, Dict) and "results" in actual.keys():
             actual = actual.get("results")
 
         assert_json_equal(actual, expected, exception_columns)

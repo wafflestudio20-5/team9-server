@@ -91,7 +91,6 @@ def test_get_schedules_filtered_by_period(
         protection_level=protection.ProtectionLevel.OPEN.value,
         participant_ids=[2, 3],
     ).as_dict()
-
     schedule_2_data = data_utils.ScheduleData.create_nth_schedule_data(
         n=2,
         protection_level=protection.ProtectionLevel.OPEN.value,
