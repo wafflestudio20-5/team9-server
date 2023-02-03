@@ -121,16 +121,17 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
         return schedules
 
-    def update(self, instance, validated_data):
-        participants_raw_data = validated_data.pop("participants", [])
-        user_ids = [row.get("pk") for row in participants_raw_data]
+    def update(self, instance: calendar_model.Schedule, validated_data: Dict) -> calendar_model.Schedule:
+        edit_participants = validated_data.keys().__contains__("participants")
+        if edit_participants:
+            participants_raw_data = validated_data.pop("participants", [])
+            user_ids = [row.get("pk") for row in participants_raw_data]
 
         schedule = super().update(instance, validated_data)
 
-        if (not self.partial) or user_ids:
+        if edit_participants:
             participants = calendar_model.Participant.objects.filter(schedule=schedule)
-            for participant in participants:
-                participant.delete()
+            participants.delete()
 
             self.create_participants_with_schedule(schedule, user_ids)
         return schedule
