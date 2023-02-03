@@ -52,9 +52,9 @@ def test_create_comment(
     client.post("/api/v1/user/logout/")
     client.post("/api/v1/user/login/", data=user2.for_login, content_type="application/json")
 
-    comment_data = {"post":1, "content":"Test Content"}
+    comment_data = {"content":"Test Content"}
     response = client.post(
-        path="/api/v1/blog/comment/",
+        path="/api/v1/blog/post/1/comment/",
         data=comment_data,
         content_type="application/json",
     )
@@ -89,9 +89,9 @@ def test_update_comment(
     client.post(path="/api/v1/user/logout/")
     client.post(path="/api/v1/user/login/", data=user2.for_login, content_type="application/json")
 
-    comment_data = {"post":1, "content":"Test Content"}
+    comment_data = {"content":"Test Content"}
     response = client.post(
-        path="/api/v1/blog/comment/",
+        path="/api/v1/blog/post/1/comment/",
         data=comment_data,
         content_type="application/json",
     )
