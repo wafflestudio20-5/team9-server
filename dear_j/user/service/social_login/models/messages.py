@@ -14,7 +14,7 @@ class SocialLoginExceptionMessageMixin:
 
     @property
     def invalid_social_user(self) -> str:
-        return f"Invalid email. Your email is not registered as {self.platform} social user in our service."
+        return f"Invalid Social Login. Your email is already registered, but not as {self.platform}."
 
     @property
     def fail_to_sign_up(self) -> str:
