@@ -193,7 +193,7 @@ class ScheduleParticipantNotificationView(generics.ListAPIView):
         authentication.SessionAuthentication,
     ]
     queryset = calendar_models.Schedule.objects.all()
-    pagination_class = calendar_paginations.ScheduleListPagination
+    pagination_class = None
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = calendar_serializers.ScheduleSerializer
 
