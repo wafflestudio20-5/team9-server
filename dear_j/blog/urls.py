@@ -16,6 +16,6 @@ urlpatterns = [
     ),
     urls.path(
         "schedule/post/<int:pk>/",
-        blog_views.ScheduleToPostListView.as_view(),
+        blog_views.PostListFilteredByScheduleView.as_view(),
     ),
 ]

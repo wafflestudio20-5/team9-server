@@ -60,7 +60,7 @@ class CommentUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = "cid"
 
 
-class ScheduleToPostListView(generics.ListCreateAPIView):
+class PostListFilteredByScheduleView(generics.ListCreateAPIView):
     authentication_classes = [
         jwt_auth.JWTCookieAuthentication,
         authentication.SessionAuthentication,
@@ -68,7 +68,7 @@ class ScheduleToPostListView(generics.ListCreateAPIView):
     pagination_class = blog_paginations.PostListPagination
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = blog_models.Post.objects.all()
-    serializer_class = blog_serializers.ScheduleToPostSerializer
+    serializer_class = blog_serializers.PostSerializer
 
     def get_queryset(self) -> query.QuerySet:
         schedule_pk = self.kwargs["pk"]

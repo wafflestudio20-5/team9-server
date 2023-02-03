@@ -46,7 +46,7 @@ def test_get_post_by_schedule(
     compare_utils.assert_response_equal(response, status.HTTP_201_CREATED)
 
     post_data = {"title":"Test Title", "content":"Test Content"}
-    post_data["schedules"] = [{"pk":1}, {"pk":2}]
+    post_data["schedules_json"] = [{"pk":1}, {"pk":2}]
     response = client.post(
         path="/api/v1/blog/post/",
         data=post_data,

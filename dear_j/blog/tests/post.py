@@ -48,7 +48,7 @@ def test_create_post(
     )
 
     post_data = {"title":"Test Title", "content":"Test Content"}
-    post_data["schedules"] = [{"pk":1}, {"pk":2}]
+    post_data["schedules_json"] = [{"pk":1}, {"pk":2}]
     response = client.post(
         path="/api/v1/blog/post/",
         data=post_data,
@@ -86,7 +86,7 @@ def test_get_post(
     )
 
     post_data = {"title":"Test Title", "content":"Test Content"}
-    post_data["schedules"] = [{"pk":1}, {"pk":2}]
+    post_data["schedules_json"] = [{"pk":1}, {"pk":2}]
     response = client.post(
         path="/api/v1/blog/post/",
         data=post_data,

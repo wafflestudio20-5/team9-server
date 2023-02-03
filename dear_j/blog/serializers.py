@@ -12,8 +12,8 @@ from calendar_j import serializers as calendar_serializers
 
 
 class PostSerializer(serializers.ModelSerializer):
-    schedules = calendar_serializers.SchedulePKSerializer(many=True, required=False)
-    nested_json = serializers.JSONField(write_only=True)
+    schedules = calendar_serializers.ScheduleFromPKSerializer(many=True, required=False)
+    schedules_json = serializers.JSONField(write_only=True, required=False)
 
     class Meta:
         model = blog_models.Post
@@ -26,18 +26,18 @@ class PostSerializer(serializers.ModelSerializer):
 
     def validate_nested_json(self, value):
         if not isinstance(value, list):
-            exceptions.ValidationError("nested json expects a list")
+            raise exceptions.ValidationError("nested json expects a list")
         for item in value:
             serializer = calendar_serializers.SchedulePKSerializer(data=item)
             serializer.is_valid(raise_exception=True)
         return value
 
     def create(self, validated_data: Dict) -> blog_models.Post:
-        schedule_ordered_dicts = validated_data.pop("nested_json")
+        schedule_dicts = validated_data.pop("schedules_json", [])
         schedule_ids = []
-        for ordered_dicts in schedule_ordered_dicts:
-            dic = dict(ordered_dicts)
-            schedule_ids.append(dic.get("pk"))
+        for schedule_dict in schedule_dicts:
+            schedule_dict = dict(schedule_dict)
+            schedule_ids.append(schedule_dict.get("pk"))
 
         post: blog_models.Post = super().create(validated_data)
 
@@ -48,23 +48,19 @@ class PostSerializer(serializers.ModelSerializer):
         post.save()
         return post
 
-    def update(self, instance, validated_data: Dict) -> blog_models.Post:
-        try:
-            schedule_ordered_dicts = validated_data.pop("nested_json")
-            schedule_ids = []
-            for ordered_dicts in schedule_ordered_dicts:
-                dic = dict(ordered_dicts)
-                schedule_ids.append(dic.get("pk"))
-        except KeyError as e:
-            schedule_ids = []
+    def update(self, instance: blog_models.Post, validated_data: Dict) -> blog_models.Post:
+        schedule_dicts = validated_data.pop("schedules_json", [])
+        schedule_ids = []
+        for schedule_dict in schedule_dicts:
+            schedule_dict = dict(schedule_dict)
+            schedule_ids.append(schedule_dict.get("pk"))
 
-        if schedule_ids:
-            past_schedule = blog_models.ScheduleToPost.objects.filter(post=instance)
-            past_schedule.delete()
+        past_schedule = blog_models.ScheduleToPost.objects.filter(post=instance)
+        past_schedule.delete()
 
-            for schedule_id in schedule_ids:
-                schedule = shortcuts.get_object_or_404(calendar_models.Schedule, id=schedule_id)
-                blog_models.ScheduleToPost.objects.create(post=instance, schedule=schedule)
+        for schedule_id in schedule_ids:
+            schedule = shortcuts.get_object_or_404(calendar_models.Schedule, id=schedule_id)
+            blog_models.ScheduleToPost.objects.create(post=instance, schedule=schedule)
 
         instance.save()
         return super().update(instance, validated_data)
