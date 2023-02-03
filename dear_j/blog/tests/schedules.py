@@ -57,7 +57,7 @@ def test_get_post_by_schedule(
     response = client.get(path="/api/v1/blog/post/")
 
     expected = [{
-        "pid": 1,
+        "id": 1,
         "title": "Test Title",
         "content": "Test Content",
         "created_by": 1,

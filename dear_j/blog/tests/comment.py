@@ -41,7 +41,7 @@ def test_create_comment(
     post_data = data_utils.PostData.create_post_data(schedules_list=[1, 2])
 
     expected = {
-        "pid": 1,
+        "id": 1,
         "title": "Test Title",
         "content": "Test Content",
         "created_by": 1,
@@ -58,7 +58,7 @@ def test_create_comment(
         data=comment_data,
         content_type="application/json",
     )
-    expected = {"post":1, "cid": 1, "content": "Test Content", "created_by": 2, "is_updated": False}
+    expected = {"post":1, "id": 1, "content": "Test Content", "created_by": 2, "is_updated": False}
     compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ["created_at", "updated_at"])
 
 
@@ -78,7 +78,7 @@ def test_update_comment(
         content_type="application/json",
     )
     expected = {
-        "pid": 1,
+        "id": 1,
         "title": "Test Title",
         "content": "Test Content",
         "created_by": 1,
@@ -95,7 +95,7 @@ def test_update_comment(
         data=comment_data,
         content_type="application/json",
     )
-    expected = {"post":1, "cid": 1, "content": "Test Content", "created_by": 2, "is_updated": False}
+    expected = {"post":1, "id": 1, "content": "Test Content", "created_by": 2, "is_updated": False}
     compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ["created_at", "updated_at"])
 
     response = client.get(path="/api/v1/blog/comment/1/")
@@ -108,7 +108,7 @@ def test_update_comment(
     )
     expected = {
         "post": 1,
-        "cid": 1,
+        "id": 1,
         "content": "Test Patch",
         "created_by": 2,
         "is_updated": True

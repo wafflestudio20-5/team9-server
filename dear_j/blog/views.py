@@ -35,7 +35,6 @@ class PostRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [blog_permissions.IsPostCreator]
     queryset = blog_models.Post.objects.all()
     serializer_class = blog_serializers.PostSerializer
-    lookup_field = "pid"
 
 
 class CommentListCreateView(generics.ListCreateAPIView):
@@ -48,11 +47,11 @@ class CommentListCreateView(generics.ListCreateAPIView):
     serializer_class = blog_serializers.CommentSerializer
 
     def post(self, request: req.Request, *args, **kwargs):
-        request.data["post"] = kwargs.get("pid")
+        request.data["post"] = kwargs.get("pk")
         return super().post(request, *args, **kwargs)
 
     def get(self, request: req.Request, *args, **kwargs):
-        request.data["post"] = kwargs.get("pid")
+        request.data["post"] = kwargs.get("pk")
         return super().get(request, *args, **kwargs)
 
 
@@ -64,7 +63,6 @@ class CommentUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [blog_permissions.IsCommentCreator]
     queryset = blog_models.Comment.objects.all()
     serializer_class = blog_serializers.CommentSerializer
-    lookup_field = "cid"
 
 
 class PostListFilteredByScheduleView(generics.ListCreateAPIView):
