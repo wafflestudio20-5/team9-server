@@ -3,10 +3,12 @@ from typing import Dict
 from allauth.socialaccount import models as allauth_models
 from dj_rest_auth import serializers as dj_auth_serializers
 from dj_rest_auth.registration import serializers as dj_reg_serializers
+from django import shortcuts
 from rest_framework import serializers as rest_serializers
 
-from user import exceptions
 from user import models
+from user.service.social_login.models import messages
+from utils import uri as uri_utils
 
 
 class UserDetailSerializer(dj_auth_serializers.UserDetailsSerializer):
@@ -46,8 +48,8 @@ class RegisterSerializer(dj_reg_serializers.RegisterSerializer):
         fields = ["username", "email", "password1", "password2", "birthdate", "image"]
 
 
-class SocialLoginSerializer(dj_reg_serializers.SocialLoginSerializer):
-    platform: str = None
+class SocialLoginSerializer(dj_reg_serializers.SocialLoginSerializer, messages.SocialLoginExceptionMessageMixin):
+    redirect_frontend_url: str = None
 
     def _get_request(self):
         return self.context.get("request")
@@ -58,7 +60,14 @@ class SocialLoginSerializer(dj_reg_serializers.SocialLoginSerializer):
             if models.User.objects.filter(email=email):
                 user = models.User.objects.get(email=email)
                 if not allauth_models.SocialAccount.objects.filter(user=user, provider=self.platform):
-                    raise exceptions.SocialLoginEmailException
+                    return shortcuts.redirect(
+                        uri_utils.get_uri_with_extra_params(
+                            self.redirect_frontend_url,
+                            {
+                                "error": self.invalid_email_error,
+                            },
+                        )
+                    )
         return social_login
 
     def create(self, validated_data):

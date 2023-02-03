@@ -9,7 +9,6 @@ from rest_framework import request as req
 from rest_framework import response as resp
 from rest_framework import views
 
-from user import models
 from user import serializers
 from user.service.social_login.contexts import base
 from user.service.social_login.models import messages
@@ -60,7 +59,9 @@ class SocialPlatformCallBackView(
                 "view": self.social_login_view,
             },
         )
+
         self.social_login_view.serializer.platform = self.platform
+        self.social_login_view.serializer.redirect_frontend_url = self.redirect_frontend_url
 
         self.social_login_view.serializer.is_valid(raise_exception=True)
         self.social_login_view.login()
