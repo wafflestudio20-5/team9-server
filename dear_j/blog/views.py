@@ -47,14 +47,6 @@ class CommentListCreateView(generics.ListCreateAPIView):
     queryset = blog_models.Comment.objects.all()
     serializer_class = blog_serializers.CommentSerializer
 
-    def post(self, request: req.Request, *args, **kwargs):
-        request.data["post"] = kwargs.get("pid")
-        return super().post(request, *args, **kwargs)
-
-    def get(self, request: req.Request, *args, **kwargs):
-        request.data["post"] = kwargs.get("pid")
-        return super().get(request, *args, **kwargs)
-
 
 class CommentUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = [
