@@ -22,8 +22,6 @@ class ParticipantSerializer(serializers.ModelSerializer):
 
 
 class ScheduleFromPKSerializer(serializers.ModelSerializer):
-    pk = serializers.IntegerField()
-
     class Meta:
         model = calendar_model.Schedule
         fields = "__all__"
