@@ -1,13 +1,11 @@
+from dj_rest_auth import jwt_auth
 from django import shortcuts
 from django.db.models import query
-
 from rest_framework import authentication
 from rest_framework import generics
 from rest_framework import mixins
 from rest_framework import permissions
 from rest_framework import request as req
-
-from dj_rest_auth import jwt_auth
 
 from blog import models as blog_models
 from blog import paginations as blog_paginations
@@ -46,6 +44,14 @@ class CommentListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = blog_models.Comment.objects.all()
     serializer_class = blog_serializers.CommentSerializer
+
+    def post(self, request: req.Request, *args, **kwargs):
+        request.data["post"] = kwargs.get("pid")
+        return super().post(request, *args, **kwargs)
+
+    def get(self, request: req.Request, *args, **kwargs):
+        request.data["post"] = kwargs.get("pid")
+        return super().get(request, *args, **kwargs)
 
 
 class CommentUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
