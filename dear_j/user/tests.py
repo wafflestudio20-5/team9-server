@@ -108,3 +108,63 @@ def test_refresh_token(client: test.Client, user1: data_utils.UserData):
     assert "access" in actual
     assert "access_token_expiration" in actual
     compare_utils.assert_response_equal(response, status.HTTP_200_OK)
+
+
+@pytest.mark.django_db
+def test_update_email(client: test.Client, user1: data_utils.UserData):
+    data = {"email": user1.email, "password": user1.password}
+    client.post(path="/api/v1/user/login/", data=data, content_type="application/json")
+
+    update_data = {
+        "email": "testuser@example.com",
+    }
+    response = client.patch(path="/api/v1/user/profile/", data=update_data, content_type="application/json")
+
+    expected = {
+        "pk": 1,
+        "email": "testuser@example.com",
+        "birthdate": "2001-01-01",
+        "username": "user1",
+        "image": IMAGE_ADDRESS,
+    }
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected)
+
+
+@pytest.mark.django_db
+def test_update_birthdate(client: test.Client, user1: data_utils.UserData):
+    data = {"email": user1.email, "password": user1.password}
+    client.post(path="/api/v1/user/login/", data=data, content_type="application/json")
+
+    update_data = {
+        "birthdate": "2000-01-01",
+    }
+    response = client.patch(path="/api/v1/user/profile/", data=update_data, content_type="application/json")
+
+    expected = {
+        "pk": 1,
+        "email": "user1@example.com",
+        "birthdate": "2000-01-01",
+        "username": "user1",
+        "image": IMAGE_ADDRESS,
+    }
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected)
+
+
+@pytest.mark.django_db
+def test_update_username(client: test.Client, user1: data_utils.UserData):
+    data = {"email": user1.email, "password": user1.password}
+    client.post(path="/api/v1/user/login/", data=data, content_type="application/json")
+
+    update_data = {
+        "username": "username",
+    }
+    response = client.patch(path="/api/v1/user/profile/", data=update_data, content_type="application/json")
+
+    expected = {
+        "pk": 1,
+        "email": "user1@example.com",
+        "birthdate": "2000-01-01",
+        "username": "username",
+        "image": IMAGE_ADDRESS,
+    }
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected)

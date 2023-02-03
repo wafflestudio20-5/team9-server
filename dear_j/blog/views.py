@@ -43,7 +43,6 @@ class CommentListCreateView(generics.ListCreateAPIView):
         jwt_auth.JWTCookieAuthentication,
         authentication.SessionAuthentication,
     ]
-    pagination_class = blog_paginations.CommentListPagination
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = blog_models.Comment.objects.all()
     serializer_class = blog_serializers.CommentSerializer
