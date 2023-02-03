@@ -42,7 +42,11 @@ class SocialPlatformCallBackView(
         access_token = token.get("access_token")
 
         # Step II. Sign In
-        response = self._login(access_token, code)
+        try:
+            response = self._login(access_token, code)
+        except ValueError:
+            return self._redirect_to_front_for_exception(self.invalid_email_error)
+
         response.data.pop("user")
         return shortcuts.redirect(self.get_redirect_to_front(**response.data))
 
@@ -59,9 +63,7 @@ class SocialPlatformCallBackView(
                 "view": self.social_login_view,
             },
         )
-
         self.social_login_view.serializer.platform = self.platform
-        self.social_login_view.serializer.redirect_frontend_url = self.redirect_frontend_url
 
         self.social_login_view.serializer.is_valid(raise_exception=True)
         self.social_login_view.login()
