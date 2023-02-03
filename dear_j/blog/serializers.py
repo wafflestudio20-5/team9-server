@@ -34,12 +34,9 @@ class PostSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data: Dict) -> blog_models.Post:
         schedule_dicts = validated_data.pop("schedules_json", [])
-        schedule_ids = []
-        for schedule_dict in schedule_dicts:
-            schedule_dict = dict(schedule_dict)
-            schedule_ids.append(schedule_dict.get("pk"))
+        schedule_ids = [row.get("pk") for row in schedule_dicts]
 
-        post: blog_models.Post = super().create(validated_data)
+        post = super().create(validated_data)
 
         for schedule_id in schedule_ids:
             schedule = shortcuts.get_object_or_404(calendar_models.Schedule, pk=schedule_id)
@@ -49,21 +46,22 @@ class PostSerializer(serializers.ModelSerializer):
         return post
 
     def update(self, instance: blog_models.Post, validated_data: Dict) -> blog_models.Post:
-        schedule_dicts = validated_data.pop("schedules_json", [])
-        schedule_ids = []
-        for schedule_dict in schedule_dicts:
-            schedule_dict = dict(schedule_dict)
-            schedule_ids.append(schedule_dict.get("pk"))
+        edit_schedules = validated_data.keys().__contains__("schedules_json")
+        if edit_schedules:
+            schedule_dicts = validated_data.pop("schedules_json")
+            schedule_ids = [row.get("pk") for row in schedule_dicts]
 
-        past_schedule = blog_models.ScheduleToPost.objects.filter(post=instance)
-        past_schedule.delete()
+        post = super().update(instance, validated_data)
 
-        for schedule_id in schedule_ids:
-            schedule = shortcuts.get_object_or_404(calendar_models.Schedule, id=schedule_id)
-            blog_models.ScheduleToPost.objects.create(post=instance, schedule=schedule)
+        if edit_schedules:
+            schedule_to_posts = blog_models.ScheduleToPost.objects.filter(post=instance)
+            schedule_to_posts.delete()
 
-        instance.save()
-        return super().update(instance, validated_data)
+            for schedule_id in schedule_ids:
+                schedule = shortcuts.get_object_or_404(calendar_models.Schedule, id=schedule_id)
+                blog_models.ScheduleToPost.objects.create(post=post, schedule=schedule)
+
+        return post
 
 
 class CommentSerializer(serializers.ModelSerializer):
