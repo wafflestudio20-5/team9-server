@@ -129,3 +129,4 @@ jobs:
           EOF
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
           docker-compose down && docker-compose pull && docker-compose up -d
+          docker rmi $(docker images -q) 
