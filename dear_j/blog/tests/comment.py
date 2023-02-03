@@ -38,8 +38,6 @@ def test_create_comment(
         data=post_data,
         content_type="application/json",
     )
-    post_data = data_utils.PostData.create_post_data(schedules_list=[1, 2])
-
     expected = {
         "pid": 1,
         "title": "Test Title",
@@ -49,10 +47,17 @@ def test_create_comment(
     }
     compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ["created_at", "updated_at", "image"])
 
+    post_data = {"title": "Test Title2", "content": "Test Content2"}
+    response = client.post(
+        path="/api/v1/blog/post/",
+        data=post_data,
+        content_type="application/json",
+    )
+
     client.post(path="/api/v1/user/logout/")
     client.post(path="/api/v1/user/login/", data=user2.for_login, content_type="application/json")
 
-    comment_data = {"post": 1, "content": "Test Content"}
+    comment_data = {"content": "Test Content"}
     response = client.post(
         path="/api/v1/blog/post/1/comment/",
         data=comment_data,
@@ -61,6 +66,12 @@ def test_create_comment(
     expected = {"post": 1, "cid": 1, "content": "Test Content", "created_by": 2, "is_updated": False}
     compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ["created_at", "updated_at"])
 
+    comment_data = {"content": "Test Content2"}
+    response = client.post(
+        path="/api/v1/blog/post/2/comment/",
+        data=comment_data,
+        content_type="application/json",
+    )
     response = client.get(
         path="/api/v1/blog/post/1/comment/",
     )
