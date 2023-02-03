@@ -1,7 +1,6 @@
 import abc
 from typing import Dict
 
-from allauth.socialaccount import models as allauth_models
 from allauth.socialaccount.providers.oauth2 import client
 from allauth.socialaccount.providers.oauth2 import views as oauth2_views
 from dj_rest_auth.registration import views as dj_reg_views
@@ -61,15 +60,9 @@ class SocialPlatformCallBackView(
                 "view": self.social_login_view,
             },
         )
+        self.social_login_view.serializer.platform = self.platform
 
         self.social_login_view.serializer.is_valid(raise_exception=True)
-        user = self.social_login_view.serializer.validated_data["user"]
-
-        if models.User.objects.filter(email=user.email) and not allauth_models.SocialAccount.objects.filter(
-            user=user, provider=self.platform
-        ):
-            return self._redirect_to_front_for_exception(self.invalid_social_user)
-
         self.social_login_view.login()
         return self.social_login_view.get_response()
 

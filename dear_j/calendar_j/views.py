@@ -51,7 +51,7 @@ class ScheduleListCreateView(generics.ListCreateAPIView):
         related_queryset = total_queryset.filter(
             query.Q(created_by__pk=target_user_id) | query.Q(participants__id__contains=target_user_id)
         ).distinct()
-        date_filtered_queryset = related_queryset.filter(~(query.Q(start_at__gt=end_date) | query.Q(end_at__lt=start_date)))
+        date_filtered_queryset = related_queryset.filter(~(query.Q(start_at__gte=end_date) | query.Q(end_at__lt=start_date)))
         permission_refined_queryset = date_filtered_queryset.filter(
             protection_level__lte=protection.ProtectionLevel.filter_user_schedule(self.request.user, target_user),
         )

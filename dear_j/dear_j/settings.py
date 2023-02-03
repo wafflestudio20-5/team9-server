@@ -28,6 +28,8 @@ DEBUG = True  # not site_env.is_prod()
 
 ALLOWED_HOSTS = host.BACKEND_HOST.ALLOWED_HOSTS
 
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https") if site_env.is_prod_or_stage() else None
+
 BACKEND_URL = host.BACKEND_HOST.url
 FRONTEND_URL = host.FRONTEND_HOST.url
 DOMAIN = host.BACKEND_HOST.domain

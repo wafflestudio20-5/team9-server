@@ -1,9 +1,11 @@
 from typing import Dict
 
+from allauth.socialaccount import models as allauth_models
 from dj_rest_auth import serializers as dj_auth_serializers
 from dj_rest_auth.registration import serializers as dj_reg_serializers
 from rest_framework import serializers as rest_serializers
 
+from user import exceptions
 from user import models
 
 
@@ -45,8 +47,19 @@ class RegisterSerializer(dj_reg_serializers.RegisterSerializer):
 
 
 class SocialLoginSerializer(dj_reg_serializers.SocialLoginSerializer):
+    platform: str = None
+
     def _get_request(self):
         return self.context.get("request")
+
+    def get_social_login(self, adapter, app, token, response):
+        social_login = super().get_social_login(adapter, app, token, response)
+        for email in social_login.email_addresses:
+            if models.User.objects.filter(email=email):
+                user = models.User.objects.get(email=email)
+                if not allauth_models.SocialAccount.objects.filter(user=user, provider=self.platform):
+                    raise exceptions.SocialLoginEmailException
+        return social_login
 
     def create(self, validated_data):
         raise NotImplementedError
