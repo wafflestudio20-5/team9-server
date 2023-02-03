@@ -12,7 +12,7 @@ from calendar_j import serializers as calendar_serializers
 
 
 class PostSerializer(serializers.ModelSerializer):
-    schedules = calendar_serializers.ScheduleFromPKSerializer(many=True, required=False)
+    schedules = calendar_serializers.ScheduleFromPKSerializer(read_only=True, many=True, required=False)
     schedules_json = serializers.JSONField(write_only=True, required=False)
 
     class Meta:
