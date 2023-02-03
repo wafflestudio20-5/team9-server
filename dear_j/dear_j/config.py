@@ -17,7 +17,7 @@ ACCOUNT_USERNAME_REQUIRED = True
 AUTH_USER_MODEL = "user.User"
 
 # django-allauth
-ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
+ACCOUNT_ADAPTER = "user.adapter.AccountAdapter"
 if site_env.is_test():
     KAKAO_CLIENT_ID = os.environ.get("KAKAO_CLIENT_ID")
     KAKAO_SECRET = os.environ.get("KAKAO_SECRET")
