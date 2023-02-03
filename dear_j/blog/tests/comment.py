@@ -49,8 +49,8 @@ def test_create_comment(
     }
     compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ["created_at", "updated_at", "image"])
 
-    client.post(path="/api/v1/user/logout/")
-    client.post(path="/api/v1/user/login/", data=user2.for_login, content_type="application/json")
+    client.post("/api/v1/user/logout/")
+    client.post("/api/v1/user/login/", data=user2.for_login, content_type="application/json")
 
     comment_data = {"content":"Test Content"}
     response = client.post(
