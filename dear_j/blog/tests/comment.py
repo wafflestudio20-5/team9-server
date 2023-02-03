@@ -61,6 +61,12 @@ def test_create_comment(
     expected = {"post": 1, "cid": 1, "content": "Test Content", "created_by": 2, "is_updated": False}
     compare_utils.assert_response_equal(response, status.HTTP_201_CREATED, expected, ["created_at", "updated_at"])
 
+    response = client.get(
+        path="/api/v1/blog/post/1/comment/",
+    )
+    expected = [expected]
+    compare_utils.assert_response_equal(response, status.HTTP_200_OK, expected, ["created_at", "updated_at"])
+
 
 @pytest.mark.django_db
 def test_update_comment(

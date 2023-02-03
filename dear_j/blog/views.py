@@ -44,6 +44,7 @@ class CommentListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = blog_models.Comment.objects.all()
     serializer_class = blog_serializers.CommentSerializer
+    pagination_class = None
 
     def post(self, request: req.Request, *args, **kwargs):
         request.data["post"] = kwargs.get("pid")
