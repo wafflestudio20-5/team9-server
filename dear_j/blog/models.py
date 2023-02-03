@@ -5,6 +5,7 @@ from user import models as user_models
 
 
 class Post(models.Model):
+    pid = models.AutoField(primary_key=True)
     title = models.CharField(max_length=50)
     created_by = models.ForeignKey(user_models.User, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -16,13 +17,14 @@ class Post(models.Model):
     class Meta:
         verbose_name = "post"
         verbose_name_plural = "posts"
-        db_table = "tb_post"
+        db_table = "tb_posts"
 
     def __str__(self):
         return str(self.title)
 
 
 class Comment(models.Model):
+    cid = models.AutoField(primary_key=True)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     created_by = models.ForeignKey(user_models.User, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -33,7 +35,7 @@ class Comment(models.Model):
     class Meta:
         verbose_name = "comment"
         verbose_name_plural = "comments"
-        db_table = "tb_comment"
+        db_table = "tb_comments"
 
 
 class ScheduleToPost(models.Model):

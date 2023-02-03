@@ -5,13 +5,13 @@ from blog import views as blog_views
 urlpatterns = [
     urls.path("post/", blog_views.PostListCreateView.as_view()),
     urls.path(
-        "post/<int:pk>/", blog_views.PostRetrieveUpdateDestroyView.as_view()
+        "post/<int:pid>/", blog_views.PostRetrieveUpdateDestroyView.as_view()
     ),
     urls.path(
-        "post/<int:pk>/comment/", blog_views.CommentListCreateView.as_view()
+        "post/<int:pid>/comment/", blog_views.CommentListCreateView.as_view()
     ),
     urls.path(
-        "comment/<int:pk>/",
+        "comment/<int:cid>/",
         blog_views.CommentUpdateDestroyView.as_view(),
     ),
     urls.path(

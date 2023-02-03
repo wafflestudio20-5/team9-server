@@ -55,7 +55,7 @@ def test_create_post(
         content_type="application/json",
     )
     expected = {
-        "id": 1,
+        "pid": 1,
         "title": "Test Title",
         "content": "Test Content",
         "created_by": 1,
@@ -96,7 +96,7 @@ def test_get_post(
 
     response = client.get(path="/api/v1/blog/post/1/")
     expected = {
-        "id": 1,
+        "pid": 1,
         "title": "Test Title",
         "content": "Test Content",
         "created_by": 1,
