@@ -54,6 +54,10 @@ class CommentListCreateView(generics.ListCreateAPIView):
         request.data["post"] = kwargs.get("pid")
         return super().get(request, *args, **kwargs)
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(**self.request.data)
+
 
 class CommentUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = [
