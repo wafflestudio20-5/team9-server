@@ -40,6 +40,7 @@ BLACKLIST_AFTER_ROTATION = True
 
 # cors setting
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 
 # aws setting
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
