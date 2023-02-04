@@ -5,6 +5,8 @@ from rest_framework import status
 
 from utils.test import data as data_utils
 
+IMAGE_ADDRESS = "https://dear-j-blog.s3.ap-northeast-2.amazonaws.com/user/user.png"
+
 
 @pytest.fixture(name="user1")
 def fixture_registered_user1(client: test.Client):
@@ -80,6 +82,7 @@ def test_search_candidate(
             "pk": 3,
             "username": "user3",
             "email": "user3@example.com",
+            "image": IMAGE_ADDRESS,
         },
     ]
     actual = response.json()["results"]
