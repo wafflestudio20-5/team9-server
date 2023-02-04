@@ -8,10 +8,19 @@ from rest_framework import serializers as rest_serializers
 from user import models
 from user.service.social_login.models import platforms
 
+IMAGE_ADDRESS = "user/user.png"
+
 
 class UserDetailSerializer(dj_auth_serializers.UserDetailsSerializer):
     def create(self, validated_data):
         raise NotImplementedError
+
+    def update(self, instance: models.User, validated_data: Dict):
+        user = super().update(instance, validated_data)
+        if not validated_data.get("image", []):
+            user.image = IMAGE_ADDRESS
+        user.save()
+        return user
 
     class Meta(dj_auth_serializers.UserDetailsSerializer.Meta):
         fields = dj_auth_serializers.UserDetailsSerializer.Meta.fields + (
