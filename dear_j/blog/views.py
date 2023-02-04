@@ -3,7 +3,6 @@ from django import shortcuts
 from django.db.models import query
 from rest_framework import authentication
 from rest_framework import generics
-from rest_framework import mixins
 from rest_framework import permissions
 from rest_framework import request as req
 
