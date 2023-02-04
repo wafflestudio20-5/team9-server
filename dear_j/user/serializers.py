@@ -81,3 +81,18 @@ class EssentialUserInfoFromPKSerializer(rest_serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         raise NotImplementedError
+
+
+class UserInfoSearchSerializer(rest_serializers.ModelSerializer):
+    pk = rest_serializers.IntegerField()
+
+    class Meta:
+        model = models.User
+        fields = ["pk", "username", "email", "image"]
+        read_only_fields = ["username", "email", "image"]
+
+    def create(self, validated_data):
+        raise NotImplementedError
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError
